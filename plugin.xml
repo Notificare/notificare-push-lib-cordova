@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        id="re.notifica.cordova"
+        version="0.0.2">
+
+  <name>Notificare Plugin</name>
+
+  <description>
+    This plugin allows your application to register for, receive and handle push notifications with Notificare on both Android and iOS devices.
+  </description>
+
+  <license>MIT</license>
+
+  <engines>
+    <engine name="cordova" version=">=3.4.0"/>
+  </engines>
+
+  <js-module src="www/notificare.js" name="Notificare">
+    <clobbers target="Notificare"/>
+  </js-module>
+
+  <!-- android -->
+  <platform name="android">
+    <config-file target="res/xml/config.xml" parent="/*">
+      <feature name="NotificarePlugin">
+        <param name="android-package" value="re.notifica.cordova.NotificarePlugin"/>
+      </feature>
+    </config-file>
+
+    <config-file target="AndroidManifest.xml" parent="/manifest">
+      <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+      <uses-permission android:name="android.permission.WAKE_LOCK"/>
+      <uses-permission android:name="android.permission.INTERNET"/>
+      <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+      <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+      <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
+      <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+      <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+      <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
+      <permission android:name="$PACKAGE_NAME.permission.C2D_MESSAGE" android:protectionLevel="signature"/>
+      <uses-permission android:name="$PACKAGE_NAME.permission.C2D_MESSAGE"/>
+    </config-file>
+
+    <config-file target="AndroidManifest.xml" parent="/manifest/application">
+      <activity 
+        android:name="re.notifica.ui.NotificationActivity"
+        android:excludeFromRecents="true" />
+      <receiver 
+        android:name="re.notifica.push.gcm.PushReceiver" 
+        android:permission="com.google.android.c2dm.permission.SEND">
+        <intent-filter>
+          <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+          <action android:name="com.google.android.c2dm.intent.REGISTRATION"/>
+          <category android:name="$PACKAGE_NAME"/>
+        </intent-filter>
+      </receiver>
+      <service android:name="re.notifica.push.gcm.PushService"
+        android:label="Notificare Push Service" />
+      <receiver android:name="re.notifica.cordova.IntentReceiver" />
+    </config-file>
+
+    <source-file src="src/android/libs/notificare-push-lib.jar" target-dir="libs/"/>
+    <source-file src="src/android/libs/android-support-v4.jar" target-dir="libs/"/>
+    <source-file src="src/android/src/re/notifica/cordova/NotificarePlugin.java" target-dir="src/re/notifica/cordova/"/>
+    <source-file src="src/android/src/re/notifica/cordova/IntentReceiver.java" target-dir="src/re/notifica/cordova/"/>
+  </platform>
+
+  <!-- ios -->
+</plugin>
