@@ -1,10 +1,10 @@
 package re.notifica.cordova;
 
-import android.util.Log;
 import re.notifica.Notificare;
 import re.notifica.NotificareCallback;
 import re.notifica.NotificareError;
 import re.notifica.push.gcm.DefaultIntentReceiver;
+import android.util.Log;
 
 public class IntentReceiver extends DefaultIntentReceiver {
 
@@ -13,37 +13,31 @@ public class IntentReceiver extends DefaultIntentReceiver {
 	@Override
 	public void onRegistrationFinished(final String deviceId) {
 		Log.d(TAG, "Device registered to GCM");
-        Notificare.shared().registerDevice(deviceId, new NotificareCallback<String>() {
-
-			@Override
-			public void onSuccess(String result) {
-				Log.d(TAG, "Successfully registered");
-				NotificarePlugin.shared().sendRegistration(deviceId);
-			}
-
-			@Override
-			public void onError(NotificareError error) {
-				Log.e(TAG, "Error registering device", error);
-			}
-        	
-        });
+		NotificarePlugin.shared().sendRegistration(deviceId);
 	}
 
 	@Override
 	public void onUnregistrationFinished() {
 		Log.d(TAG, "Device unregistered from GCM");
-        Notificare.shared().unregisterDevice(new NotificareCallback<Boolean>() {
-
+		Notificare.shared().unregisterDevice(new NotificareCallback<Boolean>() {
+			
 			@Override
-			public void onSuccess(Boolean result) {
-				Log.d(TAG, "Successfully unregistered");
+			public void onSuccess(Boolean success) {
+				Log.d(TAG, "Device unregistered from Notificare");
 			}
-
+			
 			@Override
 			public void onError(NotificareError error) {
-				Log.e(TAG, "Error unregistering device", error);
+				Log.e(TAG, "Error unregistering from Notificare", error);
 			}
-        	
-        });
+		});
 	}
+
+	@Override
+	public void onRegistrationError(String errorId) {
+		Log.d(TAG, "Device failed registration to GCM");
+		NotificarePlugin.shared().sendRegistrationError(errorId);
+	}
+	
+	
 }

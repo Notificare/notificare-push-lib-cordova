@@ -23,7 +23,7 @@
   <!-- android -->
   <platform name="android">
     <config-file target="res/xml/config.xml" parent="/*">
-      <feature name="NotificarePlugin">
+      <feature name="Notificare">
         <param name="android-package" value="re.notifica.cordova.NotificarePlugin"/>
       </feature>
     </config-file>
@@ -60,11 +60,84 @@
       <receiver android:name="re.notifica.cordova.IntentReceiver" />
     </config-file>
 
-    <source-file src="src/android/libs/notificare-push-lib.jar" target-dir="libs/"/>
-    <source-file src="src/android/libs/android-support-v4.jar" target-dir="libs/"/>
     <source-file src="src/android/src/re/notifica/cordova/NotificarePlugin.java" target-dir="src/re/notifica/cordova/"/>
     <source-file src="src/android/src/re/notifica/cordova/IntentReceiver.java" target-dir="src/re/notifica/cordova/"/>
   </platform>
 
   <!-- ios -->
+  <platform name="ios">
+    <config-file target="config.xml" parent="/*">
+      <feature name="Notificare">
+        <param name="ios-package" value="NotificarePlugin" />
+      </feature>
+    </config-file>
+    <header-file src="src/ios/NotificarePlugin.h"/>
+    <source-file src="src/ios/NotificarePlugin.m"/>
+    <header-file src="src/ios/NotificareAppDelegateSurrogate.h"/>
+    <source-file src="src/ios/NotificareAppDelegateSurrogate.m"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/App/NotificareApp.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/Browser/NotificareBrowser.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/Callback/NotificareCallback.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/Custom/NotificareCustom.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/Mail/NotificareMail.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/SMS/NotificareSMS.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/Telephone/NotificareTelephone.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/ActionDelegate.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/ActionType.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/NSData+NotificareMKBase64.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/NSDate+NotificareRFC1123.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/NSDictionary+NotificareRequestEncoding.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/NSString+NotificareMKNetworkKitAdditions.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/UIAlertView+NotificareMKNetworkKitAdditions.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Reachability/NotificareReachability.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/NotificareMKNetworkEngine.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/NotificareMKNetworkKit.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/NotificareMKNetworkOperation.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/base64.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/NSData+SRB64Additions.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/SocketRocket-Prefix.pch"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/SRWebSocket.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Models/Action.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Models/Attachment.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Models/Content.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Models/Notification.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Shared/NSData+Hex.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Shared/NSDictionary+FromPlist.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Shared/NSString+FromBundle.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Shared/NSString+Utils.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Shared/UIImage+FromBundle.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Alert/NotificareAlert.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Form/NotificareForm.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Image/NotificareImage.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Map/NotificareLocation.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Map/NotificareMap.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Passbook/NotificarePassbook.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Rate/NotificareRate.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/URL/NotificareURL.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Video/NotificareVideo.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/WebView/NotificareWebView.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/NotificationDelegate.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/NotificationType.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Notificare.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/NotificareActions.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/NotificareEngine.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/NotificarePushLib.h"/>
+    
+    <resource-file src="src/ios/NotificareResources.bundle"/>
+    
+    <source-file src="src/ios/libNotificarePushLib.a" framework="true"/>
+    
+    <framework src="CoreLocation.framework"/>
+    <framework src="MobileCoreServices.framework"/>
+    <framework src="MessageUI.framework"/>
+    <framework src="libicucore.dylib"/>
+    <framework src="UIKit.framework"/>
+    <framework src="Foundation.framework"/>
+    <framework src="CoreGraphics.framework"/>
+    <framework src="PassKit.framework"/>
+    <framework src="MapKit.framework"/>
+    <framework src="SystemConfiguration.framework"/>
+    <framework src="Security.framework"/>
+    <framework src="CFNetwork.framework"/>
+  </platform>
 </plugin>

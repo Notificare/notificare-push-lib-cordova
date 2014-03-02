@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>DEVELOPMENT_APP_KEY</key>
+	<string></string>
+	<key>DEVELOPMENT_APP_SECRET</key>
+	<string></string>
+	<key>PRODUCTION_APP_KEY</key>
+	<string></string>
+	<key>PRODUCTION_APP_SECRET</key>
+	<string></string>
+	<key>DEVELOPMENT</key>
+	<true/>
+	<key>RESOURCE_BUNDLE</key>
+	<string>NotificareResources.bundle</string>
+	<key>OPTIONS</key>
+	<dict>
+		<key>APP_RUNS_ON_BACKGROUND</key>
+		<false/>
+		<key>IMAGES_SHARING</key>
+		<true/>
+		<key>BACKGROUND_COLOR</key>
+		<string>FF0000</string>
+		<key>TITLE_COLOR</key>
+		<string>0x000000</string>
+		<key>BUTTONS_TEXT_COLOR</key>
+		<string>0x000000</string>
+		<key>TEXTFIELD_TEXT_COLOR</key>
+		<string>0x000000</string>
+		<key>TEXTFIELD_BACKGROUND_COLOR</key>
+		<string>0xCCCCCC</string>
+	</dict>
+</dict>
+</plist>

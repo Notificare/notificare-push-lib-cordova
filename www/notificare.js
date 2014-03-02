@@ -72,7 +72,6 @@ Notificare.prototype.registerDevice = function(deviceId, userId, userName, succe
 };
 
 Notificare.prototype.enableNotifications = function(success, fail) {
-	alert("enable!");
 	cordova.exec(success, fail, 'Notificare', 'enableNotifications', []);
 };
 
@@ -80,30 +79,28 @@ Notificare.prototype.enableLocationUpdates = function(success, fail) {
 	cordova.exec(success, fail, 'Notificare', 'enableLocationUpdates', []);
 };
 
-Notificare.prototype.fetchNotification = function(notificationId, success, fail) {
-	cordova.exec(success, fail, 'Notificare', 'fetchNotification', [notificationId]);
-};
-
 Notificare.prototype.addDeviceTags = function(tags, success, fail) {
 	cordova.exec(success, fail, 'Notificare', 'addDeviceTags', [tags]);
 };
 
-Notificare.prototype.pushNotificationReceivedCallback = function(message, notificationId, extras) {
-	this.emit('notification-received', message, notificationId, extras);
+Notificare.prototype.removeDeviceTag = function(tag, success, fail) {
+	cordova.exec(success, fail, 'Notificare', 'removeDeviceTag', [tag]);
 };
 
-Notificare.prototype.pushNotificationOpenedCallback = function(message, notificationId, extras) {
-	this.emit('notification-opened', message, notificationId, extras);
+Notificare.prototype.clearDeviceTags = function(success, fail) {
+	cordova.exec(success, fail, 'Notificare', 'clearDeviceTags', []);
 };
 
-Notificare.prototype.registrationCallback = function(deviceId) {
-	this.emit('registration', deviceId);
+Notificare.prototype.fetchDeviceTags = function(success, fail) {
+	cordova.exec(success, fail, 'Notificare', 'fetchDeviceTags', []);
 };
 
-cordova.addConstructor(function() {
-	if(!window.plugins) window.plugins = {};
-	window.plugins.notificare = new Notificare();
-	console.log('Notificare plugin loaded');
-});
+Notificare.prototype.registrationCallback = function(err, deviceId) {
+	if (err) {
+		this.emit('registrationError', err);
+	} else {
+		this.emit('registration', deviceId);
+	}
+};
 
 module.exports = new Notificare();
