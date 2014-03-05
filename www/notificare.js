@@ -79,6 +79,14 @@ Notificare.prototype.enableLocationUpdates = function(success, fail) {
 	cordova.exec(success, fail, 'Notificare', 'enableLocationUpdates', []);
 };
 
+Notificare.prototype.disableNotifications = function(success, fail) {
+	cordova.exec(success, fail, 'Notificare', 'disableNotifications', []);
+};
+
+Notificare.prototype.disableLocationUpdates = function(success, fail) {
+	cordova.exec(success, fail, 'Notificare', 'disableLocationUpdates', []);
+};
+
 Notificare.prototype.addDeviceTags = function(tags, success, fail) {
 	cordova.exec(success, fail, 'Notificare', 'addDeviceTags', [tags]);
 };
