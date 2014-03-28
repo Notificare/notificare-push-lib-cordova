@@ -23,6 +23,10 @@ Requirements
 Setup
 -----
 
+* `Android`
+	* 
+
+* `iOS`
 
 
 Basic Usage
@@ -51,6 +55,7 @@ onDeviceReady: function() {
 		});
 	});
 });
+```
 
 ### Location updates & geofences
 
@@ -73,7 +78,7 @@ onDeviceReady: function() {
 		});
 	});
 });
-
+```
 
 ### Tags
 
@@ -87,6 +92,7 @@ Notificare.addDeviceTags(['tag1','tag2'], function() {
 }, function(error) {
 	console.log(error);
 });
+```
 
 ```javascript
 Notificare.removeDeviceTag('tag2', function() {
@@ -94,6 +100,7 @@ Notificare.removeDeviceTag('tag2', function() {
 }, function(error) {
 	console.log(error);
 });
+```
 
 ```javascript
 Notificare.clearDeviceTags(function() {
@@ -101,6 +108,7 @@ Notificare.clearDeviceTags(function() {
 }, function(error) {
 	console.log(error);
 });
+```
 
 ```javascript
 Notificare.fetchDeviceTags(function(tags) {
@@ -108,7 +116,7 @@ Notificare.fetchDeviceTags(function(tags) {
 }, function(error) {
 	console.log(error);
 });
-
+```
 
 ### Disabling
 
