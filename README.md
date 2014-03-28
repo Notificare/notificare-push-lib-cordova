@@ -20,13 +20,23 @@ Requirements
 	* iOS 6 or 7. 
 	* Manage certificates and API keys as explained in [Set up APNS](https://notificare.atlassian.net/wiki/display/notificare/1.+Set+up+APNS) and [Create an iOS application](https://notificare.atlassian.net/wiki/display/notificare/2.+Create+an+iOS+Application)
 
-Setup
------
+Setup notes for Android
+-----------------------
 
-* `Android`
-	* 
+To get Android to link to the Notificare SDK, Google Play SDK and Android Support Library v7, you will need to edit the project properties.
+If you are using Eclipse as an IDE, the easiest way to do this is adding these 3 dependencies as linked projects in Eclipse, as described in "Before we start" in the [Android Developer documentation](https://notificare.atlassian.net/wiki/display/notificare/3.+Implementing+the+Android+library) 
 
-* `iOS`
+Otherwise, you will need to edit the `project.properties` file yourself. It should eventually look something like this:
+
+```
+android.library.reference.1=CordovaLib
+# Project target.
+target=android-19
+android.library.reference.2=../../../../android-sdks/extras/google/google_play_services/libproject/google-play-services_lib
+android.library.reference.3=../../../notificare-push-lib-android/SDK
+```
+
+Where path references to Support Library, Google Play SDK and Notificare SDK are of course dependent on your local setup.
 
 
 Basic Usage
