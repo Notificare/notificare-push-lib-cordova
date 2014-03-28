@@ -23,8 +23,8 @@ Requirements
 Setup notes for Android
 -----------------------
 
-To get Android to link to the Notificare SDK, Google Play SDK and Android Support Library v7, you will need to edit the project properties.
-If you are using Eclipse as an IDE, the easiest way to do this is adding these 3 dependencies as linked projects in Eclipse, as described in "Before we start" in the [Android Developer documentation](https://notificare.atlassian.net/wiki/display/notificare/3.+Implementing+the+Android+library) 
+To get Android to link to the Notificare SDK and the Google Play SDK, you will need to edit the project properties.
+If you are using Eclipse as an IDE, the easiest way to do this is adding these 2 dependencies as linked projects in Eclipse, as described in "Before we start" in the [Android Developer documentation](https://notificare.atlassian.net/wiki/display/notificare/3.+Implementing+the+Android+library) 
 
 Otherwise, you will need to edit the `project.properties` file yourself. It should eventually look something like this:
 
