@@ -38,6 +38,43 @@ android.library.reference.3=../../../notificare-push-lib-android/SDK
 
 Where path references to Support Library, Google Play SDK and Notificare SDK are of course dependent on your local setup.
 
+Since the Cordova plugin installer doesn't add all necessary changes to the AndroidManifest.xml, you have to add some settings manually in that file.
+First of all, your application needs to be of class re.notifica.cordova.BaseApplication
+
+```
+<application 
+   android:hardwareAccelerated="true" 
+   android:icon="@drawable/icon" 
+   android:label="@string/app_name" 
+   android:name="re.notifica.cordova.BaseApplication">
+```
+
+Second, your application needs some settings for Google Play Services. Add the following somewhere inside the <application> element of your AndroidManifest.xml
+
+```
+<meta-data
+    android:name="com.google.android.gms.version"
+    android:value="@integer/google_play_services_version" />
+```
+
+Finally, if you want to keep track of user sessions in your app, have your main activity extend re.notifica.cordova.BaseActivity
+
+```
+import re.notifica.cordova.BaseActivity;
+
+public class MyCordovaApp extends BaseActivity
+{
+    @Override
+    public void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        super.init();
+        // Set by <content src="index.html" /> in config.xml
+        super.loadUrl(Config.getStartUrl());
+        //super.loadUrl("file:///android_asset/www/index.html");
+    }
+}
+```
 
 Basic Usage
 -----------

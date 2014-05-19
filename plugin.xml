@@ -2,7 +2,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="re.notifica.cordova"
-        version="0.1.2">
+        version="0.2.0">
 
   <name>Notificare Plugin</name>
 
@@ -62,7 +62,9 @@
 
     <source-file src="src/android/src/re/notifica/cordova/NotificarePlugin.java" target-dir="src/re/notifica/cordova/"/>
     <source-file src="src/android/src/re/notifica/cordova/IntentReceiver.java" target-dir="src/re/notifica/cordova/"/>
-  </platform>
+    <source-file src="src/android/src/re/notifica/cordova/BaseApplication.java" target-dir="src/re/notifica/cordova/"/>
+    <source-file src="src/android/src/re/notifica/cordova/BaseActivity.java" target-dir="src/re/notifica/cordova/"/>
+    </platform>
 
   <!-- ios -->
   <platform name="ios">
