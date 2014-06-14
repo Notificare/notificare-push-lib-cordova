@@ -1,0 +1,7 @@
+<resources>
+    <string name="pref_tags_title">Notification categories</string>
+    <string name="pref_summary_tag_something">Text to be shown in the user preferences</string>
+    <string name="pref_title_tag_something">Title to be shown in the user preferences</string>
+    <string name="pref_summary_tag_something2">Text to be shown in the user preferences</string>
+    <string name="pref_title_tag_something2">Title to be shown in the user preferences</string>
+</resources>

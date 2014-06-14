@@ -2,7 +2,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="re.notifica.cordova"
-        version="0.2.0">
+        version="1.0.0">
 
   <name>Notificare Plugin</name>
 
@@ -64,6 +64,9 @@
     <source-file src="src/android/src/re/notifica/cordova/IntentReceiver.java" target-dir="src/re/notifica/cordova/"/>
     <source-file src="src/android/src/re/notifica/cordova/BaseApplication.java" target-dir="src/re/notifica/cordova/"/>
     <source-file src="src/android/src/re/notifica/cordova/BaseActivity.java" target-dir="src/re/notifica/cordova/"/>
+    <resource-file src="src/android/res/xml/preferences.xml" target="res/xml/preferences.xml" />
+    <resource-file src="src/android/res/values/strings_preferences.xml" target="res/values/strings_preferences.xml" />
+    <resource-file src="src/android/assets/notificareconfig.properties" target="assets/notificareconfig.properties" />
     </platform>
 
   <!-- ios -->
@@ -95,6 +98,24 @@
     <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/NotificareMKNetworkEngine.h"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/NotificareMKNetworkKit.h"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/NotificareMKNetworkOperation.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOauth2.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOauth2AccessToken.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOauth2Account+Private.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOauth2Account.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOauth2AccountStore.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOauth2Client.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOauth2ClientDelegate.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOauth2Connection.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOauth2ConnectionDelegate.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOauth2Constants.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOauth2FileStreamWrapper.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOauth2PostBodyPart.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOauth2PostBodyStream.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOauth2Request.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOauth2TrustDelegate.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NSData+NotificareNXOauth2.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NSString+NotificareNXOauth2.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NSURL+NotificareNXOauth2.h"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/base64.h"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/NSData+SRB64Additions.h"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/SocketRocket-Prefix.pch"/>
@@ -116,6 +137,7 @@
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/Passbook/NotificarePassbook.h"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/Rate/NotificareRate.h"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/URL/NotificareURL.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/UserPreferences/NotificareUserPreferences.h"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/Video/NotificareVideo.h"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/WebView/NotificareWebView.h"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/NotificationDelegate.h"/>
@@ -125,7 +147,9 @@
     <header-file src="src/ios/Notificare/NotificarePushLib/NotificareEngine.h"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/NotificarePushLib.h"/>
     
-    <resource-file src="src/ios/NotificareResources.bundle"/>
+    <resource-file src="src/ios/DefaultTheme.bundle"/>
+    <resource-file src="src/ios/Notificare.plist"/>
+    <resource-file src="src/ios/NotificareTags.plist"/>
     
     <source-file src="src/ios/libNotificarePushLib.a" framework="true"/>
     

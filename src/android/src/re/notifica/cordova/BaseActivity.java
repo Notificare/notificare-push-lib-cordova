@@ -25,8 +25,6 @@ public class BaseActivity extends CordovaActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		Log.d(TAG, "activity created with intent action " + getIntent().getAction() + " and data " + getIntent().getDataString());
 		super.onCreate(savedInstanceState);
-		Notificare.shared().setForeground(true);
-		Notificare.shared().getEventLogger().logCreateActivity();
 		if (Notificare.shared().getStatus() != Notificare.STATUS_OK) {
 			if (Notificare.isUserRecoverableError(Notificare.shared().getErrorCode())) {
 	            Notificare.getErrorDialog(Notificare.shared().getErrorCode(), this, Notificare.shared().getRequestCode()).show();
@@ -36,13 +34,21 @@ public class BaseActivity extends CordovaActivity {
 	        }
 		}
 	}
+	
+	@Override
+	public void onResume() {
+		Log.d(TAG, "activity started");
+		super.onResume();
+		Notificare.shared().setForeground(true);
+		Notificare.shared().getEventLogger().logStartSession();		
+	}
 
 	@Override
-	public void onDestroy() {
-		Log.d(TAG, "activity destroyed");
-		super.onDestroy();
+	public void onPause() {
+		Log.d(TAG, "activity stopped");
+		super.onPause();
 		Notificare.shared().setForeground(false);
-		Notificare.shared().getEventLogger().logDestroyActivity();
+		Notificare.shared().getEventLogger().logEndSession();
 	}
 
 	@Override

@@ -14,6 +14,7 @@ import org.json.JSONException;
 import re.notifica.Notificare;
 import re.notifica.NotificareCallback;
 import re.notifica.NotificareError;
+import re.notifica.model.NotificareUser;
 import android.util.Log;
 
 /**
@@ -33,6 +34,12 @@ public class NotificarePlugin extends CordovaPlugin {
 	public static final String REMOVETAG = "removeDeviceTag";
 	public static final String CLEARTAGS = "clearDeviceTags";
 	public static final String FETCHTAGS = "fetchDeviceTags";
+	public static final String CREATEACCOUNT = "createAccount";
+	public static final String SENDPASSWORD = "sendPassword";
+	public static final String RESETPASSWORD = "resetPassword";
+	public static final String CHANGEPASSWORD = "changePassword";
+	public static final String USERLOGIN = "userLogin";
+	public static final String FETCHUSERDETAILS = "fetchUserDetails";	
 
 	protected HashMap<String, CallbackContext> pendingCallbacks = new HashMap<String, CallbackContext>();
 		
@@ -92,6 +99,24 @@ public class NotificarePlugin extends CordovaPlugin {
 			return true;
 		} else if (FETCHTAGS.equals(action)) {
 			fetchDeviceTags(args, callbackContext);
+			return true;
+		} else if (CREATEACCOUNT.equals(action)) {
+			createAccount(args, callbackContext);
+			return true;
+		} else if (SENDPASSWORD.equals(action)) {
+			sendPassword(args, callbackContext);
+			return true;
+		} else if (RESETPASSWORD.equals(action)) {
+			resetPassword(args, callbackContext);
+			return true;
+		} else if (CHANGEPASSWORD.equals(action)) {
+			changePassword(args, callbackContext);
+			return true;
+		} else if (USERLOGIN.equals(action)) {
+			userLogin(args, callbackContext);
+			return true;
+		} else if (FETCHUSERDETAILS.equals(action)) {
+			fetchUserDetails(args, callbackContext);
 			return true;
 		}
         Log.d(TAG, "Invalid action: " + action);
@@ -307,7 +332,205 @@ public class NotificarePlugin extends CordovaPlugin {
 			}
 		});
 	}
+
+	/**
+	 * Create a new user account
+	 * @param args
+	 * @param callbackContext
+	 */
+	protected void createAccount(JSONArray args, final CallbackContext callbackContext) {
+		Log.d(TAG, "CREATEACCOUNT");
+		try {
+			String email = args.getString(0);
+			String password = args.getString(1);
+			String userName = args.optString(2);
+			if (userName.isEmpty()) {
+				userName = null;
+			}
+			Notificare.shared().createAccount(email, password, userName, new NotificareCallback<Boolean>() {
+
+				@Override
+				public void onSuccess(Boolean result) {
+					if (callbackContext == null) {
+						return;
+					}
+					callbackContext.success();
+				}
+
+				@Override
+				public void onError(NotificareError error) {
+					if (callbackContext == null) {
+						return;
+					}
+					callbackContext.error(error.getLocalizedMessage());
+				}
+			});
+		} catch (JSONException e) {
+			callbackContext.error("JSON parse error");
+		}
+	}
+
+	/**
+	 * Send a password reset email
+	 * @param args
+	 * @param callbackContext
+	 */
+	protected void sendPassword(JSONArray args, final CallbackContext callbackContext) {
+		Log.d(TAG, "SENDPASSWORD");
+		try {
+			String email = args.getString(0);
+			Notificare.shared().sendPassword(email, new NotificareCallback<Boolean>() {
+
+				@Override
+				public void onSuccess(Boolean result) {
+					if (callbackContext == null) {
+						return;
+					}
+					callbackContext.success();
+				}
+
+				@Override
+				public void onError(NotificareError error) {
+					if (callbackContext == null) {
+						return;
+					}
+					callbackContext.error(error.getLocalizedMessage());
+				}
+			});
+		} catch (JSONException e) {
+			callbackContext.error("JSON parse error");
+		}
+	}	
+
+	/**
+	 * Reset password
+	 * @param args
+	 * @param callbackContext
+	 */
+	protected void resetPassword(JSONArray args, final CallbackContext callbackContext) {
+		Log.d(TAG, "RESETPASSWORD");
+		try {
+			String password = args.getString(0);
+			String token = args.getString(1);
+			Notificare.shared().resetPassword(password, token, new NotificareCallback<Boolean>() {
+
+				@Override
+				public void onSuccess(Boolean result) {
+					if (callbackContext == null) {
+						return;
+					}
+					callbackContext.success();
+				}
+
+				@Override
+				public void onError(NotificareError error) {
+					if (callbackContext == null) {
+						return;
+					}
+					callbackContext.error(error.getLocalizedMessage());
+				}
+			});
+		} catch (JSONException e) {
+			callbackContext.error("JSON parse error");
+		}		
+	}
 	
+	/**
+	 * Change password
+	 * @param args
+	 * @param callbackContext
+	 */
+	protected void changePassword(JSONArray args, final CallbackContext callbackContext) {
+		Log.d(TAG, "CHANGEPASSWORD");
+		try {
+			String password = args.getString(0);
+			Notificare.shared().changePassword(password, new NotificareCallback<Boolean>() {
+
+				@Override
+				public void onSuccess(Boolean result) {
+					if (callbackContext == null) {
+						return;
+					}
+					callbackContext.success();
+				}
+
+				@Override
+				public void onError(NotificareError error) {
+					if (callbackContext == null) {
+						return;
+					}
+					callbackContext.error(error.getLocalizedMessage());
+				}
+			});
+		} catch (JSONException e) {
+			callbackContext.error("JSON parse error");
+		}		
+	}
+
+	/**
+	 * Log in user
+	 * @param args
+	 * @param callbackContext
+	 */
+	protected void userLogin(JSONArray args, final CallbackContext callbackContext) {
+		Log.d(TAG, "USERLOGIN");
+		try {
+			String username = args.getString(0);
+			String password = args.getString(1);
+			Notificare.shared().userLogin(username, password, new NotificareCallback<Boolean>() {
+
+				@Override
+				public void onSuccess(Boolean result) {
+					if (callbackContext == null) {
+						return;
+					}
+					callbackContext.success();
+				}
+
+				@Override
+				public void onError(NotificareError error) {
+					if (callbackContext == null) {
+						return;
+					}
+					callbackContext.error(error.getLocalizedMessage());
+				}
+			});
+		} catch (JSONException e) {
+			callbackContext.error("JSON parse error");
+		}
+	}
+
+	/**
+	 * Fetch user details
+	 * @param args
+	 * @param callbackContext
+	 */
+	protected void fetchUserDetails(JSONArray args, final CallbackContext callbackContext) {
+		Log.d(TAG, "FETCHUSERDETAILS");
+		Notificare.shared().fetchUserDetails(new NotificareCallback<NotificareUser>() {
+
+			@Override
+			public void onSuccess(NotificareUser result) {
+				if (callbackContext == null) {
+					return;
+				}
+				try {
+					callbackContext.success(result.toJSONObject());
+				} catch (JSONException error) {
+					callbackContext.error(error.getLocalizedMessage());
+				}
+			}
+
+			@Override
+			public void onError(NotificareError error) {
+				if (callbackContext == null) {
+					return;
+				}
+				callbackContext.error(error.getLocalizedMessage());
+			}
+		});
+	}
+
 	/**
 	 * Send the registered deviceId (APID) to the webview
 	 * @param deviceId
