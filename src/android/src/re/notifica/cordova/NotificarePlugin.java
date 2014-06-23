@@ -343,9 +343,9 @@ public class NotificarePlugin extends CordovaPlugin {
 		try {
 			String email = args.getString(0);
 			String password = args.getString(1);
-			String userName = args.optString(2);
-			if (userName.isEmpty()) {
-				userName = null;
+			String userName = null;
+			if (args.length() == 3) {
+				userName = args.optString(2);
 			}
 			Notificare.shared().createAccount(email, password, userName, new NotificareCallback<Boolean>() {
 
