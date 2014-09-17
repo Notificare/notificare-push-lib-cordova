@@ -44,33 +44,44 @@ typedef void (^FileUploadResponseBlock)(NSDictionary*file);
 
 -(NotificareMKNetworkOperation*)updateDeviceTimezone:(NSString*)device;
 
--(NotificareMKNetworkOperation*)getNotification:(NSString*)notificationID completionHandler:(NotificationResponseBlock) info errorHandler:(nMKNKErrorBlock) errorBlock;
+-(NotificareMKNetworkOperation*)updateDeviceLanguage:(NSString*)device;
 
--(NotificareMKNetworkOperation*)clearNotification:(NSString*)notificationID completionHandler:(NotificationResponseBlock) info errorHandler:(nMKNKErrorBlock) errorBlock;
+-(NotificareMKNetworkOperation*)getNotification:(NSString*)notificationID completionHandler:(NotificationResponseBlock)info errorHandler:(nMKNKErrorBlock)errorBlock;
 
--(NotificareMKNetworkOperation*)getTags:(NSString *)deviceID completionHandler:(NotificationResponseBlock) info errorHandler:(nMKNKErrorBlock) error;
+-(NotificareMKNetworkOperation*)clearNotification:(NSString*)notificationID completionHandler:(NotificationResponseBlock)info errorHandler:(nMKNKErrorBlock)errorBlock;
 
--(NotificareMKNetworkOperation*)addTags:(NSArray *)tags forDevice:(NSString *)device completionHandler:(NotificationResponseBlock) info errorHandler:(nMKNKErrorBlock) errorBlock;
+-(NotificareMKNetworkOperation*)getTags:(NSString *)deviceID completionHandler:(NotificationResponseBlock)info errorHandler:(nMKNKErrorBlock)error;
+
+-(NotificareMKNetworkOperation*)addTags:(NSArray *)tags forDevice:(NSString *)device completionHandler:(NotificationResponseBlock)info errorHandler:(nMKNKErrorBlock)errorBlock;
 
 -(NotificareMKNetworkOperation*)clearTags:(NSString *)deviceID completionHandler:(NotificationResponseBlock)info errorHandler:(nMKNKErrorBlock) error;
 
--(NotificareMKNetworkOperation*)removeTag:(NSString *)tag forDevice:(NSString *)device completionHandler:(NotificationResponseBlock) info errorHandler:(nMKNKErrorBlock) errorBlock;
+-(NotificareMKNetworkOperation*)removeTag:(NSString *)tag forDevice:(NSString *)device completionHandler:(NotificationResponseBlock)info errorHandler:(nMKNKErrorBlock)errorBlock;
 
--(NotificareMKNetworkOperation*)getNearestFences:(NSString *)device forLatitude:(float)latitude andLongitude:(float)longitude completionHandler:(NotificationResponseBlock) info errorHandler:(nMKNKErrorBlock) errorBlock;
+-(NotificareMKNetworkOperation*)getNearestFences:(NSString *)device forLatitude:(float)latitude andLongitude:(float)longitude completionHandler:(NotificationResponseBlock)info errorHandler:(nMKNKErrorBlock)errorBlock;
 
 -(NotificareMKNetworkOperation*)trigger:(NSString*)device forDevice:(NSString *)device andRegion:(NSString *)region;
 
+-(NotificareMKNetworkOperation*)trigger:(NSString*)device forDevice:(NSString *)device andBeacon:(NSString *)beacon;
+
 -(NotificareMKNetworkOperation*)eventLog:(NSDictionary *)params;
+-(NotificareMKNetworkOperation*)eventLog:(NSDictionary *)params completionHandler:(NotificationResponseBlock)response errorHandler:(nMKNKErrorBlock) errorBlock;
 
 -(NotificareMKNetworkOperation*)uploadFile:(NSData*)file completionHandler:(FileUploadResponseBlock)response errorHandler:(nMKNKErrorBlock) errorBlock;
 
 -(NotificareMKNetworkOperation*)executeAction:(NSString *)path withParams:(NSDictionary *)params withMethod:(NSString *)method isSSL:(BOOL)ssl;
 
 -(NotificareMKNetworkOperation*)actionLog:(NSDictionary *)data;
+-(NotificareMKNetworkOperation*)actionLog:(NSDictionary *)data completionHandler:(NotificationResponseBlock)response errorHandler:(nMKNKErrorBlock) errorBlock;
 
--(NotificareMKNetworkOperation*)getBeacons:(NSNumber *)major completionHandler:(NotificationResponseBlock)info errorHandler:(nMKNKErrorBlock)error;
+-(NotificareMKNetworkOperation*)getBeacons:(NSString *)region completionHandler:(NotificationResponseBlock)info errorHandler:(nMKNKErrorBlock)error;
 
 -(NotificareMKNetworkOperation*)getApplicationInfo:(NotificationResponseBlock)info errorHandler:(nMKNKErrorBlock)error;
+
+-(NotificareMKNetworkOperation*)createAccount:(NSDictionary *)params completionHandler:(NotificationResponseBlock)info errorHandler:(nMKNKErrorBlock)error;
+-(NotificareMKNetworkOperation*)resetPassword:(NSDictionary *)params withToken:(NSString *)token completionHandler:(NotificationResponseBlock)info errorHandler:(nMKNKErrorBlock)errorBlock;
+-(NotificareMKNetworkOperation*)sendPassword:(NSDictionary *)params completionHandler:(NotificationResponseBlock)info errorHandler:(nMKNKErrorBlock)error;
+-(NotificareMKNetworkOperation*)checkAccount:(NSString *)user completionHandler:(NotificationResponseBlock)info errorHandler:(nMKNKErrorBlock)error;
 
 
 @end

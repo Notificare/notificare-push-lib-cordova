@@ -16,7 +16,7 @@
 #import "Notification.h"
 #import <CoreLocation/CoreLocation.h>
 #import "NSString+Utils.h"
-
+#import "NotificareNXOAuth2.h"
 
 #define Suppressor(Selector) \
 do { \
@@ -28,6 +28,17 @@ _Pragma("clang diagnostic pop") \
 
 typedef void (^SuccessBlock)(NSDictionary * info);
 typedef void (^ErrorBlock)(NSError * error);
+
+typedef enum  {
+    kNotificareErrorCodeBadRequest = 400,
+    kNotificareErrorCodeUnauthorized = 401,
+    kNotificareErrorCodeForbidden = 403,
+    kNotificareErrorCodeNotFound = 404,
+    kNotificareErrorCodeConflict = 409,
+    kNotificareErrorCodeUnprocessableEntity = 422,
+    kNotificareErrorCodeInternalServerError = 500,
+    kNotificareErrorCodeGatewayTimeout = 504
+} kNotificareErrorCode;
 
 @class NotificarePushLib;
 
@@ -64,6 +75,10 @@ typedef void (^ErrorBlock)(NSError * error);
 - (void)notificarePushLib:(NotificarePushLib *)library rangingBeaconsDidFailForRegion:(CLBeaconRegion *)region withError:(NSError *)error;
 - (void)notificarePushLib:(NotificarePushLib *)library didRangeBeacons:(NSArray *)beacons inRegion:(CLBeaconRegion *)region;
 
+- (void)notificarePushLib:(NotificarePushLib *)library didChangeAccountNotification:(NSDictionary *)info;
+- (void)notificarePushLib:(NotificarePushLib *)library didFailToRequestAccessNotification:(NSError *)error;
+- (void)notificarePushLib:(NotificarePushLib *)library didReceiveActivationToken:(NSString *)token;
+- (void)notificarePushLib:(NotificarePushLib *)library didReceiveResetPasswordToken:(NSString *)token;
 
 
 @end
@@ -92,6 +107,8 @@ typedef void (^ErrorBlock)(NSError * error);
 @property (strong, nonatomic) NotificareEngine * notificareEngine;
 
 @property (strong, nonatomic) Notificare * notificare;
+
+@property (strong, nonatomic) Notificare * currentNotificare;
 
 @property (strong, nonatomic) NotificareActions * notificareActions;
 
@@ -124,6 +141,15 @@ typedef void (^ErrorBlock)(NSError * error);
 @property (strong, nonatomic) NSString * deviceToken;
 
 /*!
+ *  @abstract The raw device Token
+ *
+ *  @discussion
+ *	Returns the raw device Token
+ *
+ */
+@property (strong, nonatomic) NSData * deviceTokenData;
+
+/*!
  *  @abstract The device UUID
  *
  *  @discussion
@@ -149,6 +175,15 @@ typedef void (^ErrorBlock)(NSError * error);
  *
  */
 @property (strong, nonatomic) NSString * userID;
+
+/*!
+ *  @abstract The oAuth account
+ *
+ *  @discussion
+ *	Returns the account object
+ *
+ */
+@property (strong, nonatomic) NotificareNXOAuth2Account * account;
 
 
 /*!
@@ -176,10 +211,23 @@ typedef void (^ErrorBlock)(NSError * error);
 @property (assign) BOOL isOpen;
 
 /*!
+ *  @abstract Boolean for checking if position is being fixed
+ *
+ */
+@property (assign) BOOL isFixingGPS;
+
+
+/*!
  *  @abstract Boolean for checking if notification is open
  *
  */
 @property (assign) BOOL displayMessage;
+
+/*!
+ *  @abstract CLRegion Object for the current Fence
+ *
+ */
+@property (strong, nonatomic) CLRegion * currentFence;
 
 /*!
  *  @abstract An array with notifications to be displayed
@@ -244,6 +292,16 @@ typedef void (^ErrorBlock)(NSError * error);
  *
  */
 @property (strong, nonatomic) CLBeaconRegion *beaconRegion;
+
+/*!
+ *  @abstract shouldAllwaysLogBeacons flag
+ *  @discussion
+ *	A BOOL to flag the library to log all the beacons changes in range and location
+ *  This will result in an increase on storage since it will save the location and proximity when beacons are ranging
+ *  Leaving this option out will just log each beacon once if found in range.
+ */
+
+@property (nonatomic, assign) BOOL shouldAlwaysLogBeacons;
 
 /*!
  *  @abstract Ranging flag
@@ -345,7 +403,7 @@ typedef void (^ErrorBlock)(NSError * error);
  */
 
 
-- (void)registerDevice:(NSData *)token;
+- (void)registerDevice:(NSData *)token __attribute__((deprecated("use registerDevice:completionHandler:errorHandler: instead.")));
 - (void)registerDevice:(NSData *)token completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)error;
 /*!
  *  @abstract Register Device with ID
@@ -359,7 +417,7 @@ typedef void (^ErrorBlock)(NSError * error);
  *  @seealso
  *  registerDevice:withUserID:withUsername:
  */
-- (void)registerDevice:(NSData *)token withUserID:(NSString *)userID;
+- (void)registerDevice:(NSData *)token withUserID:(NSString *)userID __attribute__((deprecated("use registerDevice:withUserID:completionHandler:errorHandler: instead.")));
 - (void)registerDevice:(NSData *)token withUserID:(NSString *)userID completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)error;
 /*!
  *  @abstract Register Device with ID and name
@@ -372,7 +430,7 @@ typedef void (^ErrorBlock)(NSError * error);
  *  only after successfully register a device token.
  *  Adds another string that can be used to display name
  */
-- (void)registerDevice:(NSData *)token withUserID:(NSString *)userID withUsername:(NSString *)username;
+- (void)registerDevice:(NSData *)token withUserID:(NSString *)userID withUsername:(NSString *)username __attribute__((deprecated("use registerDevice:withUserID:withUsername:completionHandler:errorHandler: instead.")));
 - (void)registerDevice:(NSData *)token withUserID:(NSString *)userID withUsername:(NSString *)username completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)error;
 
 /*!
@@ -403,7 +461,7 @@ typedef void (^ErrorBlock)(NSError * error);
  *  @seealso
  *  registerDeviceForWebsockets:withUserID
  */
-- (void)registerDeviceForWebsockets:(NSString *)token;
+- (void)registerDeviceForWebsockets:(NSString *)token __attribute__((deprecated("use registerDeviceForWebsockets:completionHandler:errorHandler: instead.")));
 - (void)registerDeviceForWebsockets:(NSString *)token completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)error;
 /*!
  *  @abstract Register Device with ID for WebSockets
@@ -417,7 +475,7 @@ typedef void (^ErrorBlock)(NSError * error);
  *  @seealso
  *  registerDevice:withUserID:withUsername:
  */
-- (void)registerDeviceForWebsockets:(NSString *)token withUserID:(NSString *)userID;
+- (void)registerDeviceForWebsockets:(NSString *)token withUserID:(NSString *)userID __attribute__((deprecated("use registerDeviceForWebsockets:withUserID:completionHandler:errorHandler: instead.")));
 - (void)registerDeviceForWebsockets:(NSString *)token withUserID:(NSString *)userID completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)error;
 /*!
  *  @abstract Register Device with ID
@@ -431,14 +489,15 @@ typedef void (^ErrorBlock)(NSError * error);
  *  @seealso
  *  registerDevice:withUserID:withUsername:
  */
-- (void)registerDeviceForWebsockets:(NSString *)token withUserID:(NSString *)userID withUsername:(NSString *)username;
+- (void)registerDeviceForWebsockets:(NSString *)token withUserID:(NSString *)userID withUsername:(NSString *)username __attribute__((deprecated("use registerDeviceForWebsockets:withUserID:withUsername:completionHandler:errorHandler: instead.")));
 - (void)registerDeviceForWebsockets:(NSString *)token withUserID:(NSString *)userID withUsername:(NSString *)username completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)error;
 
 /*!
  *  @abstract Unregister Device
  *
  *  @discussion
- *  This method allows you to prevent a device from receive notifications without having to remove it from the provider
+ *  This method allows you to prevent Notificare from sending notifications
+ *  If you also wish to remove the device from APNS also call [[UIApplication sharedApplication] unregisterForRemoteNotifications]
  */
 - (void)unregisterDevice;
 
@@ -481,7 +540,7 @@ typedef void (^ErrorBlock)(NSError * error);
  *  @abstract Start Location Updates
  *
  *  @discussion
- *  Starts a CLManager using significant changes updates
+ *  Starts the location manager for geo-targeting, geo-fencing and beacons
  */
 -(void)startLocationUpdates;
 
@@ -489,19 +548,23 @@ typedef void (^ErrorBlock)(NSError * error);
  *  @abstract Update Device's Location
  *
  *  @discussion
- *  Fetches a notification's full payload. Usually used if you gonna handle the notifications yourself.
+ *  Update the device's location manually
  */
 - (void)updateLocation:(NSString*)device withLatitude:(float)latitude andLongitude:(float)longitude;
-
 /*!
- *  @abstract Reply action
+ *  @abstract Stop Location Updates
  *
  *  @discussion
- *  Register an action event manually. Usually needed when you handling notifications yourself and want to use the actions to register a certain user choice.
+ *  Stops the location manager from collecting location updates
  */
-- (void)reply:(NSString *)notification withLabel:(NSString *)label andData:(NSDictionary *)data;
+-(void)stopLocationUpdates;
 
-//Add Tags to a device
+/*!
+ *  @abstract Tags
+ *
+ *  @discussion
+ *  Tags are used to easily categorize devices according to any kpi, point or area of 
+ */
 - (void)getTags:(SuccessBlock)info errorHandler:(ErrorBlock)error;
 - (void)addTags:(NSArray *)tags;
 - (void)addTags:(NSArray *)tags completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)error;
@@ -525,6 +588,42 @@ typedef void (^ErrorBlock)(NSError * error);
  *  getNotification:completionHandler:errorHandler:
  */
 - (void)openBeacon:(NSDictionary *)beacon;
+- (void)openBeacons;
+/*!
+ *  @abstract Open User Preferences
+ *
+ *  @discussion
+ *  Displays a view with for user control of notifications, location updates and key-value pairs inserted in NotificareTags.plist
+ */
+- (void)openUserPreferences;
+
+/*!
+ *  @abstract Reply action
+ *
+ *  @discussion
+ *  Register an action event manually. Usually needed when you handling notifications yourself and want to use the actions to register a certain user choice.
+ */
+- (void)reply:(NSString *)notification withLabel:(NSString *)label andData:(NSDictionary *)data;
+
+/*!
+ *  @abstract OAuth2 Methods
+ *
+ *  @discussion
+ *  When enabled in the dashboard (this feature is an add-on, activation done in your dashboard) you can allow your users to create, authenticate and manage their own user profiles.
+ */
+
+- (void)createAccount:(NSDictionary *)params completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
+- (void)resetPassword:(NSDictionary *)params withToken:(NSString *)token completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
+- (void)sendPassword:(NSDictionary *)params completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
+- (void)loginWithUsername:(NSString *)username andPassword:(NSString *)password completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)error;
+- (void)fetchAccountDetails:(SuccessBlock)info errorHandler:(ErrorBlock)error;
+- (void)generateEmailToken:(SuccessBlock)info errorHandler:(ErrorBlock)error __attribute__((deprecated("use generateAccessToken:completionHandler:errorHandler: instead.")));
+- (void)generateAccessToken:(SuccessBlock)info errorHandler:(ErrorBlock)error;
+- (void)changePassword:(NSDictionary *)params completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)error;
+- (void)checkAccount:(NSString *)user completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)error;
+- (void)handleOpenURL:(NSURL *)url;
+- (void)logoutAccount;
+- (BOOL)isLoggedIn;
 
 @end
 

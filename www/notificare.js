@@ -1,4 +1,8 @@
-//var exec = require("cordova/exec");
+/**
+ * Notificare Cordova Plugin
+ * 
+ * @author Joris Verbogt <joris@notifica.re>
+ */
 
 /**
  * Event emitter class
@@ -60,6 +64,15 @@ function inherit(proto) {
 
 /**
  * Notificare Cordova plugin
+ * @base {EventEmitter}
+ * @type {Notificare}
+ * 
+ * A singleton instance is automatically created by adding the plugin to your project
+ * This singleton can be accessed as global var Notificare in JavaScript
+ * 
+ * <code>
+ * 
+ * </code>
  */
 function Notificare() {
 	EventEmitter.apply(this, arguments);
@@ -103,12 +116,20 @@ Notificare.prototype.fetchDeviceTags = function(success, fail) {
 	cordova.exec(success, fail, 'Notificare', 'fetchDeviceTags', []);
 };
 
+Notificare.prototype.openNotification = function(notification, success, fail) {
+	cordova.exec(success, fail, 'Notificare', 'openNotification', [notification]);
+};
+
 Notificare.prototype.registrationCallback = function(err, deviceId) {
 	if (err) {
 		this.emit('registrationError', err);
 	} else {
 		this.emit('registration', deviceId);
 	}
+};
+
+Notificare.prototype.notificationCallback = function(notification) {
+	this.emit('notification', notification);
 };
 
 module.exports = new Notificare();

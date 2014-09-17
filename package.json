@@ -1,5 +1,5 @@
 {
-    "version": "0.2.0",
+    "version": "1.1.0",
     "name": "re.notifica.cordova",
     "cordova_name": "Notificare Plugin",
     "description": "This plugin allows your application to register for, receive ansd handle push notifications with Notificare on both Android and iOS devices.",
@@ -7,7 +7,7 @@
     "engines": [
         {
             "name": "cordova",
-            "version": ">=3.4.0"
+            "version": ">=3.5.0"
         }
     ]
 }

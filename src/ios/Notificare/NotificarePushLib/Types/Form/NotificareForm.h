@@ -26,5 +26,6 @@
 @property (strong, nonatomic) UIBarButtonItem * actionsButton;
 
 -(void)openNotification;
+-(void)sendData:(NSArray *)data;
 
 @end

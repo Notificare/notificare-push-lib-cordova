@@ -14,10 +14,10 @@ Requirements
 ------------
 
 * `Android`
-	* Minimal required Android SDK version to 9
+	* Minimal required Android SDK version is 10 (Gingerbread / 2.3.x)
 	* Setup GCM in Notificare (and optionally Google Maps) as described in [Set up GCM](https://notificare.atlassian.net/wiki/display/notificare/1.+Set+up+GCM) and [Create an Android application](https://notificare.atlassian.net/wiki/display/notificare/2.+Create+an+Android+application)
 * `iOS`
-	* iOS 6 or 7. 
+	* iOS 6+. 
 	* Manage certificates and API keys as explained in [Set up APNS](https://notificare.atlassian.net/wiki/display/notificare/1.+Set+up+APNS) and [Create an iOS application](https://notificare.atlassian.net/wiki/display/notificare/2.+Create+an+iOS+Application)
 
 Setup notes for Android
@@ -31,9 +31,10 @@ Otherwise, you will need to edit the `project.properties` file yourself. It shou
 ```
 android.library.reference.1=CordovaLib
 # Project target.
-target=android-19
+target=android-20
 android.library.reference.2=../../../../android-sdks/extras/google/google_play_services/libproject/google-play-services_lib
-android.library.reference.3=../../../notificare-push-lib-android/SDK
+android.library.reference.3=../../../../android-sdks/extras/android/support/v7/appcompat
+android.library.reference.4=../../../notificare-push-lib-android/SDK
 ```
 
 Where path references to Support Library, Google Play SDK and Notificare SDK are of course dependent on your local setup.
@@ -57,7 +58,8 @@ Second, your application needs some settings for Google Play Services. Add the f
     android:value="@integer/google_play_services_version" />
 ```
 
-Finally, if you want to keep track of user sessions in your app, have your main activity extend re.notifica.cordova.BaseActivity
+Finally, if you want to keep track of user sessions in your app, have your activities extend re.notifica.cordova.BaseActivity. This is only necessary for
+your non-Cordova activities. The Cordova plugin will do the logging for you in the Cordova activity.
 
 ```
 import re.notifica.cordova.BaseActivity;
@@ -168,3 +170,6 @@ Notificare.fetchDeviceTags(function(tags) {
 ### Disabling
 
 Both locationUpdates and notifications can be disabled by calling `disableLocationUpdates()` and `disableLocationUpdates()`
+
+Handling Notifications yourself
+-----------
