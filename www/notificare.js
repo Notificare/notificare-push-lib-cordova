@@ -116,6 +116,42 @@ Notificare.prototype.fetchDeviceTags = function(success, fail) {
 	cordova.exec(success, fail, 'Notificare', 'fetchDeviceTags', []);
 };
 
+Notificare.prototype.createAccount = function(email, password, userName, success, fail) {
+	cordova.exec(success, fail, 'Notificare', 'createAccount', [email, password, userName]);
+};
+
+Notificare.prototype.validateUser = function(token, success, fail) {
+	cordova.exec(success, fail, 'Notificare', 'validateUser', [token]);
+};
+
+Notificare.prototype.sendPassword = function(email, success, fail) {
+	cordova.exec(success, fail, 'Notificare', 'sendPassword', [email]);
+};
+
+Notificare.prototype.resetPassword = function(password, token, success, fail) {
+	cordova.exec(success, fail, 'Notificare', 'resetPassword', [password, token]);
+};
+
+Notificare.prototype.changePassword = function(password, success, fail) {
+	cordova.exec(success, fail, 'Notificare', 'fetchDeviceTags', [password]);
+};
+
+Notificare.prototype.userLogin = function(username, password, success, fail) {
+	cordova.exec(success, fail, 'Notificare', 'userLogin', [username, password]);
+};
+
+Notificare.prototype.userLogout = function(success, fail) {
+	cordova.exec(success, fail, 'Notificare', 'userLogout', []);
+};
+
+Notificare.prototype.generateAccessToken = function(success, fail) {
+	cordova.exec(success, fail, 'Notificare', 'generateAccessToken', []);
+};
+
+Notificare.prototype.fetchUserDetails = function(success, fail) {
+	cordova.exec(success, fail, 'Notificare', 'fetchUserDetails', []);
+};
+
 Notificare.prototype.openNotification = function(notification, success, fail) {
 	cordova.exec(success, fail, 'Notificare', 'openNotification', [notification]);
 };

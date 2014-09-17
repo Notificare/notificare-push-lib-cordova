@@ -13,5 +13,15 @@
 - (void)removeDeviceTag:(CDVInvokedUrlCommand *)command;
 - (void)clearDeviceTags:(CDVInvokedUrlCommand *)command;
 - (void)fetchDeviceTags:(CDVInvokedUrlCommand *)command;
+- (void)createAccount:(CDVInvokedUrlCommand *)command;
+- (void)validateUser:(CDVInvokedUrlCommand *)command;
+- (void)sendPassword:(CDVInvokedUrlCommand *)command;
+- (void)resetPassword:(CDVInvokedUrlCommand *)command;
+- (void)changePassword:(CDVInvokedUrlCommand *)command;
+- (void)userLogin:(CDVInvokedUrlCommand *)command;
+- (void)userLogout:(CDVInvokedUrlCommand *)command;
+- (void)generateAccessToken:(CDVInvokedUrlCommand *)command;
+- (void)fetchUserDetails:(CDVInvokedUrlCommand *)command;
+- (void)openNotification:(CDVInvokedUrlCommand *)command;
 
 @end

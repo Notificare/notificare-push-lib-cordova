@@ -136,6 +136,105 @@
     }];
 }
 
+- (void)createAccount:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] getTags:^(NSDictionary *info) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:[info objectForKey:@"tags"]];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    } errorHandler:^(NSError *error) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    }];
+}
+
+- (void)validateUser:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] getTags:^(NSDictionary *info) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:[info objectForKey:@"tags"]];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    } errorHandler:^(NSError *error) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    }];
+}
+
+- (void)sendPassword:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] getTags:^(NSDictionary *info) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:[info objectForKey:@"tags"]];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    } errorHandler:^(NSError *error) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    }];
+}
+
+- (void)resetPassword:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] getTags:^(NSDictionary *info) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:[info objectForKey:@"tags"]];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    } errorHandler:^(NSError *error) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    }];
+}
+
+- (void)changePassword:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] getTags:^(NSDictionary *info) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:[info objectForKey:@"tags"]];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    } errorHandler:^(NSError *error) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    }];
+}
+
+- (void)loginUser:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] getTags:^(NSDictionary *info) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:[info objectForKey:@"tags"]];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    } errorHandler:^(NSError *error) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    }];
+}
+
+- (void)logoutUser:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] getTags:^(NSDictionary *info) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:[info objectForKey:@"tags"]];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    } errorHandler:^(NSError *error) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    }];
+}
+
+- (void)generateAccessToken:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] getTags:^(NSDictionary *info) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:[info objectForKey:@"tags"]];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    } errorHandler:^(NSError *error) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    }];
+}
+
+- (void)fetchUserDetails:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] getTags:^(NSDictionary *info) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:[info objectForKey:@"tags"]];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    } errorHandler:^(NSError *error) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    }];
+}
+
+- (void)openNotification:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] getTags:^(NSDictionary *info) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:[info objectForKey:@"tags"]];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    } errorHandler:^(NSError *error) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    }];
+}
 
 #pragma UIApplicationDelegate
 
