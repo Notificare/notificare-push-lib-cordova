@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import re.notifica.Notificare;
 import re.notifica.NotificareCallback;
 import re.notifica.NotificareError;
+import re.notifica.model.NotificareApplicationInfo;
 import re.notifica.model.NotificareNotification;
 import re.notifica.model.NotificareUser;
 import re.notifica.ui.NotificationActivity;
@@ -34,6 +35,7 @@ public class NotificarePlugin extends CordovaPlugin {
 	public static final int PLUGIN_VERSION_CODE = 10100;
 	public static final String PLUGIN_VERSION_NAME = "1.1.0";
     
+	public static final String SETHANDLENOTIFICATION = "setHandleNotification";
     public static final String ENABLE = "enableNotifications";
     public static final String ENABLELOCATIONS = "enableLocationUpdates";
     public static final String DISABLE = "disableNotifications";
@@ -92,15 +94,19 @@ public class NotificarePlugin extends CordovaPlugin {
 		}
 		Notificare.shared().setForeground(true);
 		Notificare.shared().getEventLogger().logStartSession();	
-		// Check for launch with notification
+		// Check for launch with notification or tokens
 		sendNotification(parseNotificationIntent(cordova.getActivity().getIntent()));
+		sendValidateUserToken(parseValidateUserIntent(cordova.getActivity().getIntent()));
+		sendResetPasswordToken(parseResetPasswordIntent(cordova.getActivity().getIntent()));
 	}
 
 	@Override
 	public void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
-		// Check for launch with notification
-		sendNotification(parseNotificationIntent(intent));		
+		// Check for launch with notification or tokens
+		sendNotification(parseNotificationIntent(intent));
+		sendValidateUserToken(parseValidateUserIntent(intent));
+		sendResetPasswordToken(parseResetPasswordIntent(intent));
 	}
 
 	@Override
@@ -127,7 +133,10 @@ public class NotificarePlugin extends CordovaPlugin {
 
 	@Override
 	public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-		if (ENABLE.equals(action)) {
+		if (SETHANDLENOTIFICATION.equals(action)) {
+			setHandleNotification(args, callbackContext);
+			return true;
+		} else if (ENABLE.equals(action)) {
 			enableNotifications(callbackContext);
 			return true;
 		} else if (ENABLELOCATIONS.equals(action)) {
@@ -187,6 +196,15 @@ public class NotificarePlugin extends CordovaPlugin {
 		}
         Log.d(TAG, "Invalid action: " + action);
 		return false;
+	}
+
+	/**
+	 * Handle notifications ourselves: a no-op on Android since this is determined from the AndroidManifest intent-filter
+	 * @param callbackContext
+	 */
+	protected void setHandleNotification(JSONArray args, CallbackContext callbackContext) {
+		Log.d(TAG, "SETHANDLENOTIFICATION called on Android, no effect");
+		callbackContext.success();
 	}
 
 	/**
@@ -712,7 +730,24 @@ public class NotificarePlugin extends CordovaPlugin {
 			callbackContext.error("JSON parse error");
 		}
 	}
-	
+
+	/**
+	 * Send the ready event to the webview
+	 * @param deviceId
+	 */
+	public void sendReady(NotificareApplicationInfo applicationInfo) {
+        try {
+            String js = String.format("Notificare.readyCallback(null, '%s');", applicationInfo.toJSONObject().toString());
+            Log.i(TAG, "Calling JS: " + js);
+            this.webView.sendJavascript(js);
+        } catch (JSONException e) {
+        	Log.e(TAG, "unable to parse javascript in sendReady", e);
+        } catch (NullPointerException npe) {
+            Log.e(TAG, "unable to send javascript in sendReady", npe);
+        } catch (Exception e) {
+            Log.e(TAG, "unexpected exception in sendReady", e);
+        }
+	}
 
 	/**
 	 * Send the registered deviceId (APID) to the webview
@@ -761,21 +796,95 @@ public class NotificarePlugin extends CordovaPlugin {
 	}
 	
 	/**
+	 * Checks for a reset password token in intent URI
+	 * @param intent
+	 * @return
+	 */
+	public String parseResetPasswordIntent(Intent intent) {
+		if (intent.getData() != null) {
+			List<String> pathSegments = intent.getData().getPathSegments();
+			if (pathSegments.size() >= 4 && pathSegments.get(0).equals("oauth") && pathSegments.get(1).equals("resetpassword")) {
+				return pathSegments.get(3);
+			} else {
+				return null;
+			}
+		} else {
+			return intent.getStringExtra(Notificare.INTENT_EXTRA_TOKEN);
+		}
+	}
+
+	/**
+	 * Checks for a validation token in intent URI
+	 * @param intent
+	 * @return
+	 */
+	public String parseValidateUserIntent(Intent intent) {
+		if (intent.getData() != null) {
+			List<String> pathSegments = intent.getData().getPathSegments();
+			if (pathSegments.size() >= 4 && pathSegments.get(0).equals("oauth") && pathSegments.get(1).equals("validate")) {
+				return pathSegments.get(3);
+			} else {
+				return null;
+			}
+		} else {
+			return intent.getStringExtra(Notificare.INTENT_EXTRA_TOKEN);
+		}
+	}
+	
+	/**
 	 * Send the notification to the webview
 	 * @param deviceId
 	 */
 	public void sendNotification(NotificareNotification notification) {
-        try {
-			String js = String.format("Notificare.notificationCallback(%s);", notification.toJSONObject().toString());
-	        Log.i(TAG, "Calling JS: " + js);
-            this.webView.sendJavascript(js);
-        } catch (NullPointerException npe) {
-            Log.i(TAG, "unable to send javascript in sendNotification");
-		} catch (JSONException e) {
-			Log.e(TAG, "error creating JSON from notification", e);
-        } catch (Exception e) {
-            Log.e(TAG, "unexpected exception in sendRegistration", e);
-        }
+		if (notification != null) {
+	        try {
+				String js = String.format("Notificare.notificationCallback(%s);", notification.toJSONObject().toString());
+		        Log.i(TAG, "Calling JS: " + js);
+	            this.webView.sendJavascript(js);
+	        } catch (NullPointerException npe) {
+	            Log.i(TAG, "unable to send javascript in sendNotification");
+			} catch (JSONException e) {
+				Log.e(TAG, "error creating JSON from notification", e);
+	        } catch (Exception e) {
+	            Log.e(TAG, "unexpected exception in sendRegistration", e);
+	        }			
+		}
+	}
+
+	/**
+	 * Send reset password token to the webview
+	 * @param token
+	 */
+	public void sendResetPasswordToken(String token) {
+		if (token != null) {
+	        try {
+				String js = String.format("Notificare.resetPasswordTokenCallback('%s');", token);
+		        Log.i(TAG, "Calling JS: " + js);
+	            this.webView.sendJavascript(js);
+	        } catch (NullPointerException npe) {
+	            Log.i(TAG, "unable to send javascript in sendNotification");
+	        } catch (Exception e) {
+	            Log.e(TAG, "unexpected exception in sendRegistration", e);
+	        }			
+		}
+	}
+
+	/**
+	 * Send validate user token to the webview
+	 * @param token
+	 */
+	public void sendValidateUserToken(String token) {
+		if (token != null) {
+	        try {
+				String js = String.format("Notificare.validateUserTokenCallback('%s');", token);
+		        Log.i(TAG, "Calling JS: " + js);
+	            this.webView.sendJavascript(js);
+	        } catch (NullPointerException npe) {
+	            Log.i(TAG, "unable to send javascript in sendNotification");
+	        } catch (Exception e) {
+	            Log.e(TAG, "unexpected exception in sendRegistration", e);
+	        }		
+		}
 	}
 
 }

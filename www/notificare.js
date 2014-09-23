@@ -80,6 +80,10 @@ function Notificare() {
 
 Notificare.prototype = inherit(EventEmitter.prototype);
 
+Notificare.prototype.setHandleNotification = function(handle, success, fail) {
+	cordova.exec(success, fail, 'Notificare', 'setHandleNotification', [handle]);
+};
+
 Notificare.prototype.registerDevice = function(deviceId, userId, userName, success, fail) {
 	cordova.exec(success, fail, 'Notificare', 'registerDevice', [deviceId, userId, userName]);
 };
@@ -133,7 +137,7 @@ Notificare.prototype.resetPassword = function(password, token, success, fail) {
 };
 
 Notificare.prototype.changePassword = function(password, success, fail) {
-	cordova.exec(success, fail, 'Notificare', 'fetchDeviceTags', [password]);
+	cordova.exec(success, fail, 'Notificare', 'changePassword', [password]);
 };
 
 Notificare.prototype.userLogin = function(username, password, success, fail) {
@@ -156,6 +160,10 @@ Notificare.prototype.openNotification = function(notification, success, fail) {
 	cordova.exec(success, fail, 'Notificare', 'openNotification', [notification]);
 };
 
+Notificare.prototype.readyCallback = function(applicationInfo) {
+	this.emit('ready', applicationInfo);
+};
+
 Notificare.prototype.registrationCallback = function(err, deviceId) {
 	if (err) {
 		this.emit('registrationError', err);
@@ -166,6 +174,14 @@ Notificare.prototype.registrationCallback = function(err, deviceId) {
 
 Notificare.prototype.notificationCallback = function(notification) {
 	this.emit('notification', notification);
+};
+
+Notificare.prototype.resetPasswordTokenCallback = function(token) {
+	this.emit('resetPasswordToken', token);
+};
+
+Notificare.prototype.validateUserTokenCallback = function(token) {
+	this.emit('validateUserToken', token);
 };
 
 module.exports = new Notificare();

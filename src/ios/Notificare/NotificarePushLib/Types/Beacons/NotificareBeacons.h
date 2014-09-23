@@ -7,10 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "Notification.h"
-#import "Action.h"
-#import "Content.h"
-#import "Attachment.h"
+#import "NotificareNotification.h"
+#import "NotificareAction.h"
+#import "NotificareContent.h"
+#import "NotificareAttachment.h"
 #import "NotificationType.h"
 #import "NotificationDelegate.h"
 #import "NotificareActions.h"
@@ -22,7 +22,7 @@
 @interface NotificareBeacons : NSObject <NotificationType,UITableViewDelegate, UITableViewDataSource,UIActionSheetDelegate>
 
 @property (nonatomic, assign) id<NotificationDelegate> delegate;
-@property (nonatomic, strong) Notification * notification;
+@property (nonatomic, strong) NotificareNotification * notification;
 @property (nonatomic, strong) NotificareActions * notificareActions;
 @property (strong, nonatomic) NotificareEngine * notificareEngine;
 @property (strong, nonatomic) UIViewController * rootViewController;
@@ -34,7 +34,7 @@
 @property (strong, nonatomic) NSMutableArray *beacons;
 @property (strong, nonatomic) NSMutableArray *types;
 @property (strong, nonatomic) UITableView * beaconsTableView;
-
+@property (strong, nonatomic) UILabel * emptyLabel;
 
 
 -(void)openNotification;

@@ -2,26 +2,68 @@
 #import "NotificareAppDelegateSurrogate.h"
 #import "NotificarePushLib.h"
 
-@interface NotificarePlugin()
+@implementation NSString (NotificareJSON)
 
+- (NSString *)escapedString {
+    NSString *escaped = [self stringByReplacingOccurrencesOfString:@"\r" withString:@""];
+    escaped = [escaped stringByReplacingOccurrencesOfString:@"\n" withString:@"\\n"];
+    escaped = [escaped stringByReplacingOccurrencesOfString:@"\'" withString:@"\\\'"];
+    return escaped;
+}
+
+@end
+
+@implementation NSDictionary (NotificareJSON)
+- (NSString*)escapedJSONString {
+    NSError* error = nil;
+    NSData* jsonData = [NSJSONSerialization dataWithJSONObject:self options:0 error:&error];
+    if (error != nil) {
+        NSLog(@"NSDictionary escapedJSONString error: %@", [error localizedDescription]);
+        return nil;
+    } else {
+        NSString *json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+        return [json escapedString];
+    }
+}
+@end
+
+@implementation NSArray (NotificareJSON)
+- (NSString*)escapedJSONString {
+    NSError* error = nil;
+    NSData* jsonData = [NSJSONSerialization dataWithJSONObject:self options:0 error:&error];
+    if (error != nil) {
+        NSLog(@"NSArray escapedJSONString error: %@", [error localizedDescription]);
+        return nil;
+    } else {
+        NSString *json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+        return [json escapedString];
+    }
+}
+@end
+
+@interface NotificarePlugin() {
+    BOOL _handleNotification;
+    NSMutableDictionary *_openedNotifications;
+}
 @end
 
 
 @implementation NotificarePlugin
 
 - (void)pluginInitialize {
+    _openedNotifications = [[NSMutableDictionary alloc] initWithCapacity:10];
     [[NotificareAppDelegateSurrogate shared] setSurrogateDelegate:self];
     [[NotificarePushLib shared] launch];
     [[NotificarePushLib shared] setDelegate:self];
-    NSDictionary *launchOptions = [[NotificareAppDelegateSurrogate shared] launchOptions];
-    if ([launchOptions objectForKey:@"UIApplicationLaunchOptionsRemoteNotificationKey"]) {
-    	[[NotificarePushLib shared] handleOptions:[[[NotificareAppDelegateSurrogate shared] launchOptions] objectForKey:@"UIApplicationLaunchOptionsRemoteNotificationKey"]];
-    }
+    [[NotificarePushLib shared] handleOptions:[[NotificareAppDelegateSurrogate shared] launchOptions]];
+}
+
+- (void)setHandleNotification:(CDVInvokedUrlCommand*)command {
+    _handleNotification = [[command argumentAtIndex:0] boolValue];
 }
 
 - (void)enableNotifications:(CDVInvokedUrlCommand*)command {
-    [[NotificarePushLib shared] registerForRemoteNotificationsTypes:(UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert)];
-   
+    [[NotificarePushLib shared] registerForNotifications];
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
 }
@@ -137,8 +179,9 @@
 }
 
 - (void)createAccount:(CDVInvokedUrlCommand*)command {
-    [[NotificarePushLib shared] getTags:^(NSDictionary *info) {
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:[info objectForKey:@"tags"]];
+    NSDictionary *params = @{@"email": [command argumentAtIndex:0], @"password": [command argumentAtIndex:1], @"userName": [command argumentAtIndex:2]};
+    [[NotificarePushLib shared] createAccount:params completionHandler:^(NSDictionary *info) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
         [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
     } errorHandler:^(NSError *error) {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
@@ -147,8 +190,9 @@
 }
 
 - (void)validateUser:(CDVInvokedUrlCommand*)command {
-    [[NotificarePushLib shared] getTags:^(NSDictionary *info) {
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:[info objectForKey:@"tags"]];
+    NSString *token = [command argumentAtIndex:0];
+    [[NotificarePushLib shared] validateAccount:token completionHandler:^(NSDictionary *info) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
         [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
     } errorHandler:^(NSError *error) {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
@@ -157,8 +201,9 @@
 }
 
 - (void)sendPassword:(CDVInvokedUrlCommand*)command {
-    [[NotificarePushLib shared] getTags:^(NSDictionary *info) {
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:[info objectForKey:@"tags"]];
+    NSDictionary *params = @{@"email": [command argumentAtIndex:0]};
+    [[NotificarePushLib shared] sendPassword:params completionHandler:^(NSDictionary *info) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
         [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
     } errorHandler:^(NSError *error) {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
@@ -167,8 +212,10 @@
 }
 
 - (void)resetPassword:(CDVInvokedUrlCommand*)command {
-    [[NotificarePushLib shared] getTags:^(NSDictionary *info) {
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:[info objectForKey:@"tags"]];
+    NSDictionary *params = @{@"password": [command argumentAtIndex:0]};
+    NSString *token = [command argumentAtIndex:1];
+    [[NotificarePushLib shared] resetPassword:params withToken:token completionHandler:^(NSDictionary *info) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
         [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
     } errorHandler:^(NSError *error) {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
@@ -177,8 +224,9 @@
 }
 
 - (void)changePassword:(CDVInvokedUrlCommand*)command {
-    [[NotificarePushLib shared] getTags:^(NSDictionary *info) {
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:[info objectForKey:@"tags"]];
+    NSDictionary *params = @{@"password": [command argumentAtIndex:0]};
+    [[NotificarePushLib shared] changePassword:params completionHandler:^(NSDictionary *info) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
         [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
     } errorHandler:^(NSError *error) {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
@@ -186,29 +234,29 @@
     }];
 }
 
-- (void)loginUser:(CDVInvokedUrlCommand*)command {
-    [[NotificarePushLib shared] getTags:^(NSDictionary *info) {
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:[info objectForKey:@"tags"]];
-        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
-    } errorHandler:^(NSError *error) {
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
-        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
-    }];
+- (void)userLogin:(CDVInvokedUrlCommand*)command {
+    NSString *username = [command argumentAtIndex:0];
+    NSString *password = [command argumentAtIndex:1];
+    if (username && password) {
+        [[NotificarePushLib shared] loginWithUsername:username andPassword:password completionHandler:^(NSDictionary *info) {
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+        } errorHandler:^(NSError *error) {
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+        }];
+    }
 }
 
-- (void)logoutUser:(CDVInvokedUrlCommand*)command {
-    [[NotificarePushLib shared] getTags:^(NSDictionary *info) {
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:[info objectForKey:@"tags"]];
-        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
-    } errorHandler:^(NSError *error) {
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
-        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
-    }];
+- (void)userLogout:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] logoutAccount];
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
 }
 
 - (void)generateAccessToken:(CDVInvokedUrlCommand*)command {
-    [[NotificarePushLib shared] getTags:^(NSDictionary *info) {
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:[info objectForKey:@"tags"]];
+    [[NotificarePushLib shared] generateAccessToken:^(NSDictionary *info) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[info objectForKey:@"user"]];
         [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
     } errorHandler:^(NSError *error) {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
@@ -217,8 +265,8 @@
 }
 
 - (void)fetchUserDetails:(CDVInvokedUrlCommand*)command {
-    [[NotificarePushLib shared] getTags:^(NSDictionary *info) {
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:[info objectForKey:@"tags"]];
+    [[NotificarePushLib shared] fetchAccountDetails:^(NSDictionary *info) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[info objectForKey:@"user"]];
         [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
     } errorHandler:^(NSError *error) {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
@@ -227,13 +275,43 @@
 }
 
 - (void)openNotification:(CDVInvokedUrlCommand*)command {
-    [[NotificarePushLib shared] getTags:^(NSDictionary *info) {
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:[info objectForKey:@"tags"]];
-        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
-    } errorHandler:^(NSError *error) {
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
-        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
-    }];
+    if ([[command argumentAtIndex:0] objectForKey:@"_id"]) {
+        // Incoming argument is the full Notification object
+        [_openedNotifications setObject:[command argumentAtIndex:0] forKey:[[command argumentAtIndex:0] objectForKey:@"_id"]];
+        
+        // NotificarePushLib needs the original payload from APNS
+        [[NotificarePushLib shared] openNotification:[[NSDictionary alloc] initWithObjectsAndKeys:[[command argumentAtIndex:0] objectForKey:@"_id"], @"id", nil]];
+    }
+}
+
+#pragma NotificarePushLibDelegate
+
+- (void)notificarePushLib:(NotificarePushLib *)library onReady:(NSDictionary *)info {
+    NSLog(@"Notificare ready");
+}
+
+- (BOOL)notificarePushLib:(NotificarePushLib *)library shouldHandleNotification:(NSDictionary *)info {
+    // Incoming info is the full notification object in key "notification"
+    if (_handleNotification && [info objectForKey:@"notification"] && ![_openedNotifications objectForKey:[[info objectForKey:@"notification"] objectForKey:@"_id"]]) {
+        NSString *js = [NSString stringWithFormat:@"Notificare.notificationCallback(%@);", [[info objectForKey:@"notification"] escapedJSONString]];
+        [[self webView] stringByEvaluatingJavaScriptFromString:js];
+        return NO;
+    } else if ([info objectForKey:@"notification"]) {
+        [_openedNotifications removeObjectForKey:[[info objectForKey:@"notification"] objectForKey:@"_id"]];
+    }
+    return YES;
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didReceiveActivationToken:(NSString *)token {
+    NSLog(@"received validation token %@", token);
+    NSString *js = [NSString stringWithFormat:@"Notificare.validateUserTokenCallback('%@');", token];
+    [[self webView] stringByEvaluatingJavaScriptFromString:js];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didReceiveResetPasswordToken:(NSString *)token {
+    NSLog(@"received reset password token %@", token);
+    NSString *js = [NSString stringWithFormat:@"Notificare.resetPasswordTokenCallback('%@');", token];
+    [[self webView] stringByEvaluatingJavaScriptFromString:js];
 }
 
 #pragma UIApplicationDelegate
@@ -244,14 +322,19 @@
 }
 
 - (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error{
-    NSLog(@"%@",error);
-    NSString *js = [NSString stringWithFormat:@"Notificare.registrationCallback(new Error('%@'));", [error localizedDescription]];
+    NSLog(@"Error registering for remote notifications: %@",error);
+    NSString *js = [NSString stringWithFormat:@"Notificare.registrationCallback(new Error('%@'));", [[error localizedDescription] escapedString]];
     [[self webView] stringByEvaluatingJavaScriptFromString:js];
 }
-
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
     [[NotificarePushLib shared] openNotification:userInfo];
 }
+
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation{
+    [[NotificarePushLib shared]  handleOpenURL:url];
+    return YES;
+}
+
 
 @end

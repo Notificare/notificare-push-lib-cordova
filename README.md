@@ -39,8 +39,8 @@ android.library.reference.4=../../../notificare-push-lib-android/SDK
 
 Where path references to Support Library, Google Play SDK and Notificare SDK are of course dependent on your local setup.
 
-Since the Cordova plugin installer doesn't add all necessary changes to the AndroidManifest.xml, you have to add some settings manually in that file.
-First of all, your application needs to be of class re.notifica.cordova.BaseApplication
+Since the Cordova plugin installer doesn't add all necessary changes to the AndroidManifest.xml, you might have to add some settings manually in that file.
+In any case, your application needs to be of class re.notifica.cordova.BaseApplication
 
 ```
 <application 
@@ -50,33 +50,31 @@ First of all, your application needs to be of class re.notifica.cordova.BaseAppl
    android:name="re.notifica.cordova.BaseApplication">
 ```
 
-Second, your application needs some settings for Google Play Services. Add the following somewhere inside the <application> element of your AndroidManifest.xml
-
-```
-<meta-data
-    android:name="com.google.android.gms.version"
-    android:value="@integer/google_play_services_version" />
-```
-
-Finally, if you want to keep track of user sessions in your app, have your activities extend re.notifica.cordova.BaseActivity. This is only necessary for
+If you want to keep track of user sessions in your app, have your activities extend re.notifica.cordova.BaseActivity. This is only necessary for
 your non-Cordova activities. The Cordova plugin will do the logging for you in the Cordova activity.
 
 ```
 import re.notifica.cordova.BaseActivity;
 
-public class MyCordovaApp extends BaseActivity
-{
+public class MyNonCordovaActivity extends BaseActivity {
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        super.init();
-        // Set by <content src="index.html" /> in config.xml
-        super.loadUrl(Config.getStartUrl());
-        //super.loadUrl("file:///android_asset/www/index.html");
     }
 }
 ```
+
+Configure plugin
+----------------
+
+### iOS
+
+Edit the Notificare.plist and enter your keys from the Notificare Dashboard
+
+### Android
+
+Edit assets/notificareconfig.properties and enter your keys from the Notificare Dashboard plus the SenderId from your Google API Console
+
 
 Basic Usage
 -----------
@@ -173,3 +171,64 @@ Both locationUpdates and notifications can be disabled by calling `disableLocati
 
 Handling Notifications yourself
 -----------
+
+### Android
+
+In Android, simply add an intent filter to your (Cordova) Activity in the AndroidManifest.
+
+```xml
+   <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale" android:label="@string/app_name" android:launchMode="singleTop" android:name="MyCordovaActivity" android:theme="@android:style/Theme.Black.NoTitleBar">
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+        <!--
+        	This activity will receive notification opened intents
+        -->
+        <intent-filter>
+            <action android:name="re.notifica.intent.action.NotificationOpened" />
+            <category android:name="android.intent.category.DEFAULT" />
+        </intent-filter>
+    </activity>
+```
+
+### iOS
+
+In iOS, you only need to tell the plugin to handle notifications by calling Notificare.setHandleNotification(true) in JS. See below.
+
+### JS
+
+In your device ready logic, tell the plugin to handle incoming notifications, then add an event listener for incoming notifications
+
+```javascript
+onDeviceReady: function() {
+	Notificare.setHandleNotification(true);
+
+	Notificare.enableNotifications();
+	Notificare.on('registration', function(deviceId) {
+	
+		// ...
+
+	});
+
+	Notificare.on('notification', function(notification) {
+		if (someCondition) {
+			// Here you should show notification in your view, or ignore it
+			// In iOS, don't use any blocking calls like window.alert()
+		}
+	});
+});
+```
+
+
+
+
+Customizations
+--------------
+
+For more info on customizing the default behavior and looks of the Notificare UI, take a look at the platforms' respective docs:
+
+[4. iOS - Settings & Customizations](https://notificare.atlassian.net/wiki/pages/viewpage.action?pageId=2228230) 
+
+[4. Android Costumizations](https://notificare.atlassian.net/wiki/display/notificare/4.+Android+Costumizations)
+

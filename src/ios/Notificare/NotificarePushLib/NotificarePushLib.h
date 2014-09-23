@@ -13,7 +13,7 @@
 #import "Notificare.h"
 #import "NotificareActions.h"
 #import "SRWebSocket.h"
-#import "Notification.h"
+#import "NotificareNotification.h"
 #import <CoreLocation/CoreLocation.h>
 #import "NSString+Utils.h"
 #import "NotificareNXOAuth2.h"
@@ -46,6 +46,8 @@ typedef enum  {
 
 @optional
 
+- (void)notificarePushLib:(NotificarePushLib *)library onReady:(NSDictionary *)info;
+
 - (void)notificarePushLib:(NotificarePushLib *)library didRegisterForWebsocketsNotifications:(NSString *)token;
 - (void)notificarePushLib:(NotificarePushLib *)library didReceiveWebsocketNotification:(NSDictionary *)info;
 - (void)notificarePushLib:(NotificarePushLib *)library didFailToRegisterWebsocketNotifications:(NSError *)error;
@@ -53,12 +55,13 @@ typedef enum  {
 
 - (BOOL)notificarePushLib:(NotificarePushLib *)library shouldHandleNotification:(NSDictionary *)info;
 
-- (void)notificarePushLib:(NotificarePushLib *)library willOpenNotification:(Notification *)notification;
-- (void)notificarePushLib:(NotificarePushLib *)library didOpenNotification:(Notification *)notification;
-- (void)notificarePushLib:(NotificarePushLib *)library didCloseNotification:(Notification *)notification;
-- (void)notificarePushLib:(NotificarePushLib *)library didFailToOpenNotification:(Notification *)notification;
+- (void)notificarePushLib:(NotificarePushLib *)library didUpdateBadge:(int)badge;
+- (void)notificarePushLib:(NotificarePushLib *)library willOpenNotification:(NotificareNotification *)notification;
+- (void)notificarePushLib:(NotificarePushLib *)library didOpenNotification:(NotificareNotification *)notification;
+- (void)notificarePushLib:(NotificarePushLib *)library didCloseNotification:(NotificareNotification *)notification;
+- (void)notificarePushLib:(NotificarePushLib *)library didFailToOpenNotification:(NotificareNotification *)notification;
 
-- (void)notificarePushLib:(NotificarePushLib *)library willExecuteAction:(Notification *)notification;
+- (void)notificarePushLib:(NotificarePushLib *)library willExecuteAction:(NotificareNotification *)notification;
 - (void)notificarePushLib:(NotificarePushLib *)library didExecuteAction:(NSDictionary *)info;
 - (void)notificarePushLib:(NotificarePushLib *)library shouldPerformSelector:(NSString *)selector;
 - (void)notificarePushLib:(NotificarePushLib *)library didNotExecuteAction:(NSDictionary *)info;
@@ -111,6 +114,7 @@ typedef enum  {
 @property (strong, nonatomic) Notificare * currentNotificare;
 
 @property (strong, nonatomic) NotificareActions * notificareActions;
+
 
 /*!
  *  @abstract the apiID key
@@ -381,7 +385,15 @@ typedef enum  {
  *  @discussion
  *  Registers for APNS
  */
-- (void)registerForRemoteNotificationsTypes:(UIRemoteNotificationType)types;
+- (void)registerForRemoteNotificationsTypes:(UIRemoteNotificationType)types __attribute__((deprecated("use registerForNotifications instead.")));;
+
+/*!
+ *  @abstract Register for APNS
+ *
+ *  @discussion
+ *  Registers for User Notifications and Remote Notifications (since iOS8)
+ */
+- (void)registerForNotifications;
 
 /*!
  *  @abstract Handle didFinishLaunchingWithOptions notifications
@@ -545,6 +557,14 @@ typedef enum  {
 -(void)startLocationUpdates;
 
 /*!
+ *  @abstract Check if Location Updates are ON
+ *
+ *  @discussion
+ *  Returns boolean for Location Service status
+ */
+-(BOOL)checkLocationUpdates;
+
+/*!
  *  @abstract Update Device's Location
  *
  *  @discussion
@@ -604,6 +624,60 @@ typedef enum  {
  *  Register an action event manually. Usually needed when you handling notifications yourself and want to use the actions to register a certain user choice.
  */
 - (void)reply:(NSString *)notification withLabel:(NSString *)label andData:(NSDictionary *)data;
+/*!
+ *  @abstract Handle action from iOS8 notifications
+ *
+ *  @discussion
+ *  Handles the action clicked from a notificaition in iOS 8
+ */
+- (void)handleAction:(NSString *)action forNotification:(NSDictionary *)notification withData:(NSDictionary *)data completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)errorBlock;
+
+/*!
+ *  @abstract Log a Custom Event
+ *
+ *  @discussion
+ *  This method allows your app to store key metrics you might find useful. You can then visualize time based agreggations of this data.
+ */
+- (void)logCustomEvent:(NSString *)name withData:(NSDictionary *)data completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)error;
+/*!
+ *  @abstract Save Notification to Inbox
+ *
+ *  @discussion
+ *  Save the incoming notifications to the Notificare Inbox. To be use in -application didReceiveRemoteNotification:fetchCompletionHandler:
+ */
+- (void)saveToInbox:(NSDictionary *)notification forApplication:(UIApplication *)application completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
+/*!
+ *  @abstract Remove Notification from Inbox
+ *
+ *  @discussion
+ *  Remove a notification from the Inbox
+ */
+- (void)removeFromInbox:(NSDictionary *)notification;
+
+/*!
+ *  @abstract Open Inbox
+ *
+ *  @discussion
+ *  Opens the UI to present an Inbox with all the items received in the device. This window allows to also remove these records from the inbox.
+ *
+ */
+-(void)openInbox;
+/*!
+ *  @abstract Inbox
+ *
+ *  @discussion
+ *  At any point in your app you can access [[NotificarePushLib shared] myInbox] to retrieve the device's inbox.
+ *  The returned value is a NSArray containing NSDictionary objects of you notifications.
+ */
+-(NSArray *)myInbox;
+
+/*!
+ *  @abstract Badge
+ *
+ *  @discussion
+ *  At any point in your app you can access [[NotificarePushLib shared] myBadge] to retrieve the device's badge number.
+ */
+-(int)myBadge;
 
 /*!
  *  @abstract OAuth2 Methods
@@ -614,6 +688,7 @@ typedef enum  {
 
 - (void)createAccount:(NSDictionary *)params completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
 - (void)resetPassword:(NSDictionary *)params withToken:(NSString *)token completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
+- (void)validateAccount:(NSString *)token completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
 - (void)sendPassword:(NSDictionary *)params completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
 - (void)loginWithUsername:(NSString *)username andPassword:(NSString *)password completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)error;
 - (void)fetchAccountDetails:(SuccessBlock)info errorHandler:(ErrorBlock)error;

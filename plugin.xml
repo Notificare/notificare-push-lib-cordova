@@ -71,7 +71,7 @@
         android:label="Notificare Push Service" />
       <receiver android:name="re.notifica.cordova.IntentReceiver" />
 
-      <meta-data  android:name="com.google.android.gms.version" android:value="4452000"/>
+      <meta-data  android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version"/>
       <!-- API key for Google Maps -->
       <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
@@ -83,10 +83,11 @@
     <source-file src="src/android/src/re/notifica/cordova/IntentReceiver.java" target-dir="src/re/notifica/cordova/"/>
     <source-file src="src/android/src/re/notifica/cordova/BaseApplication.java" target-dir="src/re/notifica/cordova/"/>
     <source-file src="src/android/src/re/notifica/cordova/BaseActivity.java" target-dir="src/re/notifica/cordova/"/>
+
     <resource-file src="src/android/res/xml/preferences.xml" target="res/xml/preferences.xml" />
     <resource-file src="src/android/res/values/strings_preferences.xml" target="res/values/strings_preferences.xml" />
     <resource-file src="src/android/assets/notificareconfig.properties" target="assets/notificareconfig.properties" />
-    </platform>
+  </platform>
 
   <!-- ios -->
   <platform name="ios">
@@ -137,12 +138,11 @@
     <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NSURL+NotificareNXOauth2.h"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/base64.h"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/NSData+SRB64Additions.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/SocketRocket-Prefix.pch"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/SRWebSocket.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Models/Action.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Models/Attachment.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Models/Content.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Models/Notification.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareAction.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareAttachment.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareContent.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareNotification.h"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Shared/NSData+Hex.h"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Shared/NSDictionary+FromPlist.h"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Shared/NSString+FromBundle.h"/>
@@ -167,7 +167,7 @@
     <header-file src="src/ios/Notificare/NotificarePushLib/NotificareEngine.h"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/NotificarePushLib.h"/>
     
-    <resource-file src="src/ios/DefaultTheme.bundle"/>
+	<resource-file src="src/ios/DefaultTheme.bundle"/>
     <resource-file src="src/ios/Notificare.plist"/>
     <resource-file src="src/ios/NotificareTags.plist"/>
     

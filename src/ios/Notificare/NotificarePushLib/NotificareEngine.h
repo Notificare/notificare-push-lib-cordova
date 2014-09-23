@@ -41,6 +41,7 @@ typedef void (^FileUploadResponseBlock)(NSDictionary*file);
 -(NotificareMKNetworkOperation*)unregisterDevice:(NSString*)device;
 
 -(NotificareMKNetworkOperation*)updateDeviceLocation:(NSString*)device;
+-(NotificareMKNetworkOperation*)clearDeviceLocation:(NSString*)device;
 
 -(NotificareMKNetworkOperation*)updateDeviceTimezone:(NSString*)device;
 
@@ -80,6 +81,7 @@ typedef void (^FileUploadResponseBlock)(NSDictionary*file);
 
 -(NotificareMKNetworkOperation*)createAccount:(NSDictionary *)params completionHandler:(NotificationResponseBlock)info errorHandler:(nMKNKErrorBlock)error;
 -(NotificareMKNetworkOperation*)resetPassword:(NSDictionary *)params withToken:(NSString *)token completionHandler:(NotificationResponseBlock)info errorHandler:(nMKNKErrorBlock)errorBlock;
+-(NotificareMKNetworkOperation*)validateAccount:(NSString *)token completionHandler:(NotificationResponseBlock)info errorHandler:(nMKNKErrorBlock)errorBlock;
 -(NotificareMKNetworkOperation*)sendPassword:(NSDictionary *)params completionHandler:(NotificationResponseBlock)info errorHandler:(nMKNKErrorBlock)error;
 -(NotificareMKNetworkOperation*)checkAccount:(NSString *)user completionHandler:(NotificationResponseBlock)info errorHandler:(nMKNKErrorBlock)error;
 
