@@ -31,9 +31,9 @@ public class NotificarePlugin extends CordovaPlugin {
 	
     protected static final String TAG = NotificarePlugin.class.getSimpleName();
 
-	public static final int MIN_SDK_VERSION = 10100;
-	public static final int PLUGIN_VERSION_CODE = 10100;
-	public static final String PLUGIN_VERSION_NAME = "1.1.0";
+	public static final int MIN_SDK_VERSION = 10101;
+	public static final int PLUGIN_VERSION_CODE = 10101;
+	public static final String PLUGIN_VERSION_NAME = "1.1.1";
     
 	public static final String SETHANDLENOTIFICATION = "setHandleNotification";
     public static final String ENABLE = "enableNotifications";
@@ -96,8 +96,8 @@ public class NotificarePlugin extends CordovaPlugin {
 		Notificare.shared().getEventLogger().logStartSession();	
 		// Check for launch with notification or tokens
 		sendNotification(parseNotificationIntent(cordova.getActivity().getIntent()));
-		sendValidateUserToken(parseValidateUserIntent(cordova.getActivity().getIntent()));
-		sendResetPasswordToken(parseResetPasswordIntent(cordova.getActivity().getIntent()));
+		sendValidateUserToken(Notificare.shared().parseValidateUserIntent(cordova.getActivity().getIntent()));
+		sendResetPasswordToken(Notificare.shared().parseResetPasswordIntent(cordova.getActivity().getIntent()));
 	}
 
 	@Override
@@ -105,8 +105,8 @@ public class NotificarePlugin extends CordovaPlugin {
 		super.onNewIntent(intent);
 		// Check for launch with notification or tokens
 		sendNotification(parseNotificationIntent(intent));
-		sendValidateUserToken(parseValidateUserIntent(intent));
-		sendResetPasswordToken(parseResetPasswordIntent(intent));
+		sendValidateUserToken(Notificare.shared().parseValidateUserIntent(intent));
+		sendResetPasswordToken(Notificare.shared().parseResetPasswordIntent(intent));
 	}
 
 	@Override
@@ -792,42 +792,6 @@ public class NotificarePlugin extends CordovaPlugin {
 			return intent.getParcelableExtra(Notificare.INTENT_EXTRA_NOTIFICATION);
 		} else {
 			return null;
-		}
-	}
-	
-	/**
-	 * Checks for a reset password token in intent URI
-	 * @param intent
-	 * @return
-	 */
-	public String parseResetPasswordIntent(Intent intent) {
-		if (intent.getData() != null) {
-			List<String> pathSegments = intent.getData().getPathSegments();
-			if (pathSegments.size() >= 4 && pathSegments.get(0).equals("oauth") && pathSegments.get(1).equals("resetpassword")) {
-				return pathSegments.get(3);
-			} else {
-				return null;
-			}
-		} else {
-			return intent.getStringExtra(Notificare.INTENT_EXTRA_TOKEN);
-		}
-	}
-
-	/**
-	 * Checks for a validation token in intent URI
-	 * @param intent
-	 * @return
-	 */
-	public String parseValidateUserIntent(Intent intent) {
-		if (intent.getData() != null) {
-			List<String> pathSegments = intent.getData().getPathSegments();
-			if (pathSegments.size() >= 4 && pathSegments.get(0).equals("oauth") && pathSegments.get(1).equals("validate")) {
-				return pathSegments.get(3);
-			} else {
-				return null;
-			}
-		} else {
-			return intent.getStringExtra(Notificare.INTENT_EXTRA_TOKEN);
 		}
 	}
 	

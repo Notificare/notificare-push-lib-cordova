@@ -2,7 +2,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="re.notifica.cordova"
-        version="1.1.0">
+        version="1.1.1">
 
   <name>Notificare Plugin</name>
 
@@ -137,8 +137,9 @@
     <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NSString+NotificareNXOauth2.h"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NSURL+NotificareNXOauth2.h"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/base64.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/NSData+SRB64Additions.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/SRWebSocket.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/NSData+NotificareSRB64Additions.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/NotificareSRWebSocket.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/NotificareSocketRocket-Prefix.pch"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareAction.h"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareAttachment.h"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareContent.h"/>

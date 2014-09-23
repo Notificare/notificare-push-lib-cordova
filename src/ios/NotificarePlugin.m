@@ -50,7 +50,10 @@
 
 @implementation NotificarePlugin
 
+#define kPluginVersion @"1.1.1"
+
 - (void)pluginInitialize {
+	NSLog(@"Initializing Notificare Plugin version %@", kPluginVersion);
     _openedNotifications = [[NSMutableDictionary alloc] initWithCapacity:10];
     [[NotificareAppDelegateSurrogate shared] setSurrogateDelegate:self];
     [[NotificarePushLib shared] launch];
