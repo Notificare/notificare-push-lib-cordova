@@ -13,7 +13,7 @@
 	<key>DEVELOPMENT</key>
 	<true/>
 	<key>RESOURCE_BUNDLE</key>
-	<string>NotificareResources.bundle</string>
+	<string>DefaultTheme.bundle</string>
 	<key>OPTIONS</key>
 	<dict>
 		<key>APP_RUNS_ON_BACKGROUND</key>

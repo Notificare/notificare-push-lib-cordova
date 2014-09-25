@@ -41,20 +41,19 @@
 }
 @end
 
+
 @interface NotificarePlugin() {
     BOOL _handleNotification;
-    NSMutableDictionary *_openedNotifications;
 }
 @end
 
 
 @implementation NotificarePlugin
 
-#define kPluginVersion @"1.1.1"
+#define kPluginVersion @"1.1.2"
 
 - (void)pluginInitialize {
 	NSLog(@"Initializing Notificare Plugin version %@", kPluginVersion);
-    _openedNotifications = [[NSMutableDictionary alloc] initWithCapacity:10];
     [[NotificareAppDelegateSurrogate shared] setSurrogateDelegate:self];
     [[NotificarePushLib shared] launch];
     [[NotificarePushLib shared] setDelegate:self];
@@ -99,7 +98,7 @@
     NSString *userID = [command argumentAtIndex:1];
     NSString *username = [command argumentAtIndex:2];
     if (username) {
-        [[NotificarePushLib shared] registerDevice:[NSData dataFromBase64String:deviceID] withUserID:userID withUsername:username completionHandler:^(NSDictionary *info) {
+        [[NotificarePushLib shared] registerDevice:[NSData dataFromHexadecimalString:deviceID] withUserID:userID withUsername:username completionHandler:^(NSDictionary *info) {
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
             [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
         } errorHandler:^(NSError *error) {
@@ -107,7 +106,7 @@
             [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
         }];
     } else if (userID) {
-        [[NotificarePushLib shared] registerDevice:[NSData dataFromBase64String:deviceID] withUserID:userID completionHandler:^(NSDictionary *info) {
+        [[NotificarePushLib shared] registerDevice:[NSData dataFromHexadecimalString:deviceID] withUserID:userID completionHandler:^(NSDictionary *info) {
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
             [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
         } errorHandler:^(NSError *error) {
@@ -115,7 +114,7 @@
             [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
         }];
     } else {
-        [[NotificarePushLib shared] registerDevice:[NSData dataFromBase64String:deviceID] completionHandler:^(NSDictionary *info) {
+        [[NotificarePushLib shared] registerDevice:[NSData dataFromHexadecimalString:deviceID] completionHandler:^(NSDictionary *info) {
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
             [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
         } errorHandler:^(NSError *error) {
@@ -278,31 +277,14 @@
 }
 
 - (void)openNotification:(CDVInvokedUrlCommand*)command {
-    if ([[command argumentAtIndex:0] objectForKey:@"_id"]) {
-        // Incoming argument is the full Notification object
-        [_openedNotifications setObject:[command argumentAtIndex:0] forKey:[[command argumentAtIndex:0] objectForKey:@"_id"]];
-        
-        // NotificarePushLib needs the original payload from APNS
-        [[NotificarePushLib shared] openNotification:[[NSDictionary alloc] initWithObjectsAndKeys:[[command argumentAtIndex:0] objectForKey:@"_id"], @"id", nil]];
-    }
+    // NotificarePushLib needs the original payload from APNS
+    [[NotificarePushLib shared] openNotification:@{@"notification": [command argumentAtIndex:0]}];
 }
 
 #pragma NotificarePushLibDelegate
 
 - (void)notificarePushLib:(NotificarePushLib *)library onReady:(NSDictionary *)info {
     NSLog(@"Notificare ready");
-}
-
-- (BOOL)notificarePushLib:(NotificarePushLib *)library shouldHandleNotification:(NSDictionary *)info {
-    // Incoming info is the full notification object in key "notification"
-    if (_handleNotification && [info objectForKey:@"notification"] && ![_openedNotifications objectForKey:[[info objectForKey:@"notification"] objectForKey:@"_id"]]) {
-        NSString *js = [NSString stringWithFormat:@"Notificare.notificationCallback(%@);", [[info objectForKey:@"notification"] escapedJSONString]];
-        [[self webView] stringByEvaluatingJavaScriptFromString:js];
-        return NO;
-    } else if ([info objectForKey:@"notification"]) {
-        [_openedNotifications removeObjectForKey:[[info objectForKey:@"notification"] objectForKey:@"_id"]];
-    }
-    return YES;
 }
 
 - (void)notificarePushLib:(NotificarePushLib *)library didReceiveActivationToken:(NSString *)token {
@@ -320,7 +302,7 @@
 #pragma UIApplicationDelegate
 
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
-    NSString *js = [NSString stringWithFormat:@"Notificare.registrationCallback(null, '%@');", [deviceToken base64EncodedString]];
+    NSString *js = [NSString stringWithFormat:@"Notificare.registrationCallback(null, '%@');", [deviceToken hexadecimalString]];
     [[self webView] stringByEvaluatingJavaScriptFromString:js];
 }
 
@@ -331,7 +313,18 @@
 }
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
-    [[NotificarePushLib shared] openNotification:userInfo];
+    if (_handleNotification && [userInfo objectForKey:@"id"]) {
+        [[NotificarePushLib shared]getNotification:[userInfo objectForKey:@"id"] completionHandler:^(NSDictionary *info) {
+            // Info is the full notification object in key "notification"
+            NSDictionary *notification = [info objectForKey:@"notification"];
+            NSString *js = [NSString stringWithFormat:@"Notificare.notificationCallback(%@);", [notification escapedJSONString]];
+            [[self webView] stringByEvaluatingJavaScriptFromString:js];
+        } errorHandler:^(NSError *error) {
+            NSLog(@"Error fetching notification: %@",error);
+        }];
+    } else {
+        [[NotificarePushLib shared] openNotification:userInfo];
+    }
 }
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation{
