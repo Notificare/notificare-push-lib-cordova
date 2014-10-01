@@ -32,8 +32,8 @@ public class NotificarePlugin extends CordovaPlugin {
     protected static final String TAG = NotificarePlugin.class.getSimpleName();
 
 	public static final int MIN_SDK_VERSION = 10101;
-	public static final int PLUGIN_VERSION_CODE = 10102;
-	public static final String PLUGIN_VERSION_NAME = "1.1.2";
+	public static final int PLUGIN_VERSION_CODE = 10103;
+	public static final String PLUGIN_VERSION_NAME = "1.1.3";
     
 	public static final String SETHANDLENOTIFICATION = "setHandleNotification";
     public static final String ENABLE = "enableNotifications";
@@ -737,7 +737,7 @@ public class NotificarePlugin extends CordovaPlugin {
 	 */
 	public void sendReady(NotificareApplicationInfo applicationInfo) {
         try {
-            String js = String.format("Notificare.readyCallback(null, '%s');", applicationInfo.toJSONObject().toString());
+            String js = String.format("Notificare.readyCallback(null, %s);", applicationInfo.toJSONObject().toString());
             Log.i(TAG, "Calling JS: " + js);
             this.webView.sendJavascript(js);
         } catch (JSONException e) {
@@ -770,7 +770,7 @@ public class NotificarePlugin extends CordovaPlugin {
 	 * @param deviceId
 	 */
 	public void sendRegistrationError(String errorId) {
-        String js = String.format("Notificare.registrationCallback(new Error(%s));", errorId);
+        String js = String.format("Notificare.registrationCallback(new Error('%s'));", errorId);
         Log.i(TAG, "Calling JS: " + js);
         try {
             this.webView.sendJavascript(js);
