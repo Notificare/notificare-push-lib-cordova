@@ -31,9 +31,9 @@ public class NotificarePlugin extends CordovaPlugin {
 	
     protected static final String TAG = NotificarePlugin.class.getSimpleName();
 
-	public static final int MIN_SDK_VERSION = 10101;
-	public static final int PLUGIN_VERSION_CODE = 10103;
-	public static final String PLUGIN_VERSION_NAME = "1.1.3";
+	public static final int MIN_SDK_VERSION = 10102;
+	public static final int PLUGIN_VERSION_CODE = 10104;
+	public static final String PLUGIN_VERSION_NAME = "1.1.4";
     
 	public static final String SETHANDLENOTIFICATION = "setHandleNotification";
     public static final String ENABLE = "enableNotifications";
@@ -263,6 +263,7 @@ public class NotificarePlugin extends CordovaPlugin {
 	        	userId = args.getString(1);
 	        }
 	        if (args.length() == 3) {
+	        	userId = args.getString(1);
 	        	userName = args.getString(2);
 	        }
 			Notificare.shared().registerDevice(deviceId, userId, userName, new NotificareCallback<String>() {

@@ -2,7 +2,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="re.notifica.cordova"
-        version="1.1.3">
+        version="1.1.4">
 
   <name>Notificare Plugin</name>
 
@@ -96,77 +96,88 @@
         <param name="ios-package" value="NotificarePlugin" />
       </feature>
     </config-file>
+    <config-file target="*-Info.plist" parent="NSLocationAlwaysUsageDescription">
+      <string></string>
+    </config-file>
     <header-file src="src/ios/NotificarePlugin.h"/>
     <source-file src="src/ios/NotificarePlugin.m"/>
     <header-file src="src/ios/NotificareAppDelegateSurrogate.h"/>
     <source-file src="src/ios/NotificareAppDelegateSurrogate.m"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/App/NotificareApp.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/Browser/NotificareBrowser.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/Callback/NotificareCallback.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/Custom/NotificareCustom.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/Mail/NotificareMail.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/SMS/NotificareSMS.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/Telephone/NotificareTelephone.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/ActionDelegate.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/ActionType.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/NSData+NotificareMKBase64.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/NSDate+NotificareRFC1123.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/NSDictionary+NotificareRequestEncoding.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/NSString+NotificareMKNetworkKitAdditions.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/UIAlertView+NotificareMKNetworkKitAdditions.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Reachability/NotificareReachability.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/NotificareMKNetworkEngine.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/NotificareMKNetworkKit.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/NotificareMKNetworkOperation.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2AccessToken.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2Account+Private.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2Account.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2AccountStore.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2Client.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2ClientDelegate.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2Connection.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2ConnectionDelegate.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2Constants.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2FileStreamWrapper.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2PostBodyPart.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2PostBodyStream.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2Request.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2TrustDelegate.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NSData+NotificareNXOAuth2.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NSString+NotificareNXOAuth2.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NSURL+NotificareNXOAuth2.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/base64.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/NSData+NotificareSRB64Additions.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/NotificareSRWebSocket.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/NotificareSocketRocket-Prefix.pch"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareAction.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareAttachment.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareContent.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareNotification.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Shared/NSData+Hex.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Shared/NSDictionary+FromPlist.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Shared/NSString+FromBundle.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Shared/NSString+Utils.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Shared/UIImage+FromBundle.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Alert/NotificareAlert.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Beacons/NotificareBeacons.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Form/NotificareForm.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Image/NotificareImage.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Map/NotificareLocation.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Map/NotificareMap.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Passbook/NotificarePassbook.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Rate/NotificareRate.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Types/URL/NotificareURL.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Types/UserPreferences/NotificareUserPreferences.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Video/NotificareVideo.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Types/WebView/NotificareWebView.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Types/NotificationDelegate.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Types/NotificationType.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Notificare.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/NotificareActions.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/NotificareEngine.h"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/NotificarePushLib.h"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/App/NotificareApp.h" target-dir="Notificare/NotificarePushLib/Actions/App/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/Browser/NotificareBrowser.h" target-dir="Notificare/NotificarePushLib/Actions/Browser/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/Callback/NotificareCallback.h" target-dir="Notificare/NotificarePushLib/Actions/Callback/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/Custom/NotificareCustom.h" target-dir="Notificare/NotificarePushLib/Actions/Custom/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/Mail/NotificareMail.h" target-dir="Notificare/NotificarePushLib/Actions/Mail/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/SMS/NotificareSMS.h" target-dir="Notificare/NotificarePushLib/Actions/SMS/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/Telephone/NotificareTelephone.h" target-dir="Notificare/NotificarePushLib/Actions/Telephone/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/ActionDelegate.h" target-dir="Notificare/NotificarePushLib/Actions/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Actions/ActionType.h" target-dir="Notificare/NotificarePushLib/Actions/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/NSData+NotificareMKBase64.h" target-dir="Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/NSDate+NotificareRFC1123.h" target-dir="Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/NSDictionary+NotificareRequestEncoding.h" target-dir="Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/NSString+NotificareMKNetworkKitAdditions.h" target-dir="Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/UIAlertView+NotificareMKNetworkKitAdditions.h" target-dir="Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/UIImageView+NotificareMKNetworkKitAdditions.h" target-dir="Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Reachability/NotificareReachability.h" target-dir="Notificare/NotificarePushLib/Libraries/MKNetworkKit/Reachability/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/NotificareMKNetworkEngine.h" target-dir="Notificare/NotificarePushLib/Libraries/MKNetworkKit/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/NotificareMKNetworkKit.h" target-dir="Notificare/NotificarePushLib/Libraries/MKNetworkKit/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/NotificareMKNetworkOperation.h" target-dir="Notificare/NotificarePushLib/Libraries/MKNetworkKit/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2.h" target-dir="Notificare/NotificarePushLib/Libraries/NXOAuth2Client/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2AccessToken.h" target-dir="Notificare/NotificarePushLib/Libraries/NXOAuth2Client/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2Account+Private.h" target-dir="Notificare/NotificarePushLib/Libraries/NXOAuth2Client/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2Account.h" target-dir="Notificare/NotificarePushLib/Libraries/NXOAuth2Client/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2AccountStore.h" target-dir="Notificare/NotificarePushLib/Libraries/NXOAuth2Client/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2Client.h" target-dir="Notificare/NotificarePushLib/Libraries/NXOAuth2Client/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2ClientDelegate.h" target-dir="Notificare/NotificarePushLib/Libraries/NXOAuth2Client/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2Connection.h" target-dir="Notificare/NotificarePushLib/Libraries/NXOAuth2Client/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2ConnectionDelegate.h" target-dir="Notificare/NotificarePushLib/Libraries/NXOAuth2Client/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2Constants.h" target-dir="Notificare/NotificarePushLib/Libraries/NXOAuth2Client/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2FileStreamWrapper.h" target-dir="Notificare/NotificarePushLib/Libraries/NXOAuth2Client/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2PostBodyPart.h" target-dir="Notificare/NotificarePushLib/Libraries/NXOAuth2Client/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2PostBodyStream.h" target-dir="Notificare/NotificarePushLib/Libraries/NXOAuth2Client/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2Request.h" target-dir="Notificare/NotificarePushLib/Libraries/NXOAuth2Client/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2TrustDelegate.h" target-dir="Notificare/NotificarePushLib/Libraries/NXOAuth2Client/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NSData+NotificareNXOAuth2.h" target-dir="Notificare/NotificarePushLib/Libraries/NXOAuth2Client/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NSString+NotificareNXOAuth2.h" target-dir="Notificare/NotificarePushLib/Libraries/NXOAuth2Client/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NSURL+NotificareNXOAuth2.h" target-dir="Notificare/NotificarePushLib/Libraries/NXOAuth2Client/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/base64.h" target-dir="Notificare/NotificarePushLib/Libraries/SocketRocket/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/NSData+NotificareSRB64Additions.h" target-dir="Notificare/NotificarePushLib/Libraries/SocketRocket/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/NotificareSRWebSocket.h" target-dir="Notificare/NotificarePushLib/Libraries/SocketRocket/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/NotificareSocketRocket-Prefix.pch" target-dir="Notificare/NotificarePushLib/Libraries/SocketRocket/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareAction.h" target-dir="Notificare/NotificarePushLib/Models/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareAttachment.h" target-dir="Notificare/NotificarePushLib/Models/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareBeacon.h" target-dir="Notificare/NotificarePushLib/Models/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareContent.h" target-dir="Notificare/NotificarePushLib/Models/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareNotification.h" target-dir="Notificare/NotificarePushLib/Models/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareProduct.h" target-dir="Notificare/NotificarePushLib/Models/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareSegment.h" target-dir="Notificare/NotificarePushLib/Models/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareUser.h" target-dir="Notificare/NotificarePushLib/Models/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareUserPreference.h" target-dir="Notificare/NotificarePushLib/Models/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Shared/NSData+Hex.h" target-dir="Notificare/NotificarePushLib/Shared/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Shared/NSDate+TimeAgo.h" target-dir="Notificare/NotificarePushLib/Shared/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Shared/NSDictionary+FromPlist.h" target-dir="Notificare/NotificarePushLib/Shared/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Shared/NSString+FromBundle.h" target-dir="Notificare/NotificarePushLib/Shared/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Shared/SKProduct+priceAsString.h" target-dir="Notificare/NotificarePushLib/Shared/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Shared/NSString+Utils.h" target-dir="Notificare/NotificarePushLib/Shared/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Shared/UIImage+FromBundle.h" target-dir="Notificare/NotificarePushLib/Shared/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Alert/NotificareAlert.h" target-dir="Notificare/NotificarePushLib/Types/Alert/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Beacons/NotificareBeacons.h" target-dir="Notificare/NotificarePushLib/Types/Beacons/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Form/NotificareForm.h" target-dir="Notificare/NotificarePushLib/Types/Form/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Image/NotificareImage.h" target-dir="Notificare/NotificarePushLib/Types/Image/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Map/NotificareLocation.h" target-dir="Notificare/NotificarePushLib/Types/Map/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Map/NotificareMap.h" target-dir="Notificare/NotificarePushLib/Types/Map/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Passbook/NotificarePassbook.h" target-dir="Notificare/NotificarePushLib/Types/Passbook/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Rate/NotificareRate.h" target-dir="Notificare/NotificarePushLib/Types/Rate/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/URL/NotificareURL.h" target-dir="Notificare/NotificarePushLib/Types/URL/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/UserPreferences/NotificareUserPreferences.h" target-dir="Notificare/NotificarePushLib/Types/UserPreferences/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Video/NotificareVideo.h" target-dir="Notificare/NotificarePushLib/Types/Video/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/WebView/NotificareWebView.h" target-dir="Notificare/NotificarePushLib/Types/WebView/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/NotificationDelegate.h" target-dir="Notificare/NotificarePushLib/Types/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/NotificationType.h" target-dir="Notificare/NotificarePushLib/Types/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Notificare.h" target-dir="Notificare/NotificarePushLib/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/NotificareActions.h" target-dir="Notificare/NotificarePushLib/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/NotificareEngine.h" target-dir="Notificare/NotificarePushLib/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/NotificarePushLib.h" target-dir="Notificare/NotificarePushLib/"/>
     
 	<resource-file src="src/ios/DefaultTheme.bundle"/>
     <resource-file src="src/ios/Notificare.plist"/>
@@ -186,5 +197,7 @@
     <framework src="SystemConfiguration.framework"/>
     <framework src="Security.framework"/>
     <framework src="CFNetwork.framework"/>
+    <framework src="ImageIO.framework"/>
+    <framework src="StoreKit.framework"/>
   </platform>
 </plugin>

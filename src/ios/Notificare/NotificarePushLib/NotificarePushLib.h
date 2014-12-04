@@ -15,8 +15,13 @@
 #import "NotificareSRWebSocket.h"
 #import "NotificareNotification.h"
 #import <CoreLocation/CoreLocation.h>
-#import "NSString+Utils.h"
+#import <StoreKit/StoreKit.h>
 #import "NotificareNXOAuth2.h"
+#import "NotificareUser.h"
+#import "NotificareUserPreference.h"
+#import "NotificareSegment.h"
+#import "NotificareBeacon.h"
+#import "NotificareProduct.h"
 
 #define Suppressor(Selector) \
 do { \
@@ -26,6 +31,8 @@ Selector; \
 _Pragma("clang diagnostic pop") \
 } while (0)
 
+typedef void (^SuccessProductBlock)(NotificareProduct * product);
+typedef void (^SuccessArrayBlock)(NSArray * info);
 typedef void (^SuccessBlock)(NSDictionary * info);
 typedef void (^ErrorBlock)(NSError * error);
 
@@ -75,8 +82,12 @@ typedef enum  {
 - (void)notificarePushLib:(NotificarePushLib *)library didDetermineState:(CLRegionState)state forRegion:(CLRegion *)region;
 - (void)notificarePushLib:(NotificarePushLib *)library didEnterRegion:(CLRegion *)region;
 - (void)notificarePushLib:(NotificarePushLib *)library didExitRegion:(CLRegion *)region;
+
+
 - (void)notificarePushLib:(NotificarePushLib *)library rangingBeaconsDidFailForRegion:(CLBeaconRegion *)region withError:(NSError *)error;
 - (void)notificarePushLib:(NotificarePushLib *)library didRangeBeacons:(NSArray *)beacons inRegion:(CLBeaconRegion *)region;
+
+
 
 - (void)notificarePushLib:(NotificarePushLib *)library didChangeAccountNotification:(NSDictionary *)info;
 - (void)notificarePushLib:(NotificarePushLib *)library didFailToRequestAccessNotification:(NSError *)error;
@@ -84,9 +95,21 @@ typedef enum  {
 - (void)notificarePushLib:(NotificarePushLib *)library didReceiveResetPasswordToken:(NSString *)token;
 
 
+- (void)notificarePushLib:(NotificarePushLib *)library didLoadStore:(NSArray *)products;
+- (void)notificarePushLib:(NotificarePushLib *)library didFailToLoadStore:(NSError *)error;
+- (void)notificarePushLib:(NotificarePushLib *)library didCompleteProductTransaction:(SKPaymentTransaction *)transaction;
+- (void)notificarePushLib:(NotificarePushLib *)library didRestoreProductTransaction:(SKPaymentTransaction *)transaction;
+- (void)notificarePushLib:(NotificarePushLib *)library didFailProductTransaction:(SKPaymentTransaction *)transaction withError:(NSError *)error;
+- (void)notificarePushLib:(NotificarePushLib *)library didStartDownloadContent:(SKPaymentTransaction *)transaction;
+- (void)notificarePushLib:(NotificarePushLib *)library didPauseDownloadContent:(SKDownload *)download;
+- (void)notificarePushLib:(NotificarePushLib *)library didCancelDownloadContent:(SKDownload *)download;
+- (void)notificarePushLib:(NotificarePushLib *)library didReceiveProgressDownloadContent:(SKDownload *)download;
+- (void)notificarePushLib:(NotificarePushLib *)library didFailDownloadContent:(SKDownload *)download;
+- (void)notificarePushLib:(NotificarePushLib *)library didFinishDownloadContent:(SKDownload *)download;
+
 @end
 
-@interface NotificarePushLib : NSObject <NotificareSRWebSocketDelegate,NotificareDelegate,NotificareActionsDelegate,CLLocationManagerDelegate>
+@interface NotificarePushLib : NSObject <NotificareSRWebSocketDelegate,NotificareDelegate,NotificareActionsDelegate,CLLocationManagerDelegate, SKProductsRequestDelegate, SKPaymentTransactionObserver>
 
 /*!
  *  @abstract Public delegate to handle Notificare events
@@ -188,6 +211,15 @@ typedef enum  {
  *
  */
 @property (strong, nonatomic) NotificareNXOAuth2Account * account;
+
+/*!
+ *  @abstract The Notificare User object
+ *
+ *  @discussion
+ *	Returns the Notificare User object
+ *
+ */
+@property (strong, nonatomic) NotificareUser * user;
 
 
 /*!
@@ -316,6 +348,27 @@ typedef enum  {
 @property (nonatomic, assign) BOOL ranging;
 
 /*!
+ *  @abstract Beacons
+ *
+ *  @discussion
+ *	Returns Beacons being monitored
+ *
+ */
+@property (strong, nonatomic) NSMutableArray * beacons;
+
+
+
+/*!
+ *  @abstract Beacons
+ *
+ *  @discussion
+ *	Returns an array of beacons that were triggered by entry
+ *
+ */
+@property (strong, nonatomic) NSMutableArray * stateBeacons;
+
+
+/*!
  *  @abstract Application info
  *
  *  @discussion
@@ -334,14 +387,6 @@ typedef enum  {
 @property (strong, nonatomic) NSMutableArray * geofences;
 
 
-/*!
- *  @abstract Beacons
- *
- *  @discussion
- *	Returns Beacons being monitored
- *
- */
-@property (strong, nonatomic) NSMutableArray * beacons;
 
 /*!
  *  @abstract Log of entries in a region
@@ -352,15 +397,20 @@ typedef enum  {
  */
 @property (strong, nonatomic) NSMutableArray * stateEntries;
 
+
+
 /*!
- *  @abstract Beacons
+ *  @abstract In-App Billing
  *
  *  @discussion
- *	Returns an array of beacons that were triggered by entry
+ *	Methods for the In-App Billing add-on
  *
  */
-@property (strong, nonatomic) NSMutableArray * stateBeacons;
-
+@property (strong, nonatomic) NSMutableSet * productIdentifiers;
+@property (strong, nonatomic) NSMutableArray * products;
+@property (strong, nonatomic) NSMutableArray * pendingTransactions;
+@property (strong, nonatomic) NSMutableSet * purchasedProducts;
+@property (strong, nonatomic) SKProductsRequest * storeRequest;
 
 /*!
  *  @abstract The shared singleton implementation
@@ -594,6 +644,7 @@ typedef enum  {
 - (void)removeTag:(NSString *)tag completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)error;
 - (void)clearTags:(SuccessBlock)info errorHandler:(ErrorBlock)error;
 
+
 //Manually start Beacons without a geofence
 - (void)startMonitoringBeaconRegion:(NSUUID *)uuid;
 - (void)startMonitoringBeaconRegion:(NSUUID *)uuid andMajor:(NSNumber *)major;
@@ -609,6 +660,7 @@ typedef enum  {
  */
 - (void)openBeacon:(NSDictionary *)beacon;
 - (void)openBeacons;
+
 /*!
  *  @abstract Open User Preferences
  *
@@ -616,6 +668,14 @@ typedef enum  {
  *  Displays a view with for user control of notifications, location updates and key-value pairs inserted in NotificareTags.plist
  */
 - (void)openUserPreferences;
+
+/*!
+ *  @abstract Segments
+ *
+ *  @discussion
+ *  List of all available user selectable segments
+ */
+- (void)fetchUserPreferences:(SuccessArrayBlock)info errorHandler:(ErrorBlock)error;
 
 /*!
  *  @abstract Reply action
@@ -695,10 +755,30 @@ typedef enum  {
 - (void)generateEmailToken:(SuccessBlock)info errorHandler:(ErrorBlock)error __attribute__((deprecated("use generateAccessToken:completionHandler:errorHandler: instead.")));
 - (void)generateAccessToken:(SuccessBlock)info errorHandler:(ErrorBlock)error;
 - (void)changePassword:(NSDictionary *)params completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)error;
+- (void)addSegment:(NotificareSegment *)segment toPreference:(NotificareUserPreference *)preference completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)errorBlock;
+- (void)removeSegment:(NotificareSegment *)segment fromPreference:(NotificareUserPreference *)preference completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)errorBlock;
 - (void)checkAccount:(NSString *)user completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)error;
 - (void)handleOpenURL:(NSURL *)url;
 - (void)logoutAccount;
 - (BOOL)isLoggedIn;
+
+/*!
+ *
+ *  @abstract In-App Billing Methods
+ *
+ *  @discussion
+ *  When enabled in the dashboard (this feature is an add-on, activation done in your dashboard) you can sell virtual goods using the App Store in app purchases.
+ *
+ */
+
+- (void)fetchProducts:(SuccessArrayBlock)info errorHandler:(ErrorBlock)error;
+- (void)fetchPurchasedProducts:(SuccessArrayBlock)info errorHandler:(ErrorBlock)error;
+- (void)fetchProduct:(NSString *)productIdentifier completionHandler:(SuccessProductBlock)info errorHandler:(ErrorBlock)error;
+- (void)buyProduct:(NotificareProduct *)product;
+- (void)pauseDownloads:(NSArray *)downloads;
+- (void)cancelDownloads:(NSArray *)downloads;
+- (void)resumeDownloads:(NSArray *)downloads;
+- (NSString *)contentPathForProduct:(NSString *)productIdentifier;
 
 @end
 
