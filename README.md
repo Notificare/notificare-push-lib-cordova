@@ -211,8 +211,9 @@ In your device ready logic, tell the plugin to handle incoming notifications, th
 ```javascript
 onDeviceReady: function() {
 	Notificare.setHandleNotification(true);
-
-	Notificare.enableNotifications();
+	Notificare.on('ready', function(applicationInfo) {
+		Notificare.enableNotifications();
+	});
 	Notificare.on('registration', function(deviceId) {
 	
 		// ...
