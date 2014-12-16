@@ -83,16 +83,20 @@ Basic Usage
 
 An instance of the plugin is accessible in JavaScript as `Notificare`.
 
-To enable push notifications in your Cordova app, you only need to do 2 things:
+To enable push notifications in your Cordova app, you only need to do 2 things in your `deviceReady` listener:
 
-* call `Notificare.enableNotifications()` in your `deviceReady` listener
+* listen for a `ready` event to be emitted from Notificare, then call `Notificare.enableNotifications()`.
 * listen for a `registration` event to be emitted from Notificare. This will give you a deviceId to be registered to the Notificare API with optional userId and userName that are specific for your user. 
 
 #### Example
 
 ```javascript
 onDeviceReady: function() {
-	Notificare.enableNotifications();
+
+	Notificare.on('ready', function(applicationInfo) {
+		console.log(JSON.stringify(applicationInfo));
+		Notificare.enableNotifications();
+	});
 	Notificare.on('registration', function(deviceId) {
 		// Register the device on Notificare API
 		Notificare.registerDevice(deviceId, 'testuser@notifica.re', 'Test User', function() {
@@ -101,6 +105,7 @@ onDeviceReady: function() {
 			console.log(error);
 		});
 	});
+	Notificare.start();
 });
 ```
 
@@ -114,7 +119,10 @@ Be careful to only enable location updates after the device is registered, this 
 
 ```javascript
 onDeviceReady: function() {
-	Notificare.enableNotifications();
+	Notificare.on('ready', function(applicationInfo) {
+		console.log(JSON.stringify(applicationInfo));
+		Notificare.enableNotifications();
+	});
 	Notificare.on('registration', function(deviceId) {
 		// Register the device on Notificare API
 		Notificare.registerDevice(deviceId, 'testuser@notifica.re', 'Test User', function() {

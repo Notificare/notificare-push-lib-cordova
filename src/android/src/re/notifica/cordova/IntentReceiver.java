@@ -1,5 +1,6 @@
 package re.notifica.cordova;
 
+import re.notifica.Notificare;
 import re.notifica.push.gcm.DefaultIntentReceiver;
 import android.util.Log;
 
@@ -9,7 +10,6 @@ public class IntentReceiver extends DefaultIntentReceiver {
 	
 	@Override
 	public void onReady() {
-		super.onReady();
 		Log.d(TAG, "Notificare ready");
 	}
 

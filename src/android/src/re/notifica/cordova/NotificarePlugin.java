@@ -8,11 +8,14 @@ import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CordovaWebView;
+import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import re.notifica.Notificare;
+import re.notifica.Notificare.OnNotificareReadyListener;
+import re.notifica.Notificare.OnServiceErrorListener;
 import re.notifica.NotificareCallback;
 import re.notifica.NotificareError;
 import re.notifica.model.NotificareApplicationInfo;
@@ -20,21 +23,22 @@ import re.notifica.model.NotificareNotification;
 import re.notifica.model.NotificareUser;
 import re.notifica.ui.NotificationActivity;
 import android.content.Intent;
-import android.util.Log;
+import re.notifica.util.Log;
 
 /**
  * Cordova plugin for Notificare 
  * @author Joris Verbogt <joris@notifica.re>
  */
-public class NotificarePlugin extends CordovaPlugin {
+public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorListener, OnNotificareReadyListener {
 
 	
     protected static final String TAG = NotificarePlugin.class.getSimpleName();
 
-	public static final int MIN_SDK_VERSION = 10102;
-	public static final int PLUGIN_VERSION_CODE = 10104;
-	public static final String PLUGIN_VERSION_NAME = "1.1.4";
+	public static final int MIN_SDK_VERSION = 10202;
+	public static final int PLUGIN_VERSION_CODE = 10200;
+	public static final String PLUGIN_VERSION_NAME = "1.2.0";
     
+	public static final String START = "start";
 	public static final String SETHANDLENOTIFICATION = "setHandleNotification";
     public static final String ENABLE = "enableNotifications";
     public static final String ENABLELOCATIONS = "enableLocationUpdates";
@@ -55,9 +59,17 @@ public class NotificarePlugin extends CordovaPlugin {
 	public static final String GENERATEACCESSTOKEN = "generateAccessToken";
 	public static final String FETCHUSERDETAILS = "fetchUserDetails";
 	public static final String OPENNOTIFICATION = "openNotification";
-
+	
+	public static final String CALLBACK_TYPE_READY = "ready";
+	public static final String CALLBACK_TYPE_REGISTRATION = "registration";
+	public static final String CALLBACK_TYPE_NOTIFICATION = "notification";
+	public static final String CALLBACK_TYPE_RESET_PASSWORD_TOKEN = "resetPasswordToken";
+	public static final String CALLBACK_TYPE_VALIDATE_USER_TOKEN = "validateUserToken";
+	
 	protected HashMap<String, CallbackContext> pendingCallbacks = new HashMap<String, CallbackContext>();
-		
+	
+	private CallbackContext mainCallback;
+	
 	/**
 	 * Shared instance
 	 */
@@ -92,6 +104,7 @@ public class NotificarePlugin extends CordovaPlugin {
 		if (Notificare.shared().getSDKVersionCode() < MIN_SDK_VERSION) {
 			throw new IllegalStateException("Please install a newer version of the Notificare SDK, minimal compatible version is " + MIN_SDK_VERSION);
 		}
+		Notificare.shared().addServiceErrorListener(this);
 		Notificare.shared().setForeground(true);
 		Notificare.shared().getEventLogger().logStartSession();	
 		// Check for launch with notification or tokens
@@ -116,9 +129,23 @@ public class NotificarePlugin extends CordovaPlugin {
 	}
 
 	@Override
+	public void onServiceError(int errorCode, int requestCode) {
+		if (Notificare.isUserRecoverableError(errorCode)) {
+            Notificare.getErrorDialog(errorCode, cordova.getActivity(), requestCode).show();
+        }
+	}
+	
+	@Override
+	public void onNotificareReady(NotificareApplicationInfo applicationInfo) {
+		Log.d(TAG, "onNotificareReady");
+		sendReady(applicationInfo);
+	}
+	
+	@Override
 	public void onPause(boolean multitasking) {
 		Log.d(TAG, "activity paused");
 		super.onPause(multitasking);
+		Notificare.shared().removeServiceErrorListener(this);
 		Notificare.shared().setForeground(false);
 		Notificare.shared().getEventLogger().logEndSession();	
 	}
@@ -127,13 +154,27 @@ public class NotificarePlugin extends CordovaPlugin {
 	public void onResume(boolean multitasking) {
 		Log.d(TAG, "activity resumed");
 		super.onResume(multitasking);
+		Notificare.shared().addServiceErrorListener(this);
 		Notificare.shared().setForeground(true);
 		Notificare.shared().getEventLogger().logStartSession();	
 	}
 
 	@Override
+	public void onDestroy() {
+		Log.d(TAG, "activity destroyed");
+		super.onDestroy();
+		Notificare.shared().removeServiceErrorListener(this);
+		Notificare.shared().removeNotificareReadyListener(this);
+		Notificare.shared().setForeground(false);
+		Notificare.shared().getEventLogger().logEndSession();	
+	}
+
+	@Override
 	public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-		if (SETHANDLENOTIFICATION.equals(action)) {
+		if (START.equals(action)) {
+			start(callbackContext);
+			return true;
+		} else if (SETHANDLENOTIFICATION.equals(action)) {
 			setHandleNotification(args, callbackContext);
 			return true;
 		} else if (ENABLE.equals(action)) {
@@ -198,6 +239,19 @@ public class NotificarePlugin extends CordovaPlugin {
 		return false;
 	}
 
+	/**
+	 * Start the plugin, keep the callbackContext for future events
+	 * @param callbackContext
+	 */
+	protected void start(CallbackContext callbackContext) {
+		Log.d(TAG, "START");
+		mainCallback = callbackContext;
+		PluginResult result = new PluginResult(PluginResult.Status.NO_RESULT, "");
+        result.setKeepCallback(true);
+        callbackContext.sendPluginResult(result);
+        Notificare.shared().addNotificareReadyListener(this);
+	}
+	
 	/**
 	 * Handle notifications ourselves: a no-op on Android since this is determined from the AndroidManifest intent-filter
 	 * @param callbackContext
@@ -733,56 +787,6 @@ public class NotificarePlugin extends CordovaPlugin {
 	}
 
 	/**
-	 * Send the ready event to the webview
-	 * @param deviceId
-	 */
-	public void sendReady(NotificareApplicationInfo applicationInfo) {
-        try {
-            String js = String.format("Notificare.readyCallback(null, %s);", applicationInfo.toJSONObject().toString());
-            Log.i(TAG, "Calling JS: " + js);
-            this.webView.sendJavascript(js);
-        } catch (JSONException e) {
-        	Log.e(TAG, "unable to parse javascript in sendReady", e);
-        } catch (NullPointerException npe) {
-            Log.e(TAG, "unable to send javascript in sendReady", npe);
-        } catch (Exception e) {
-            Log.e(TAG, "unexpected exception in sendReady", e);
-        }
-	}
-
-	/**
-	 * Send the registered deviceId (APID) to the webview
-	 * @param deviceId
-	 */
-	public void sendRegistration(String deviceId) {
-        String js = String.format("Notificare.registrationCallback(null, '%s');", deviceId);
-        Log.i(TAG, "Calling JS: " + js);
-        try {
-            this.webView.sendJavascript(js);
-        } catch (NullPointerException npe) {
-            Log.i(TAG, "unable to send javascript in sendRegistration");
-        } catch (Exception e) {
-            Log.e(TAG, "unexpected exception in sendRegistration", e);
-        }
-	}
-
-	/**
-	 * Send the registered deviceId (APID) to the webview
-	 * @param deviceId
-	 */
-	public void sendRegistrationError(String errorId) {
-        String js = String.format("Notificare.registrationCallback(new Error('%s'));", errorId);
-        Log.i(TAG, "Calling JS: " + js);
-        try {
-            this.webView.sendJavascript(js);
-        } catch (NullPointerException npe) {
-            Log.i(TAG, "unable to send javascript in sendRegistration");
-        } catch (Exception e) {
-            Log.e(TAG, "unexpected exception in sendRegistration", e);
-        }
-	}
-
-	/**
 	 * Parse notification from launch intent
 	 * @param intent
 	 * @return
@@ -795,23 +799,96 @@ public class NotificarePlugin extends CordovaPlugin {
 			return null;
 		}
 	}
-	
+
+	/**
+	 * Send a success result to the webview
+	 * @param type
+	 * @param data
+	 */
+	private void sendSuccessResult(String type, Object data) {
+		if (mainCallback != null && data != null && type != null) {
+			JSONObject result = new JSONObject();
+			try {
+				result.put("type", type);
+				result.put("data", data);
+				PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, result);
+				pluginResult.setKeepCallback(true);
+				Log.d(TAG, "Sending success result: " + pluginResult.getMessage());
+	            mainCallback.sendPluginResult(pluginResult);
+			} catch (JSONException e) {
+				Log.e(TAG, "could not serialize result for callback");
+			}
+			
+		}
+	}
+
+	/**
+	 * Send an error to the webview
+	 * @param type
+	 * @param message
+	 */
+	private void sendErrorResult(String type, String message) {
+		if (mainCallback != null && message != null && type != null) {
+			JSONObject result = new JSONObject();
+			try {
+				result.put("type", type);
+				result.put("data", message);
+				PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, result);
+				pluginResult.setKeepCallback(true);
+	            mainCallback.sendPluginResult(pluginResult);
+			} catch (JSONException e) {
+				Log.e(TAG, "could not serialize result for callback");
+			}
+			
+		}
+	}
+
+	/**
+	 * Send the ready event to the webview
+	 * @param deviceId
+	 */
+	public void sendReady(NotificareApplicationInfo applicationInfo) {
+		Log.d(TAG, "sendReady");
+		if (applicationInfo != null) {
+	        try {
+	        	sendSuccessResult(CALLBACK_TYPE_READY, applicationInfo.toJSONObject());
+	        } catch (JSONException e) {
+	        	Log.e(TAG, "unable to parse javascript in sendReady", e);
+	        }
+		}
+	}
+
+	/**
+	 * Send the registered deviceId (APID) to the webview
+	 * @param deviceId
+	 */
+	public void sendRegistration(String deviceId) {
+		Log.d(TAG, "sendRegistration");
+		if (deviceId != null) {
+			sendSuccessResult(CALLBACK_TYPE_REGISTRATION, deviceId);
+		}
+	}
+
+	/**
+	 * Send the registered deviceId (APID) to the webview
+	 * @param deviceId
+	 */
+	public void sendRegistrationError(String errorId) {
+		Log.d(TAG, "sendRegistrationError");
+		sendErrorResult(CALLBACK_TYPE_REGISTRATION, errorId);
+	}
+
 	/**
 	 * Send the notification to the webview
 	 * @param deviceId
 	 */
 	public void sendNotification(NotificareNotification notification) {
+		Log.d(TAG, "sendNotification");
 		if (notification != null) {
 	        try {
-				String js = String.format("Notificare.notificationCallback(%s);", notification.toJSONObject().toString());
-		        Log.i(TAG, "Calling JS: " + js);
-	            this.webView.sendJavascript(js);
-	        } catch (NullPointerException npe) {
-	            Log.i(TAG, "unable to send javascript in sendNotification");
+	            sendSuccessResult(CALLBACK_TYPE_NOTIFICATION, notification.toJSONObject());
 			} catch (JSONException e) {
-				Log.e(TAG, "error creating JSON from notification", e);
-	        } catch (Exception e) {
-	            Log.e(TAG, "unexpected exception in sendRegistration", e);
+				Log.e(TAG, "error creating JSON from notification");
 	        }			
 		}
 	}
@@ -822,15 +899,7 @@ public class NotificarePlugin extends CordovaPlugin {
 	 */
 	public void sendResetPasswordToken(String token) {
 		if (token != null) {
-	        try {
-				String js = String.format("Notificare.resetPasswordTokenCallback('%s');", token);
-		        Log.i(TAG, "Calling JS: " + js);
-	            this.webView.sendJavascript(js);
-	        } catch (NullPointerException npe) {
-	            Log.i(TAG, "unable to send javascript in sendNotification");
-	        } catch (Exception e) {
-	            Log.e(TAG, "unexpected exception in sendRegistration", e);
-	        }			
+            sendSuccessResult(CALLBACK_TYPE_RESET_PASSWORD_TOKEN, token);
 		}
 	}
 
@@ -840,16 +909,10 @@ public class NotificarePlugin extends CordovaPlugin {
 	 */
 	public void sendValidateUserToken(String token) {
 		if (token != null) {
-	        try {
-				String js = String.format("Notificare.validateUserTokenCallback('%s');", token);
-		        Log.i(TAG, "Calling JS: " + js);
-	            this.webView.sendJavascript(js);
-	        } catch (NullPointerException npe) {
-	            Log.i(TAG, "unable to send javascript in sendNotification");
-	        } catch (Exception e) {
-	            Log.e(TAG, "unexpected exception in sendRegistration", e);
-	        }		
+			sendSuccessResult(CALLBACK_TYPE_VALIDATE_USER_TOKEN, token);
 		}
 	}
+
+
 
 }

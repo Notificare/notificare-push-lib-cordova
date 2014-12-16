@@ -2,55 +2,16 @@
 #import "NotificareAppDelegateSurrogate.h"
 #import "NotificarePushLib.h"
 
-@implementation NSString (NotificareJSON)
-
-- (NSString *)escapedString {
-    NSString *escaped = [self stringByReplacingOccurrencesOfString:@"\r" withString:@""];
-    escaped = [escaped stringByReplacingOccurrencesOfString:@"\n" withString:@"\\n"];
-    escaped = [escaped stringByReplacingOccurrencesOfString:@"\'" withString:@"\\\'"];
-    return escaped;
-}
-
-@end
-
-@implementation NSDictionary (NotificareJSON)
-- (NSString*)escapedJSONString {
-    NSError* error = nil;
-    NSData* jsonData = [NSJSONSerialization dataWithJSONObject:self options:0 error:&error];
-    if (error != nil) {
-        NSLog(@"NSDictionary escapedJSONString error: %@", [error localizedDescription]);
-        return nil;
-    } else {
-        NSString *json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-        return [json escapedString];
-    }
-}
-@end
-
-@implementation NSArray (NotificareJSON)
-- (NSString*)escapedJSONString {
-    NSError* error = nil;
-    NSData* jsonData = [NSJSONSerialization dataWithJSONObject:self options:0 error:&error];
-    if (error != nil) {
-        NSLog(@"NSArray escapedJSONString error: %@", [error localizedDescription]);
-        return nil;
-    } else {
-        NSString *json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-        return [json escapedString];
-    }
-}
-@end
-
-
 @interface NotificarePlugin() {
     BOOL _handleNotification;
 }
+@property (copy, nonatomic) NSString *mainCallbackId;
 @end
 
 
 @implementation NotificarePlugin
 
-#define kPluginVersion @"1.1.4"
+#define kPluginVersion @"1.2.0"
 
 - (void)pluginInitialize {
 	NSLog(@"Initializing Notificare Plugin version %@", kPluginVersion);
@@ -58,6 +19,13 @@
     [[NotificarePushLib shared] launch];
     [[NotificarePushLib shared] setDelegate:self];
     [[NotificarePushLib shared] handleOptions:[[NotificareAppDelegateSurrogate shared] launchOptions]];
+}
+
+- (void)start:(CDVInvokedUrlCommand*) command {
+    [self setMainCallbackId:[command callbackId]];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
+    [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
+    [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
 }
 
 - (void)setHandleNotification:(CDVInvokedUrlCommand*)command {
@@ -281,35 +249,63 @@
     [[NotificarePushLib shared] openNotification:@{@"notification": [command argumentAtIndex:0]}];
 }
 
+#pragma callback methods
+
+- (void)sendErrorResultWithType:(NSString *)type andMessage:(NSString *)message {
+    if (_mainCallbackId != nil && message != nil) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:message];
+        [pluginResult setKeepCallbackAsBool:[NSNumber numberWithBool:YES]];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:_mainCallbackId];
+    }
+}
+
+- (void)sendSuccessResult:(NSDictionary *)payload {
+    if (_mainCallbackId != nil && payload != nil) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:payload];
+        [pluginResult setKeepCallbackAsBool:[NSNumber numberWithBool:YES]];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:_mainCallbackId];
+    }
+}
+
+- (void)sendSuccessResultWithType:(NSString *)type andDictionary:(NSDictionary *)data {
+    if (type != nil && data != nil) {
+        NSDictionary *payload = @{@"type": type, @"data": data};
+        [self sendSuccessResult:payload];
+    }
+}
+
+- (void)sendSuccessResultWithType:(NSString *)type andString:(NSString *)data {
+    if (type != nil && data != nil) {
+        NSDictionary *payload = @{@"type": type, @"data": data};
+        [self sendSuccessResult:payload];
+    }
+}
+
+
+
 #pragma NotificarePushLibDelegate
 
 - (void)notificarePushLib:(NotificarePushLib *)library onReady:(NSDictionary *)info {
     NSLog(@"Notificare ready");
+    [self sendSuccessResultWithType:@"ready" andDictionary:info];
 }
 
 - (void)notificarePushLib:(NotificarePushLib *)library didReceiveActivationToken:(NSString *)token {
-    NSLog(@"received validation token %@", token);
-    NSString *js = [NSString stringWithFormat:@"Notificare.validateUserTokenCallback('%@');", token];
-    [[self webView] stringByEvaluatingJavaScriptFromString:js];
+    [self sendSuccessResultWithType:@"validateUserToken" andString:token];
 }
 
 - (void)notificarePushLib:(NotificarePushLib *)library didReceiveResetPasswordToken:(NSString *)token {
-    NSLog(@"received reset password token %@", token);
-    NSString *js = [NSString stringWithFormat:@"Notificare.resetPasswordTokenCallback('%@');", token];
-    [[self webView] stringByEvaluatingJavaScriptFromString:js];
+    [self sendSuccessResultWithType:@"resetPasswordToken" andString:token];
 }
 
 #pragma UIApplicationDelegate
 
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
-    NSString *js = [NSString stringWithFormat:@"Notificare.registrationCallback(null, '%@');", [deviceToken hexadecimalString]];
-    [[self webView] stringByEvaluatingJavaScriptFromString:js];
+    [self sendSuccessResultWithType:@"registration" andString:[deviceToken hexadecimalString]];
 }
 
 - (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error{
-    NSLog(@"Error registering for remote notifications: %@",error);
-    NSString *js = [NSString stringWithFormat:@"Notificare.registrationCallback(new Error('%@'));", [[error localizedDescription] escapedString]];
-    [[self webView] stringByEvaluatingJavaScriptFromString:js];
+    [self sendErrorResultWithType:@"registration" andMessage:[error localizedDescription]];
 }
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
@@ -317,14 +313,40 @@
         [[NotificarePushLib shared]getNotification:[userInfo objectForKey:@"id"] completionHandler:^(NSDictionary *info) {
             // Info is the full notification object in key "notification"
             NSDictionary *notification = [info objectForKey:@"notification"];
-            NSString *js = [NSString stringWithFormat:@"Notificare.notificationCallback(%@);", [notification escapedJSONString]];
-            [[self webView] stringByEvaluatingJavaScriptFromString:js];
+            [self sendSuccessResultWithType:@"notification" andDictionary:notification];
         } errorHandler:^(NSError *error) {
-            NSLog(@"Error fetching notification: %@",error);
+            NSLog(@"Error fetching notification: %@", error);
         }];
     } else {
         [[NotificarePushLib shared] openNotification:userInfo];
     }
+}
+
+//- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
+//    NSLog(@"didReceiveRemoteNotification:fetchCompletionHandler: %@", [userInfo description]);
+//    if (_handleNotification && [userInfo objectForKey:@"id"]) {
+//        [[NotificarePushLib shared]getNotification:[userInfo objectForKey:@"id"] completionHandler:^(NSDictionary *info) {
+//            // Info is the full notification object in key "notification"
+//            NSDictionary *notification = [info objectForKey:@"notification"];
+//            [self sendSuccessResultWithType:@"notification" andDictionary:notification];
+//            completionHandler(UIBackgroundFetchResultNewData);
+//        } errorHandler:^(NSError *error) {
+//            NSLog(@"Error fetching notification: %@", error);
+//            completionHandler(UIBackgroundFetchResultFailed);
+//        }];
+//    } else {
+//        [[NotificarePushLib shared] openNotification:userInfo];
+//        completionHandler(UIBackgroundFetchResultNewData);
+//    }
+//}
+
+
+- (void)application:(UIApplication *)application handleActionWithIdentifier:(NSString *)identifier forRemoteNotification:(NSDictionary *)userInfo completionHandler:(void (^)())completion {
+    [[NotificarePushLib shared] handleAction:identifier forNotification:userInfo withData:nil completionHandler:^(NSDictionary *info) {
+        completion();
+    } errorHandler:^(NSError *error) {
+        completion();
+    }];
 }
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation{
