@@ -11,7 +11,7 @@
 
 @implementation NotificarePlugin
 
-#define kPluginVersion @"1.2.2"
+#define kPluginVersion @"1.2.3"
 
 - (void)pluginInitialize {
 	NSLog(@"Initializing Notificare Plugin version %@", kPluginVersion);
@@ -254,7 +254,7 @@
 - (void)sendErrorResultWithType:(NSString *)type andMessage:(NSString *)message {
     if (_mainCallbackId != nil && message != nil) {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:message];
-        [pluginResult setKeepCallbackAsBool:[NSNumber numberWithBool:YES]];
+        [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
         [[self commandDelegate] sendPluginResult:pluginResult callbackId:_mainCallbackId];
     }
 }
@@ -262,7 +262,7 @@
 - (void)sendSuccessResult:(NSDictionary *)payload {
     if (_mainCallbackId != nil && payload != nil) {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:payload];
-        [pluginResult setKeepCallbackAsBool:[NSNumber numberWithBool:YES]];
+        [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
         [[self commandDelegate] sendPluginResult:pluginResult callbackId:_mainCallbackId];
     }
 }
