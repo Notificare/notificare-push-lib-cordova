@@ -221,11 +221,21 @@ onDeviceReady: function() {
 	});
 
 	Notificare.on('notification', function(notification) {
-		if (someCondition) {
-			// Here you should show notification in your view, or ignore it
+		if (notification.extra.myTypeFlag == 'special') {
+
+			// Here you could show notification in your view, or ignore it
 			// In iOS, don't use any blocking calls like window.alert()
+			// If you do want to log the notification as opened, you should call
+			// Notificare.logOpenNotification(notification);
+
+		} else {
+
+			// open like normal
+			Notificare.openNotification(notification);
+
 		}
 	});
+	Notificare.start();
 });
 ```
 

@@ -11,7 +11,7 @@
 
 @implementation NotificarePlugin
 
-#define kPluginVersion @"1.2.3"
+#define kPluginVersion @"1.3.0"
 
 - (void)pluginInitialize {
 	NSLog(@"Initializing Notificare Plugin version %@", kPluginVersion);
@@ -149,8 +149,10 @@
 }
 
 - (void)createAccount:(CDVInvokedUrlCommand*)command {
-    NSDictionary *params = @{@"email": [command argumentAtIndex:0], @"password": [command argumentAtIndex:1], @"userName": [command argumentAtIndex:2]};
-    [[NotificarePushLib shared] createAccount:params completionHandler:^(NSDictionary *info) {
+    NSString *email = [command argumentAtIndex:0];
+    NSString *password = [command argumentAtIndex:1];
+    NSString *userName = [command argumentAtIndex:2];
+    [[NotificarePushLib shared] createAccount:email withName:userName andPassword:password completionHandler:^(NSDictionary *info) {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
         [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
     } errorHandler:^(NSError *error) {
@@ -171,8 +173,8 @@
 }
 
 - (void)sendPassword:(CDVInvokedUrlCommand*)command {
-    NSDictionary *params = @{@"email": [command argumentAtIndex:0]};
-    [[NotificarePushLib shared] sendPassword:params completionHandler:^(NSDictionary *info) {
+    NSString *email = [command argumentAtIndex:0];
+    [[NotificarePushLib shared] sendPassword:email completionHandler:^(NSDictionary *info) {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
         [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
     } errorHandler:^(NSError *error) {
@@ -182,9 +184,9 @@
 }
 
 - (void)resetPassword:(CDVInvokedUrlCommand*)command {
-    NSDictionary *params = @{@"password": [command argumentAtIndex:0]};
+    NSString *password = [command argumentAtIndex:0];
     NSString *token = [command argumentAtIndex:1];
-    [[NotificarePushLib shared] resetPassword:params withToken:token completionHandler:^(NSDictionary *info) {
+    [[NotificarePushLib shared] resetPassword:password withToken:token completionHandler:^(NSDictionary *info) {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
         [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
     } errorHandler:^(NSError *error) {
@@ -194,8 +196,8 @@
 }
 
 - (void)changePassword:(CDVInvokedUrlCommand*)command {
-    NSDictionary *params = @{@"password": [command argumentAtIndex:0]};
-    [[NotificarePushLib shared] changePassword:params completionHandler:^(NSDictionary *info) {
+    NSString *password = [command argumentAtIndex:0];
+    [[NotificarePushLib shared] changePassword:password completionHandler:^(NSDictionary *info) {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
         [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
     } errorHandler:^(NSError *error) {
@@ -245,8 +247,13 @@
 }
 
 - (void)openNotification:(CDVInvokedUrlCommand*)command {
-    // NotificarePushLib needs the original payload from APNS
+    // NotificarePushLib needs the original payload from APNS or a wrapped notification
     [[NotificarePushLib shared] openNotification:@{@"notification": [command argumentAtIndex:0]}];
+}
+
+- (void)logOpenNotification:(CDVInvokedUrlCommand*)command {
+    // NotificarePushLib needs the original payload from APNS or a wrapped notification
+    [[NotificarePushLib shared] logOpenNotification:@{@"notification": [command argumentAtIndex:0]}];
 }
 
 #pragma callback methods
@@ -310,7 +317,7 @@
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
     if (_handleNotification && [userInfo objectForKey:@"id"]) {
-        [[NotificarePushLib shared]getNotification:[userInfo objectForKey:@"id"] completionHandler:^(NSDictionary *info) {
+        [[NotificarePushLib shared] getNotification:[userInfo objectForKey:@"id"] completionHandler:^(NSDictionary *info) {
             // Info is the full notification object in key "notification"
             NSDictionary *notification = [info objectForKey:@"notification"];
             [self sendSuccessResultWithType:@"notification" andDictionary:notification];

@@ -167,14 +167,18 @@ Notificare.prototype.openNotification = function(notification, success, fail) {
 	exec(success, fail, 'Notificare', 'openNotification', [notification]);
 };
 
+Notificare.prototype.logOpenNotification = function(notification, success, fail) {
+	exec(success, fail, 'Notificare', 'logOpenNotification', [notification]);
+};
+
 Notificare.prototype.successCallback = function(payload) {
-	if (payload.type) {
+	if (payload && payload.type) {
 		this.emit(payload.type, payload.data);
 	}
 }
 
 Notificare.prototype.errorCallback = function(payload) {
-	if (payload.type) {
+	if (payload && payload.type) {
 		this.emit(payload.type + 'Error', new Error(payload.message));
 	}
 }

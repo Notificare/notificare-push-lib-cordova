@@ -34,9 +34,9 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	
     protected static final String TAG = NotificarePlugin.class.getSimpleName();
 
-	public static final int MIN_SDK_VERSION = 10203;
-	public static final int PLUGIN_VERSION_CODE = 10203;
-	public static final String PLUGIN_VERSION_NAME = "1.2.3";
+	public static final int MIN_SDK_VERSION = 10301;
+	public static final int PLUGIN_VERSION_CODE = 10300;
+	public static final String PLUGIN_VERSION_NAME = "1.3.0";
     
 	public static final String START = "start";
 	public static final String SETHANDLENOTIFICATION = "setHandleNotification";
@@ -59,6 +59,7 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	public static final String GENERATEACCESSTOKEN = "generateAccessToken";
 	public static final String FETCHUSERDETAILS = "fetchUserDetails";
 	public static final String OPENNOTIFICATION = "openNotification";
+	public static final String LOGOPENNOTIFICATION = "logOpenNotification";
 	
 	public static final String CALLBACK_TYPE_READY = "ready";
 	public static final String CALLBACK_TYPE_REGISTRATION = "registration";
@@ -233,6 +234,9 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 			return true;
 		} else if (OPENNOTIFICATION.equals(action)) {
 			openNotification(args, callbackContext);
+			return true;
+		} else if (LOGOPENNOTIFICATION.equals(action)) {
+			logOpenNotification(args, callbackContext);
 			return true;
 		}
         Log.d(TAG, "Invalid action: " + action);
@@ -781,6 +785,17 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 			.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
 			cordova.getActivity().startActivity(notificationIntent);
+		} catch (JSONException e) {
+			callbackContext.error("JSON parse error");
+		}
+	}
+
+	protected void logOpenNotification(JSONArray args, final CallbackContext callbackContext) {
+		Log.d(TAG, "LOGOPENNOTIFICATION");
+		try {
+			JSONObject notificationJSON = args.getJSONObject(0);
+			NotificareNotification notification = new NotificareNotification(notificationJSON);
+			Notificare.shared().getEventLogger().logOpenNotification(notification.getNotificationId());
 		} catch (JSONException e) {
 			callbackContext.error("JSON parse error");
 		}

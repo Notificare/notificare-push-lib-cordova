@@ -24,5 +24,6 @@
 - (void)generateAccessToken:(CDVInvokedUrlCommand *)command;
 - (void)fetchUserDetails:(CDVInvokedUrlCommand *)command;
 - (void)openNotification:(CDVInvokedUrlCommand *)command;
+- (void)logOpenNotification:(CDVInvokedUrlCommand *)command;
 
 @end

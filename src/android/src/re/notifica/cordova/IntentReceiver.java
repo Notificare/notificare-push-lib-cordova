@@ -1,6 +1,5 @@
 package re.notifica.cordova;
 
-import re.notifica.Notificare;
 import re.notifica.push.gcm.DefaultIntentReceiver;
 import android.util.Log;
 

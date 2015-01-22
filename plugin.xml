@@ -2,7 +2,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="re.notifica.cordova"
-        version="1.2.3">
+        version="1.3.0">
 
   <name>Notificare Plugin</name>
 
@@ -169,7 +169,12 @@
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/Passbook/NotificarePassbook.h" target-dir="Notificare/NotificarePushLib/Types/Passbook/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/Rate/NotificareRate.h" target-dir="Notificare/NotificarePushLib/Types/Rate/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/URL/NotificareURL.h" target-dir="Notificare/NotificarePushLib/Types/URL/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/UserPreferences/NotificareBeaconsViewController.h" target-dir="Notificare/NotificarePushLib/Types/UserPreferences/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/UserPreferences/NotificareDeviceViewController.h" target-dir="Notificare/NotificarePushLib/Types/UserPreferences/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/UserPreferences/NotificareInboxViewController.h" target-dir="Notificare/NotificarePushLib/Types/UserPreferences/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/UserPreferences/NotificarePassbookViewController.h" target-dir="Notificare/NotificarePushLib/Types/UserPreferences/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/UserPreferences/NotificareUserPreferences.h" target-dir="Notificare/NotificarePushLib/Types/UserPreferences/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/UserPreferences/NotificareUserViewController.h" target-dir="Notificare/NotificarePushLib/Types/UserPreferences/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/Video/NotificareVideo.h" target-dir="Notificare/NotificarePushLib/Types/Video/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/WebView/NotificareWebView.h" target-dir="Notificare/NotificarePushLib/Types/WebView/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/NotificationDelegate.h" target-dir="Notificare/NotificarePushLib/Types/"/>
