@@ -2,7 +2,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="re.notifica.cordova"
-        version="1.3.0">
+        version="1.4.0">
 
   <name>Notificare Plugin</name>
 
@@ -148,6 +148,7 @@
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareAttachment.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareBeacon.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareContent.h" target-dir="Notificare/NotificarePushLib/Models/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareDevice.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareNotification.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareProduct.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareSegment.h" target-dir="Notificare/NotificarePushLib/Models/"/>

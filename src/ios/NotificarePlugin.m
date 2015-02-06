@@ -11,7 +11,7 @@
 
 @implementation NotificarePlugin
 
-#define kPluginVersion @"1.3.0"
+#define kPluginVersion @"1.4.0"
 
 - (void)pluginInitialize {
 	NSLog(@"Initializing Notificare Plugin version %@", kPluginVersion);
@@ -94,7 +94,7 @@
 
 
 - (void)getDeviceId:(CDVInvokedUrlCommand *)command {
-    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[[NotificarePushLib shared] deviceToken]];
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[[[NotificarePushLib shared] myDevice] deviceID]];
     [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
 }
 
