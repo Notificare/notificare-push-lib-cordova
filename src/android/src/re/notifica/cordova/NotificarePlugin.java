@@ -60,7 +60,8 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	public static final String FETCHUSERDETAILS = "fetchUserDetails";
 	public static final String OPENNOTIFICATION = "openNotification";
 	public static final String LOGOPENNOTIFICATION = "logOpenNotification";
-	
+	public static final String LOGCUSTOMEVENT = "logCustomEvent";
+
 	public static final String CALLBACK_TYPE_READY = "ready";
 	public static final String CALLBACK_TYPE_REGISTRATION = "registration";
 	public static final String CALLBACK_TYPE_NOTIFICATION = "notification";
@@ -237,6 +238,9 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 			return true;
 		} else if (LOGOPENNOTIFICATION.equals(action)) {
 			logOpenNotification(args, callbackContext);
+			return true;
+		} else if (LOGCUSTOMEVENT.equals(action)) {
+			logCustomEvent(args, callbackContext);
 			return true;
 		}
         Log.d(TAG, "Invalid action: " + action);
@@ -790,12 +794,33 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 		}
 	}
 
+    /**
+     * Log a the notification open
+     * @param args
+     * @param callbackContext
+     */
 	protected void logOpenNotification(JSONArray args, final CallbackContext callbackContext) {
 		Log.d(TAG, "LOGOPENNOTIFICATION");
 		try {
 			JSONObject notificationJSON = args.getJSONObject(0);
 			NotificareNotification notification = new NotificareNotification(notificationJSON);
 			Notificare.shared().getEventLogger().logOpenNotification(notification.getNotificationId());
+		} catch (JSONException e) {
+			callbackContext.error("JSON parse error");
+		}
+	}
+
+    /**
+     * Log a custom event
+     * @param args
+     * @param callbackContext
+     */
+	protected void logCustomEvent(JSONArray args, final CallbackContext callbackContext) {
+		Log.d(TAG, "LOGCUSTOMEVENT");
+		try {
+		    String name = args.getString(0);
+			JSONObject dataJSON = args.getJSONObject(1);
+			Notificare.shared().getEventLogger().logCustomEvent(name, dataJSON);
 		} catch (JSONException e) {
 			callbackContext.error("JSON parse error");
 		}

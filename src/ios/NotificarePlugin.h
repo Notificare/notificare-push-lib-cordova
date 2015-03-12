@@ -25,5 +25,6 @@
 - (void)fetchUserDetails:(CDVInvokedUrlCommand *)command;
 - (void)openNotification:(CDVInvokedUrlCommand *)command;
 - (void)logOpenNotification:(CDVInvokedUrlCommand *)command;
+- (void)logCustomEvent:(CDVInvokedUrlCommand *)command;
 
 @end

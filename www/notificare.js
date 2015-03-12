@@ -171,16 +171,20 @@ Notificare.prototype.logOpenNotification = function(notification, success, fail)
 	exec(success, fail, 'Notificare', 'logOpenNotification', [notification]);
 };
 
+Notificare.prototype.logCustomEvent = function(name, data, success, fail) {
+    exec(success, fail, 'Notificare', 'logCustomEvent', [name, data]);
+};
+
 Notificare.prototype.successCallback = function(payload) {
 	if (payload && payload.type) {
 		this.emit(payload.type, payload.data);
 	}
-}
+};
 
 Notificare.prototype.errorCallback = function(payload) {
 	if (payload && payload.type) {
 		this.emit(payload.type + 'Error', new Error(payload.message));
 	}
-}
+};
 
 module.exports = new Notificare();

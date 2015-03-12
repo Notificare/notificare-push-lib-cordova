@@ -11,7 +11,7 @@
 
 @implementation NotificarePlugin
 
-#define kPluginVersion @"1.4.3"
+#define kPluginVersion @"1.4.4"
 
 - (void)pluginInitialize {
 	NSLog(@"Initializing Notificare Plugin version %@", kPluginVersion);
@@ -254,6 +254,16 @@
 - (void)logOpenNotification:(CDVInvokedUrlCommand*)command {
     // NotificarePushLib needs the original payload from APNS or a wrapped notification
     [[NotificarePushLib shared] logOpenNotification:@{@"notification": [command argumentAtIndex:0]}];
+}
+
+- (void)logCustomEvent:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] logCustomEvent:[command argumentAtIndex:0] withData:[command argumentAtIndex:1] completionHandler:^(NSDictionary *info) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    } errorHandler:^(NSError *error) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    }];
 }
 
 #pragma callback methods
