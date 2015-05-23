@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
-        id="re.notifica.cordova"
+        id="cordova-plugin-notificare"
         version="1.5.0">
 
   <name>Notificare Plugin</name>
@@ -13,7 +13,7 @@
   <license>MIT</license>
 
   <engines>
-    <engine name="cordova" version=">=3.5.0"/>
+    <engine name="cordova" version=">=5.0.0"/>
   </engines>
 
   <js-module src="www/notificare.js" name="Notificare">
@@ -88,6 +88,13 @@
     <resource-file src="src/android/res/values/strings_preferences.xml" target="res/values/strings_preferences.xml" />
     <resource-file src="src/android/assets/notificareconfig.properties" target="assets/notificareconfig.properties" />
 
+      <!-- Depend on latest version of GCM from play services -->
+      <framework src="com.google.android.gms:play-services-gcm:+" />
+      <!-- Depend on v21 of appcompat-v7 support library -->
+      <framework src="com.android.support:appcompat-v7:22+" />
+      <!-- Depend on library project included in plugin -->
+      <framework src="src/android/rules.gradle" custom="true" type="gradleReference" />
+      <framework src="re.notifica:notificare-push-lib-android:1.4.3" />
   </platform>
 
   <!-- ios -->
