@@ -31,7 +31,7 @@ Otherwise, you will need to edit the `project.properties` file yourself. It shou
 ```
 android.library.reference.1=CordovaLib
 # Project target.
-target=android-21
+target=android-22
 android.library.reference.2=../../../../android-sdks/extras/google/google_play_services/libproject/google-play-services_lib
 android.library.reference.3=../../../../android-sdks/extras/android/support/v7/appcompat
 android.library.reference.4=../../../notificare-push-lib-android/SDK
