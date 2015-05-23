@@ -2,7 +2,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="re.notifica.cordova"
-        version="1.4.5">
+        version="1.5.0">
 
   <name>Notificare Plugin</name>
 
@@ -87,6 +87,7 @@
     <resource-file src="src/android/res/xml/preferences.xml" target="res/xml/preferences.xml" />
     <resource-file src="src/android/res/values/strings_preferences.xml" target="res/values/strings_preferences.xml" />
     <resource-file src="src/android/assets/notificareconfig.properties" target="assets/notificareconfig.properties" />
+
   </platform>
 
   <!-- ios -->
