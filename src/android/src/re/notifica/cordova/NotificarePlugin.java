@@ -34,9 +34,9 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	
     protected static final String TAG = NotificarePlugin.class.getSimpleName();
 
-	public static final int MIN_SDK_VERSION = 10403;
-	public static final int PLUGIN_VERSION_CODE = 10405;
-	public static final String PLUGIN_VERSION_NAME = "1.4.5";
+	public static final int MIN_SDK_VERSION = 10500;
+	public static final int PLUGIN_VERSION_CODE = 10500;
+	public static final String PLUGIN_VERSION_NAME = "1.5.0";
     
 	public static final String START = "start";
 	public static final String SETHANDLENOTIFICATION = "setHandleNotification";
