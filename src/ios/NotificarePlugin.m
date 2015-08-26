@@ -27,7 +27,7 @@
 
 @implementation NotificarePlugin
 
-#define kPluginVersion @"1.5.2"
+#define kPluginVersion @"1.5.3"
 
 - (void)pluginInitialize {
 	NSLog(@"Initializing Notificare Plugin version %@", kPluginVersion);
