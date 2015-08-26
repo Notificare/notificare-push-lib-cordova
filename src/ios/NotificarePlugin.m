@@ -1,3 +1,19 @@
+/*
+ Copyright 2015 Notificare B.V.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ */
+
 #import "NotificarePlugin.h"
 #import "NotificareAppDelegateSurrogate.h"
 #import "NotificarePushLib.h"
@@ -11,7 +27,7 @@
 
 @implementation NotificarePlugin
 
-#define kPluginVersion @"1.5.1"
+#define kPluginVersion @"1.5.2"
 
 - (void)pluginInitialize {
 	NSLog(@"Initializing Notificare Plugin version %@", kPluginVersion);
@@ -19,6 +35,7 @@
     [[NotificarePushLib shared] launch];
     [[NotificarePushLib shared] setDelegate:self];
     [[NotificarePushLib shared] handleOptions:[[NotificareAppDelegateSurrogate shared] launchOptions]];
+    [[NotificareAppDelegateSurrogate shared] clearLaunchOptions];
 }
 
 - (void)start:(CDVInvokedUrlCommand*) command {
@@ -248,7 +265,10 @@
 
 - (void)openNotification:(CDVInvokedUrlCommand*)command {
     // NotificarePushLib needs the original payload from APNS or a wrapped notification
-    [[NotificarePushLib shared] openNotification:@{@"notification": [command argumentAtIndex:0]}];
+    NSDictionary *notification = [command argumentAtIndex:0];
+    NSLog(@"NotificarePlugin: opening notification %@", [notification objectForKey:@"_id"]);
+    // Add aps.alert to make sure NotificarePushLib doesn't see this as a system push
+    [[NotificarePushLib shared] openNotification:@{@"aps":@{@"alert":[notification objectForKey:@"message"]}, @"notification": notification}];
 }
 
 - (void)logOpenNotification:(CDVInvokedUrlCommand*)command {
@@ -303,7 +323,7 @@
 #pragma NotificarePushLibDelegate
 
 - (void)notificarePushLib:(NotificarePushLib *)library onReady:(NSDictionary *)info {
-    NSLog(@"Notificare ready");
+    NSLog(@"NotificarePlugin: Notificare ready");
     [self sendSuccessResultWithType:@"ready" andDictionary:info];
 }
 
@@ -327,35 +347,44 @@
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
     if (_handleNotification && [userInfo objectForKey:@"id"]) {
+        NSLog(@"NotificarePlugin: received notification %@, fetching and sending to JS", [userInfo objectForKey:@"id"]);
         [[NotificarePushLib shared] getNotification:[userInfo objectForKey:@"id"] completionHandler:^(NSDictionary *info) {
             // Info is the full notification object in key "notification"
             NSDictionary *notification = [info objectForKey:@"notification"];
             [self sendSuccessResultWithType:@"notification" andDictionary:notification];
         } errorHandler:^(NSError *error) {
-            NSLog(@"Error fetching notification: %@", error);
+            NSLog(@"NotificarePlugin: error fetching notification: %@", error);
         }];
     } else {
+        NSLog(@"NotificarePlugin: received notification %@, opening", [userInfo objectForKey:@"id"]);
         [[NotificarePushLib shared] openNotification:userInfo];
     }
 }
 
-//- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
-//    NSLog(@"didReceiveRemoteNotification:fetchCompletionHandler: %@", [userInfo description]);
-//    if (_handleNotification && [userInfo objectForKey:@"id"]) {
-//        [[NotificarePushLib shared]getNotification:[userInfo objectForKey:@"id"] completionHandler:^(NSDictionary *info) {
-//            // Info is the full notification object in key "notification"
-//            NSDictionary *notification = [info objectForKey:@"notification"];
-//            [self sendSuccessResultWithType:@"notification" andDictionary:notification];
-//            completionHandler(UIBackgroundFetchResultNewData);
-//        } errorHandler:^(NSError *error) {
-//            NSLog(@"Error fetching notification: %@", error);
-//            completionHandler(UIBackgroundFetchResultFailed);
-//        }];
-//    } else {
-//        [[NotificarePushLib shared] openNotification:userInfo];
-//        completionHandler(UIBackgroundFetchResultNewData);
-//    }
-//}
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
+    if (_handleNotification && [userInfo objectForKey:@"id"]) {
+        NSLog(@"NotificarePlugin: received notification, fetching and sending to JS");
+        [[NotificarePushLib shared]getNotification:[userInfo objectForKey:@"id"] completionHandler:^(NSDictionary *info) {
+            // Info is the full notification object in key "notification"
+            NSDictionary *notification = [info objectForKey:@"notification"];
+            [self sendSuccessResultWithType:@"notification" andDictionary:notification];
+            completionHandler(UIBackgroundFetchResultNewData);
+        } errorHandler:^(NSError *error) {
+            NSLog(@"NotificarePlugin: error fetching notification: %@", error);
+            completionHandler(UIBackgroundFetchResultFailed);
+        }];
+    } else {
+        if ([application applicationState] == UIApplicationStateInactive || [application applicationState] == UIApplicationStateBackground) {
+            // here, we could fetch and store the notification
+            NSLog(@"NotificarePlugin: received notification, not opening in background");
+            completionHandler(UIBackgroundFetchResultNewData);
+        } else {
+            NSLog(@"NotificarePlugin: received notification, opening");
+            [[NotificarePushLib shared] openNotification:userInfo];
+            completionHandler(UIBackgroundFetchResultNewData);
+        }
+    }
+}
 
 
 - (void)application:(UIApplication *)application handleActionWithIdentifier:(NSString *)identifier forRemoteNotification:(NSDictionary *)userInfo completionHandler:(void (^)())completion {
@@ -367,7 +396,7 @@
 }
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation{
-    [[NotificarePushLib shared]  handleOpenURL:url];
+    [[NotificarePushLib shared] handleOpenURL:url];
     return YES;
 }
 

@@ -1,3 +1,19 @@
+/*
+ Copyright 2015 Notificare B.V.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ */
+
 package re.notifica.cordova;
 
 import java.util.ArrayList;
@@ -35,8 +51,8 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
     protected static final String TAG = NotificarePlugin.class.getSimpleName();
 
 	public static final int MIN_SDK_VERSION = 10501;
-	public static final int PLUGIN_VERSION_CODE = 10501;
-	public static final String PLUGIN_VERSION_NAME = "1.5.1";
+	public static final int PLUGIN_VERSION_CODE = 10502;
+	public static final String PLUGIN_VERSION_NAME = "1.5.2";
     
 	public static final String START = "start";
 	public static final String SETHANDLENOTIFICATION = "setHandleNotification";
@@ -71,6 +87,8 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	protected HashMap<String, CallbackContext> pendingCallbacks = new HashMap<String, CallbackContext>();
 	
 	private CallbackContext mainCallback;
+
+	private List<PluginResult> resultQueue;
 	
 	/**
 	 * Shared instance
@@ -84,6 +102,7 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	public NotificarePlugin() {
 		Log.d(TAG, "NotificarePlugin instantiated");
 		instance = this;
+		resultQueue = new ArrayList<PluginResult>();
 	}
 	
 	/**
@@ -141,6 +160,7 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	public void onNotificareReady(NotificareApplicationInfo applicationInfo) {
 		Log.d(TAG, "onNotificareReady");
 		sendReady(applicationInfo);
+		sendResultQueue();
 	}
 	
 	@Override
@@ -846,15 +866,20 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	 * @param data
 	 */
 	private void sendSuccessResult(String type, Object data) {
-		if (mainCallback != null && data != null && type != null) {
+		if (data != null && type != null) {
 			JSONObject result = new JSONObject();
 			try {
 				result.put("type", type);
 				result.put("data", data);
 				PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, result);
 				pluginResult.setKeepCallback(true);
-				Log.d(TAG, "Sending success result: " + pluginResult.getMessage());
-	            mainCallback.sendPluginResult(pluginResult);
+				if (mainCallback != null) {
+					Log.d(TAG, "Sending success result: " + pluginResult.getMessage());
+					mainCallback.sendPluginResult(pluginResult);
+				} else {
+					Log.d(TAG, "Queueing success result: " + pluginResult.getMessage());
+					resultQueue.add(pluginResult);
+				}
 			} catch (JSONException e) {
 				Log.e(TAG, "could not serialize result for callback");
 			}
@@ -868,19 +893,33 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	 * @param message
 	 */
 	private void sendErrorResult(String type, String message) {
-		if (mainCallback != null && message != null && type != null) {
+		if (message != null && type != null) {
 			JSONObject result = new JSONObject();
 			try {
 				result.put("type", type);
 				result.put("data", message);
 				PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, result);
 				pluginResult.setKeepCallback(true);
-	            mainCallback.sendPluginResult(pluginResult);
+				if (mainCallback != null) {
+	            	mainCallback.sendPluginResult(pluginResult);
+	            } else {
+	            	resultQueue.add(pluginResult);
+	            }
 			} catch (JSONException e) {
 				Log.e(TAG, "could not serialize result for callback");
 			}
 			
 		}
+	}
+
+	/**
+	 * Send results that were queued while the plugin was initializing
+	 */
+	private void sendResultQueue() {
+		for (PluginResult pluginResult : resultQueue) {
+			mainCallback.sendPluginResult(pluginResult);
+		}
+		resultQueue.clear();
 	}
 
 	/**
@@ -952,7 +991,5 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 			sendSuccessResult(CALLBACK_TYPE_VALIDATE_USER_TOKEN, token);
 		}
 	}
-
-
 
 }

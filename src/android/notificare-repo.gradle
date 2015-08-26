@@ -1,0 +1,5 @@
+repositories {
+	maven {
+		url "https://github.com/Notificare/notificare-mvn-repo/raw/master/releases"
+	}
+}

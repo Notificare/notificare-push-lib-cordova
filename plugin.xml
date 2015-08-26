@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
-        id="re.notifica.cordova"
-        version="1.5.1">
+        id="cordova-plugin-notificare-push"
+        version="1.5.3">
 
   <name>Notificare Plugin</name>
 
@@ -10,10 +10,11 @@
     This plugin allows your application to register for, receive and handle push notifications with Notificare on both Android and iOS devices.
   </description>
 
-  <license>MIT</license>
+  <license>Apache</license>
 
   <engines>
-    <engine name="cordova" version=">=3.5.0"/>
+    <engine name="cordova-ios" version=">=3.8.0"/>
+    <engine name="cordova-android" version=">=4.0.0"/>
   </engines>
 
   <js-module src="www/notificare.js" name="Notificare">
@@ -87,6 +88,12 @@
     <resource-file src="src/android/res/xml/preferences.xml" target="res/xml/preferences.xml" />
     <resource-file src="src/android/res/values/strings_preferences.xml" target="res/values/strings_preferences.xml" />
     <resource-file src="src/android/assets/notificareconfig.properties" target="assets/notificareconfig.properties" />
+
+    <!-- Depend on latest version of NotificarePushLib -->
+    <framework src="src/android/notificare-repo.gradle" custom="true" type="gradleReference" />
+    <framework src="re.notifica:notificare-push-lib-android:1.5.5" />
+
+
   </platform>
 
   <!-- ios -->
