@@ -23,21 +23,21 @@
 }
 @property (copy, nonatomic) NSString *mainCallbackId;
 @property (strong, nonatomic) NSMutableArray *resultQueue;
+@property (strong, nonatomic) NSMutableSet *receiveQueue;
 @end
 
 
 @implementation NotificarePlugin
 
-#define kPluginVersion @"1.5.4"
+#define kPluginVersion @"1.5.5"
 
 - (void)pluginInitialize {
 	NSLog(@"Initializing Notificare Plugin version %@", kPluginVersion);
 	[self setResultQueue:[[NSMutableArray alloc] init]];
+	[self setReceiveQueue:[[NSMutableSet alloc] init]];
     [[NotificareAppDelegateSurrogate shared] setSurrogateDelegate:self];
     [[NotificarePushLib shared] launch];
     [[NotificarePushLib shared] setDelegate:self];
-    [[NotificarePushLib shared] handleOptions:[[NotificareAppDelegateSurrogate shared] launchOptions]];
-    [[NotificareAppDelegateSurrogate shared] clearLaunchOptions];
 }
 
 - (void)start:(CDVInvokedUrlCommand*) command {
@@ -45,6 +45,47 @@
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
     [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
     [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    NSDictionary *options = [[NotificareAppDelegateSurrogate shared] launchOptions];
+    BOOL handled = NO;
+    if (_handleNotification) {
+        if ([options objectForKey:@"UIApplicationLaunchOptionsRemoteNotificationKey"] && [[options objectForKey:@"UIApplicationLaunchOptionsRemoteNotificationKey"] objectForKey:@"id"]) {
+            // Send it to JS
+            NSLog(@"NotificarePlugin: app launched with remote notification, fetching and sending to JS");
+            [self logReceivedNotification:[[options objectForKey:@"UIApplicationLaunchOptionsRemoteNotificationKey"] objectForKey:@"id"]];
+            [self logInfluencedOpenNotification:[[options objectForKey:@"UIApplicationLaunchOptionsRemoteNotificationKey"] objectForKey:@"id"]];
+            [[NotificarePushLib shared] getNotification:[[options objectForKey:@"UIApplicationLaunchOptionsRemoteNotificationKey"] objectForKey:@"id"] completionHandler:^(NSDictionary *info) {
+                // Info is the full notification object in key "notification"
+                NSDictionary *notification = [info objectForKey:@"notification"];
+                [self sendSuccessResultWithType:@"notification" andDictionary:notification];
+            } errorHandler:^(NSError *error) {
+                NSLog(@"NotificarePlugin: error fetching notification: %@", error);
+            }];
+            handled = YES;
+        } else if ([options objectForKey:@"UIApplicationLaunchOptionsLocalNotificationKey"]) {
+            UILocalNotification *notification = [options objectForKey:@"UIApplicationLaunchOptionsLocalNotificationKey"];
+            [self logReceivedNotification:[[notification userInfo] objectForKey:@"id"]];
+            [self logInfluencedOpenNotification:[[notification userInfo] objectForKey:@"id"]];
+            if ([notification userInfo] && [[notification userInfo] objectForKey:@"id"]) {
+                NSLog(@"NotificarePlugin: app launched with local notification, fetching and sending to JS");
+                // Send it to JS
+                [[NotificarePushLib shared] getNotification:[[options objectForKey:@"UIApplicationLaunchOptionsRemoteNotificationKey"] objectForKey:@"id"] completionHandler:^(NSDictionary *info) {
+                    // Info is the full notification object in key "notification"
+                    NSDictionary *notification = [info objectForKey:@"notification"];
+                    [self sendSuccessResultWithType:@"notification" andDictionary:notification];
+                } errorHandler:^(NSError *error) {
+                    NSLog(@"NotificarePlugin: error fetching notification: %@", error);
+                }];
+                handled = YES;
+            }
+        }
+    }
+    if (handled) {
+        [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
+    } else {
+        [[NotificarePushLib shared] handleOptions:options];
+    }
+    [[NotificareAppDelegateSurrogate shared] clearLaunchOptions];
+
 }
 
 - (void)setHandleNotification:(CDVInvokedUrlCommand*)command {
@@ -268,7 +309,7 @@
 - (void)openNotification:(CDVInvokedUrlCommand*)command {
     // NotificarePushLib needs the original payload from APNS or a wrapped notification
     NSDictionary *notification = [command argumentAtIndex:0];
-    NSLog(@"NotificarePlugin: opening notification %@", [notification objectForKey:@"_id"]);
+    NSLog(@"NotificarePlugin: opening notification");
     // Add aps.alert to make sure NotificarePushLib doesn't see this as a system push
     [[NotificarePushLib shared] openNotification:@{@"aps":@{@"alert":[notification objectForKey:@"message"]}, @"notification": notification}];
 }
@@ -285,6 +326,36 @@
     } errorHandler:^(NSError *error) {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
         [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    }];
+}
+
+#pragma logging of notification events
+
+- (void)logInfluencedOpenNotification:(NSString *)notificationID {
+    NSLog(@"NotificarePlugin: Log Influenced Open");
+    [self logNotificationEvent:@"re.notifica.event.notification.Influenced" forNotification:notificationID];
+}
+
+- (void)logReceivedNotification:(NSString *)notificationID {
+    NSLog(@"NotificarePlugin: Log Notification Received");
+    [self logNotificationEvent:@"re.notifica.event.notification.Receive" forNotification:notificationID];
+}
+
+- (void)logNotificationEvent:(NSString *)type forNotification:(NSString *)notificationID {
+    NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+    //what to save
+    NSMutableDictionary* log = [NSMutableDictionary dictionary];
+    [log setValue:[settings objectForKey:@"notificareSessionID"] forKey:@"sessionID"];
+    [log setValue:type forKey:@"type"];
+    [log setValue:notificationID forKey:@"notification"];
+    [log setValue:[settings objectForKey:@"userID"] forKey:@"userID"];
+    [log setValue:[settings objectForKey:@"deviceID"] forKey:@"deviceID"];
+
+    //make the call
+    [[[NotificarePushLib shared] notificareEngine] eventLog:log completionHandler:^(NSDictionary *result) {
+        // success!
+    } errorHandler:^(NSError *error) {
+        NSLog(@"NotificarePlugin: Event Log Failed: %@", error);
     }];
 }
 
@@ -311,7 +382,7 @@
 }
 
 - (void)sendSuccessResult:(NSDictionary *)payload {
-    if (_mainCallbackId != nil && payload != nil) {
+    if (payload != nil) {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:payload];
         [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
         if (_mainCallbackId != nil) {
@@ -365,8 +436,9 @@
 }
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
+    [self logReceivedNotification:[userInfo objectForKey:@"id"]];
     if (_handleNotification && [userInfo objectForKey:@"id"]) {
-        NSLog(@"NotificarePlugin: received notification %@, fetching and sending to JS", [userInfo objectForKey:@"id"]);
+        NSLog(@"NotificarePlugin: received notification, fetching and sending to JS");
         [[NotificarePushLib shared] getNotification:[userInfo objectForKey:@"id"] completionHandler:^(NSDictionary *info) {
             // Info is the full notification object in key "notification"
             NSDictionary *notification = [info objectForKey:@"notification"];
@@ -375,30 +447,56 @@
             NSLog(@"NotificarePlugin: error fetching notification: %@", error);
         }];
     } else {
-        NSLog(@"NotificarePlugin: received notification %@, opening", [userInfo objectForKey:@"id"]);
+        NSLog(@"NotificarePlugin: received notification, opening");
+        [self logInfluencedOpenNotification:[userInfo objectForKey:@"id"]];
+        [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
         [[NotificarePushLib shared] openNotification:userInfo];
     }
 }
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
     if (_handleNotification && [userInfo objectForKey:@"id"]) {
-        NSLog(@"NotificarePlugin: received notification, fetching and sending to JS");
-        [[NotificarePushLib shared]getNotification:[userInfo objectForKey:@"id"] completionHandler:^(NSDictionary *info) {
-            // Info is the full notification object in key "notification"
-            NSDictionary *notification = [info objectForKey:@"notification"];
-            [self sendSuccessResultWithType:@"notification" andDictionary:notification];
+        if ([application applicationState] == UIApplicationStateBackground) {
+            NSLog(@"NotificarePlugin: received notification in background, logging receive");
+            [self logReceivedNotification:[userInfo objectForKey:@"id"]];
+            [_receiveQueue addObject:[userInfo objectForKey:@"id"]];
             completionHandler(UIBackgroundFetchResultNewData);
-        } errorHandler:^(NSError *error) {
-            NSLog(@"NotificarePlugin: error fetching notification: %@", error);
-            completionHandler(UIBackgroundFetchResultFailed);
-        }];
+        } else {
+            NSLog(@"NotificarePlugin: received notification, fetching and sending to JS");
+            if ([_receiveQueue containsObject:[userInfo objectForKey:@"id"]]) {
+                [_receiveQueue removeObject:[userInfo objectForKey:@"id"]];
+            } else {
+                [self logReceivedNotification:[userInfo objectForKey:@"id"]];
+            }
+            [self logInfluencedOpenNotification:[userInfo objectForKey:@"id"]];
+            [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
+            [[NotificarePushLib shared] getNotification:[userInfo objectForKey:@"id"] completionHandler:^(NSDictionary *info) {
+                // Info is the full notification object in key "notification"
+                NSDictionary *notification = [info objectForKey:@"notification"];
+                [self sendSuccessResultWithType:@"notification" andDictionary:notification];
+                completionHandler(UIBackgroundFetchResultNewData);
+            } errorHandler:^(NSError *error) {
+                NSLog(@"NotificarePlugin: error fetching notification: %@", error);
+                completionHandler(UIBackgroundFetchResultFailed);
+            }];
+        }
     } else {
-        if ([application applicationState] == UIApplicationStateInactive || [application applicationState] == UIApplicationStateBackground) {
-            // here, we could fetch and store the notification
-            NSLog(@"NotificarePlugin: received notification, not opening in background");
+        if ([application applicationState] == UIApplicationStateBackground) {
+            if ([userInfo objectForKey:@"id"]) {
+                NSLog(@"NotificarePlugin: received notification, not opening in background");
+                [self logReceivedNotification:[userInfo objectForKey:@"id"]];
+                [_receiveQueue addObject:[userInfo objectForKey:@"id"]];
+            }
             completionHandler(UIBackgroundFetchResultNewData);
         } else {
             NSLog(@"NotificarePlugin: received notification, opening");
+            if ([_receiveQueue containsObject:[userInfo objectForKey:@"id"]]) {
+                [_receiveQueue removeObject:[userInfo objectForKey:@"id"]];
+            } else {
+                [self logReceivedNotification:[userInfo objectForKey:@"id"]];
+            }
+            [self logInfluencedOpenNotification:[userInfo objectForKey:@"id"]];
+            [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
             [[NotificarePushLib shared] openNotification:userInfo];
             completionHandler(UIBackgroundFetchResultNewData);
         }
