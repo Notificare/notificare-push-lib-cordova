@@ -22,15 +22,17 @@
     BOOL _handleNotification;
 }
 @property (copy, nonatomic) NSString *mainCallbackId;
+@property (strong, nonatomic) NSMutableArray *resultQueue;
 @end
 
 
 @implementation NotificarePlugin
 
-#define kPluginVersion @"1.5.3"
+#define kPluginVersion @"1.5.4"
 
 - (void)pluginInitialize {
 	NSLog(@"Initializing Notificare Plugin version %@", kPluginVersion);
+	[self setResultQueue:[[NSMutableArray alloc] init]];
     [[NotificareAppDelegateSurrogate shared] setSurrogateDelegate:self];
     [[NotificarePushLib shared] launch];
     [[NotificarePushLib shared] setDelegate:self];
@@ -288,11 +290,23 @@
 
 #pragma callback methods
 
+- (void)sendResultQueue {
+    NSLog(@"NotificarePlugin: sending queued results");
+    for (CDVPluginResult *pluginResult in _resultQueue) {
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:_mainCallbackId];
+    }
+    [_resultQueue removeAllObjects];
+}
+
 - (void)sendErrorResultWithType:(NSString *)type andMessage:(NSString *)message {
-    if (_mainCallbackId != nil && message != nil) {
+    if (message != nil) {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:message];
         [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
-        [[self commandDelegate] sendPluginResult:pluginResult callbackId:_mainCallbackId];
+        if (_mainCallbackId != nil) {
+            [[self commandDelegate] sendPluginResult:pluginResult callbackId:_mainCallbackId];
+        } else {
+            [_resultQueue addObject:pluginResult];
+        }
     }
 }
 
@@ -300,7 +314,11 @@
     if (_mainCallbackId != nil && payload != nil) {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:payload];
         [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
-        [[self commandDelegate] sendPluginResult:pluginResult callbackId:_mainCallbackId];
+        if (_mainCallbackId != nil) {
+            [[self commandDelegate] sendPluginResult:pluginResult callbackId:_mainCallbackId];
+        } else {
+            [_resultQueue addObject:pluginResult];
+        }
     }
 }
 
@@ -325,6 +343,7 @@
 - (void)notificarePushLib:(NotificarePushLib *)library onReady:(NSDictionary *)info {
     NSLog(@"NotificarePlugin: Notificare ready");
     [self sendSuccessResultWithType:@"ready" andDictionary:info];
+    [self sendResultQueue];
 }
 
 - (void)notificarePushLib:(NotificarePushLib *)library didReceiveActivationToken:(NSString *)token {
