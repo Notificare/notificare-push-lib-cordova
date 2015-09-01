@@ -2,7 +2,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="cordova-plugin-notificare-push"
-        version="1.5.5">
+        version="1.5.6">
 
   <name>Notificare Plugin</name>
 
@@ -91,7 +91,7 @@
 
     <!-- Depend on latest version of NotificarePushLib -->
     <framework src="src/android/notificare-repo.gradle" custom="true" type="gradleReference" />
-    <framework src="re.notifica:notificare-push-lib-android:1.5.5" />
+    <framework src="re.notifica:notificare-push-lib-android:1.5.6" />
 
 
   </platform>
