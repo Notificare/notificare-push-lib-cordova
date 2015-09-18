@@ -212,5 +212,6 @@
     <framework src="CFNetwork.framework"/>
     <framework src="ImageIO.framework"/>
     <framework src="StoreKit.framework"/>
+    <framework src="SafariServices.framework"/>
   </platform>
 </plugin>
