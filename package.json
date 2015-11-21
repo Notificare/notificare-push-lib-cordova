@@ -1,5 +1,5 @@
 {
-  "version": "1.6.0",
+  "version": "1.6.1",
   "name": "cordova-plugin-notificare-push",
   "cordova_name": "Notificare Plugin",
   "description": "This plugin allows your application to register for, receive and handle push notifications with Notificare on both Android and iOS devices.",
@@ -11,7 +11,7 @@
   "engines": [
     {
       "name": "cordova",
-      "version": ">=3.5.0"
+      "version": ">=5.0.0"
     }
   ],
   "cordova": {

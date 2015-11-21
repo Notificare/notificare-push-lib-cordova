@@ -50,9 +50,9 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	
     protected static final String TAG = NotificarePlugin.class.getSimpleName();
 
-	public static final int MIN_SDK_VERSION = 10501;
-	public static final int PLUGIN_VERSION_CODE = 10600;
-	public static final String PLUGIN_VERSION_NAME = "1.6.0";
+	public static final int MIN_SDK_VERSION = 10509;
+	public static final int PLUGIN_VERSION_CODE = 10601;
+	public static final String PLUGIN_VERSION_NAME = "1.6.1";
     
 	public static final String START = "start";
 	public static final String SETHANDLENOTIFICATION = "setHandleNotification";
@@ -305,6 +305,7 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	 */
 	protected void enableLocationUpdates(CallbackContext callbackContext) {
 		Log.d(TAG, "ENABLELOCATIONS");
+
 		Notificare.shared().enableLocationUpdates();
 		callbackContext.success();
 	}
