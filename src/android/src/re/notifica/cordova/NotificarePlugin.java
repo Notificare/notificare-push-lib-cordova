@@ -313,26 +313,6 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 		callbackContext.success();
 	}
 
-
-	/**
-	 * Request permission for location updates
-	 */
-	public void requestLocationPermission() {
-    	if (!Notificare.shared().hasLocationPermissionGranted()) {
-    		Log.i(TAG, "permission not granted");
-    		if (Notificare.shared().didRequestLocationPermission()) {
-    			if (Notificare.shared().shouldShowRequestPermissionRationale(cordova.getActivity())) {
-    				// Here we should show a dialog explaining location updates
-    				sendShouldShowLocationPermissionRationale();
-    			}
-    		} else {
-    			cordova.requestPermissions(this, LOCATION_PERMISSION_REQUEST_CODE, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION});
-    		}
-    	} else {
-    		Notificare.shared().enableLocationUpdates();
-    	}
-    }
-
 	/**
 	 * Enable push notifications
 	 * @param callbackContext
@@ -349,7 +329,12 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	 */
 	protected void enableLocationUpdates(CallbackContext callbackContext) {
 		Log.d(TAG, "ENABLELOCATIONS");
-		requestLocationPermission();
+    	if (!Notificare.shared().hasLocationPermissionGranted()) {
+    		Log.i(TAG, "permission not granted");
+			cordova.requestPermissions(this, LOCATION_PERMISSION_REQUEST_CODE, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION});
+    	} else {
+    		Notificare.shared().enableLocationUpdates();
+    	}
 		callbackContext.success();
 	}
 
@@ -999,11 +984,6 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	public void sendRegistrationError(String errorId) {
 		Log.d(TAG, "sendRegistrationError");
 		sendErrorResult(CALLBACK_TYPE_REGISTRATION, errorId);
-	}
-
-	public void sendShouldShowLocationPermissionRationale() {
-		Log.d(TAG, "sendShouldShowLocationPermissionRationale");
-		sendSuccessResult(CALLBACK_TYPE_LOCATION_PERMISSION_RATIONALE, true);
 	}
 
 	/**
