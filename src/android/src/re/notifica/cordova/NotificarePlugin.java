@@ -38,7 +38,11 @@ import re.notifica.model.NotificareApplicationInfo;
 import re.notifica.model.NotificareNotification;
 import re.notifica.model.NotificareUser;
 import re.notifica.ui.NotificationActivity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import re.notifica.util.Log;
 
 /**
@@ -50,9 +54,12 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	
     protected static final String TAG = NotificarePlugin.class.getSimpleName();
 
-	public static final int MIN_SDK_VERSION = 10509;
-	public static final int PLUGIN_VERSION_CODE = 10601;
-	public static final String PLUGIN_VERSION_NAME = "1.6.1";
+	private static final String SETTINGS_PREFERENCES = "re.notifica.preferences.Settings";
+	private static final String SETTINGS_KEY_LOCATION_PERMISSION_REQUESTED = "locationPermissionRequested";
+
+	public static final int MIN_SDK_VERSION = 10602;
+	public static final int PLUGIN_VERSION_CODE = 10602;
+	public static final String PLUGIN_VERSION_NAME = "1.6.2";
     
 	public static final String START = "start";
 	public static final String SETHANDLENOTIFICATION = "setHandleNotification";
@@ -81,9 +88,12 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	public static final String CALLBACK_TYPE_READY = "ready";
 	public static final String CALLBACK_TYPE_REGISTRATION = "registration";
 	public static final String CALLBACK_TYPE_NOTIFICATION = "notification";
+	public static final String CALLBACK_TYPE_LOCATION_PERMISSION_RATIONALE = "locationPermissionRationale";
 	public static final String CALLBACK_TYPE_RESET_PASSWORD_TOKEN = "resetPasswordToken";
 	public static final String CALLBACK_TYPE_VALIDATE_USER_TOKEN = "validateUserToken";
-	
+
+	public static final int LOCATION_PERMISSION_REQUEST_CODE = 0;
+
 	protected HashMap<String, CallbackContext> pendingCallbacks = new HashMap<String, CallbackContext>();
 	
 	private CallbackContext mainCallback;
@@ -192,6 +202,20 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	}
 
 	@Override
+	public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) throws JSONException {
+        switch (requestCode) {
+            case LOCATION_PERMISSION_REQUEST_CODE: {
+                if (Notificare.shared().checkRequestLocationPermissionResult(permissions, grantResults)) {
+                    Log.i(TAG, "permission granted");
+                    Notificare.shared().enableLocationUpdates();
+                    Notificare.shared().enableBeacons();
+                }
+                return;
+            }
+        }
+	}
+
+	@Override
 	public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
 		if (START.equals(action)) {
 			start(callbackContext);
@@ -289,6 +313,26 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 		callbackContext.success();
 	}
 
+
+	/**
+	 * Request permission for location updates
+	 */
+	public void requestLocationPermission() {
+    	if (!Notificare.shared().hasLocationPermissionGranted()) {
+    		Log.i(TAG, "permission not granted");
+    		if (Notificare.shared().didRequestLocationPermission()) {
+    			if (Notificare.shared().shouldShowRequestPermissionRationale(cordova.getActivity())) {
+    				// Here we should show a dialog explaining location updates
+    				sendShouldShowLocationPermissionRationale();
+    			}
+    		} else {
+    			cordova.requestPermissions(this, LOCATION_PERMISSION_REQUEST_CODE, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION});
+    		}
+    	} else {
+    		Notificare.shared().enableLocationUpdates();
+    	}
+    }
+
 	/**
 	 * Enable push notifications
 	 * @param callbackContext
@@ -305,8 +349,7 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	 */
 	protected void enableLocationUpdates(CallbackContext callbackContext) {
 		Log.d(TAG, "ENABLELOCATIONS");
-
-		Notificare.shared().enableLocationUpdates();
+		requestLocationPermission();
 		callbackContext.success();
 	}
 
@@ -956,6 +999,11 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	public void sendRegistrationError(String errorId) {
 		Log.d(TAG, "sendRegistrationError");
 		sendErrorResult(CALLBACK_TYPE_REGISTRATION, errorId);
+	}
+
+	public void sendShouldShowLocationPermissionRationale() {
+		Log.d(TAG, "sendShouldShowLocationPermissionRationale");
+		sendSuccessResult(CALLBACK_TYPE_LOCATION_PERMISSION_RATIONALE, true);
 	}
 
 	/**
