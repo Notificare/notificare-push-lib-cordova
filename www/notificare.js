@@ -187,6 +187,18 @@ Notificare.prototype.logOpenNotification = function(notification, success, fail)
 	exec(success, fail, 'Notificare', 'logOpenNotification', [notification]);
 };
 
+Notificare.prototype.fetchInbox = function(skip, limit, success, fail) {
+        exec(success, fail, 'Notificare', 'fetchInbox', [skip, limit]);
+};
+
+Notificare.prototype.markInboxItem = function(inboxItem, success, fail) {
+        exec(success, fail, 'Notificare', 'markInboxItem', [inboxItem]);
+};
+
+Notificare.prototype.clearInbox = function(success, fail) {
+        exec(success, fail, 'Notificare', 'clearInbox', []);
+};
+
 Notificare.prototype.logCustomEvent = function(name, data, success, fail) {
     exec(success, fail, 'Notificare', 'logCustomEvent', [name, data]);
 };

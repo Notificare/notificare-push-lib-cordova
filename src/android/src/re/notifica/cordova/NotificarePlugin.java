@@ -16,9 +16,13 @@
 
 package re.notifica.cordova;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.SortedSet;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
@@ -35,15 +39,17 @@ import re.notifica.Notificare.OnServiceErrorListener;
 import re.notifica.NotificareCallback;
 import re.notifica.NotificareError;
 import re.notifica.model.NotificareApplicationInfo;
+import re.notifica.model.NotificareInboxItem;
 import re.notifica.model.NotificareNotification;
 import re.notifica.model.NotificareUser;
 import re.notifica.ui.NotificationActivity;
+import re.notifica.util.Log;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import re.notifica.util.Log;
 
 /**
  * Cordova plugin for Notificare 
@@ -54,12 +60,14 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	
     protected static final String TAG = NotificarePlugin.class.getSimpleName();
 
+	private static SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
+
 	private static final String SETTINGS_PREFERENCES = "re.notifica.preferences.Settings";
 	private static final String SETTINGS_KEY_LOCATION_PERMISSION_REQUESTED = "locationPermissionRequested";
 
-	public static final int MIN_SDK_VERSION = 10605;
-	public static final int PLUGIN_VERSION_CODE = 10605;
-	public static final String PLUGIN_VERSION_NAME = "1.6.5";
+	public static final int MIN_SDK_VERSION = 10701;
+	public static final int PLUGIN_VERSION_CODE = 10700;
+	public static final String PLUGIN_VERSION_NAME = "1.7.0";
     
 	public static final String START = "start";
 	public static final String SETHANDLENOTIFICATION = "setHandleNotification";
@@ -83,16 +91,20 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	public static final String FETCHUSERDETAILS = "fetchUserDetails";
 	public static final String OPENNOTIFICATION = "openNotification";
 	public static final String LOGOPENNOTIFICATION = "logOpenNotification";
+	public static final String FETCHINBOX = "fetchInbox";
+	public static final String MARKINBOXITEM = "markInboxItem";
+	public static final String CLEARINBOX = "clearInbox";
 	public static final String LOGCUSTOMEVENT = "logCustomEvent";
 
 	public static final String CALLBACK_TYPE_READY = "ready";
 	public static final String CALLBACK_TYPE_REGISTRATION = "registration";
 	public static final String CALLBACK_TYPE_NOTIFICATION = "notification";
-	public static final String CALLBACK_TYPE_LOCATION_PERMISSION_RATIONALE = "locationPermissionRationale";
 	public static final String CALLBACK_TYPE_RESET_PASSWORD_TOKEN = "resetPasswordToken";
 	public static final String CALLBACK_TYPE_VALIDATE_USER_TOKEN = "validateUserToken";
 
 	public static final int LOCATION_PERMISSION_REQUEST_CODE = 0;
+
+	private static final int DEFAULT_LIST_SIZE = 25;
 
 	protected HashMap<String, CallbackContext> pendingCallbacks = new HashMap<String, CallbackContext>();
 	
@@ -283,6 +295,15 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 		} else if (LOGOPENNOTIFICATION.equals(action)) {
 			logOpenNotification(args, callbackContext);
 			return true;
+		} else if (FETCHINBOX.equals(action)) {
+			fetchInbox(args, callbackContext);
+			return true;
+		} else if (MARKINBOXITEM.equals(action)) {
+			markInboxItem(args, callbackContext);
+			return true;
+		} else if (CLEARINBOX.equals(action)) {
+			clearInbox(args, callbackContext);
+			return true;
 		} else if (LOGCUSTOMEVENT.equals(action)) {
 			logCustomEvent(args, callbackContext);
 			return true;
@@ -378,25 +399,25 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	        	userName = args.getString(2);
 	        }
 			Notificare.shared().registerDevice(deviceId, userId, userName, new NotificareCallback<String>() {
-	
-				@Override
-				public void onSuccess(String result) {
-					Notificare.shared().setDeviceId(result);
-					if (callbackContext == null) {
-						return;
-					}
-					callbackContext.success();
-				}
-	
-				@Override
-				public void onError(NotificareError error) {
-					if (callbackContext == null) {
-						return;
-					}
-					callbackContext.error(error.getLocalizedMessage());		
-				}
-				
-			});
+
+                @Override
+                public void onSuccess(String result) {
+                    Notificare.shared().setDeviceId(result);
+                    if (callbackContext == null) {
+                        return;
+                    }
+                    callbackContext.success();
+                }
+
+                @Override
+                public void onError(NotificareError error) {
+                    if (callbackContext == null) {
+                        return;
+                    }
+                    callbackContext.error(error.getLocalizedMessage());
+                }
+
+            });
         } catch (JSONException e) {
 			callbackContext.error("JSON parse error");
 		}
@@ -419,22 +440,22 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 			}
 			Notificare.shared().addDeviceTags(tagList, new NotificareCallback<Boolean>() {
 
-				@Override
-				public void onSuccess(Boolean result) {
-					if (callbackContext == null) {
-						return;
-					}
-					callbackContext.success();
-				}
+                @Override
+                public void onSuccess(Boolean result) {
+                    if (callbackContext == null) {
+                        return;
+                    }
+                    callbackContext.success();
+                }
 
-				@Override
-				public void onError(NotificareError error) {
-					if (callbackContext == null) {
-						return;
-					}
-					callbackContext.error(error.getLocalizedMessage());
-				}
-			});
+                @Override
+                public void onError(NotificareError error) {
+                    if (callbackContext == null) {
+                        return;
+                    }
+                    callbackContext.error(error.getLocalizedMessage());
+                }
+            });
 		} catch (JSONException e) {
 			callbackContext.error("JSON parse error");
 		}
@@ -484,22 +505,22 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 		Log.d(TAG, "CLEARTAGS");
 		Notificare.shared().clearDeviceTags(new NotificareCallback<Boolean>() {
 
-			@Override
-			public void onSuccess(Boolean result) {
-				if (callbackContext == null) {
-					return;
-				}
-				callbackContext.success();
-			}
+            @Override
+            public void onSuccess(Boolean result) {
+                if (callbackContext == null) {
+                    return;
+                }
+                callbackContext.success();
+            }
 
-			@Override
-			public void onError(NotificareError error) {
-				if (callbackContext == null) {
-					return;
-				}
-				callbackContext.error(error.getLocalizedMessage());
-			}
-		});
+            @Override
+            public void onError(NotificareError error) {
+                if (callbackContext == null) {
+                    return;
+                }
+                callbackContext.error(error.getLocalizedMessage());
+            }
+        });
 	}
 	
 	/**
@@ -511,22 +532,22 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 		Log.d(TAG, "FETCHTAGS");
 		Notificare.shared().fetchDeviceTags(new NotificareCallback<List<String>>() {
 
-			@Override
-			public void onSuccess(List<String>tags) {
-				if (callbackContext == null) {
-					return;
-				}
-				callbackContext.success(new JSONArray(tags));
-			}
+            @Override
+            public void onSuccess(List<String> tags) {
+                if (callbackContext == null) {
+                    return;
+                }
+                callbackContext.success(new JSONArray(tags));
+            }
 
-			@Override
-			public void onError(NotificareError error) {
-				if (callbackContext == null) {
-					return;
-				}
-				callbackContext.error(error.getLocalizedMessage());
-			}
-		});
+            @Override
+            public void onError(NotificareError error) {
+                if (callbackContext == null) {
+                    return;
+                }
+                callbackContext.error(error.getLocalizedMessage());
+            }
+        });
 	}
 
 	/**
@@ -545,22 +566,22 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 			}
 			Notificare.shared().createAccount(email, password, userName, new NotificareCallback<Boolean>() {
 
-				@Override
-				public void onSuccess(Boolean result) {
-					if (callbackContext == null) {
-						return;
-					}
-					callbackContext.success();
-				}
+                @Override
+                public void onSuccess(Boolean result) {
+                    if (callbackContext == null) {
+                        return;
+                    }
+                    callbackContext.success();
+                }
 
-				@Override
-				public void onError(NotificareError error) {
-					if (callbackContext == null) {
-						return;
-					}
-					callbackContext.error(error.getLocalizedMessage());
-				}
-			});
+                @Override
+                public void onError(NotificareError error) {
+                    if (callbackContext == null) {
+                        return;
+                    }
+                    callbackContext.error(error.getLocalizedMessage());
+                }
+            });
 		} catch (JSONException e) {
 			callbackContext.error("JSON parse error");
 		}
@@ -577,22 +598,22 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 			String token = args.getString(0);
 			Notificare.shared().validateUser(token, new NotificareCallback<Boolean>() {
 
-				@Override
-				public void onSuccess(Boolean result) {
-					if (callbackContext == null) {
-						return;
-					}
-					callbackContext.success();
-				}
+                @Override
+                public void onSuccess(Boolean result) {
+                    if (callbackContext == null) {
+                        return;
+                    }
+                    callbackContext.success();
+                }
 
-				@Override
-				public void onError(NotificareError error) {
-					if (callbackContext == null) {
-						return;
-					}
-					callbackContext.error(error.getLocalizedMessage());
-				}
-			});
+                @Override
+                public void onError(NotificareError error) {
+                    if (callbackContext == null) {
+                        return;
+                    }
+                    callbackContext.error(error.getLocalizedMessage());
+                }
+            });
 		} catch (JSONException e) {
 			callbackContext.error("JSON parse error");
 		}		
@@ -609,22 +630,22 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 			String email = args.getString(0);
 			Notificare.shared().sendPassword(email, new NotificareCallback<Boolean>() {
 
-				@Override
-				public void onSuccess(Boolean result) {
-					if (callbackContext == null) {
-						return;
-					}
-					callbackContext.success();
-				}
+                @Override
+                public void onSuccess(Boolean result) {
+                    if (callbackContext == null) {
+                        return;
+                    }
+                    callbackContext.success();
+                }
 
-				@Override
-				public void onError(NotificareError error) {
-					if (callbackContext == null) {
-						return;
-					}
-					callbackContext.error(error.getLocalizedMessage());
-				}
-			});
+                @Override
+                public void onError(NotificareError error) {
+                    if (callbackContext == null) {
+                        return;
+                    }
+                    callbackContext.error(error.getLocalizedMessage());
+                }
+            });
 		} catch (JSONException e) {
 			callbackContext.error("JSON parse error");
 		}
@@ -642,22 +663,22 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 			String token = args.getString(1);
 			Notificare.shared().resetPassword(password, token, new NotificareCallback<Boolean>() {
 
-				@Override
-				public void onSuccess(Boolean result) {
-					if (callbackContext == null) {
-						return;
-					}
-					callbackContext.success();
-				}
+                @Override
+                public void onSuccess(Boolean result) {
+                    if (callbackContext == null) {
+                        return;
+                    }
+                    callbackContext.success();
+                }
 
-				@Override
-				public void onError(NotificareError error) {
-					if (callbackContext == null) {
-						return;
-					}
-					callbackContext.error(error.getLocalizedMessage());
-				}
-			});
+                @Override
+                public void onError(NotificareError error) {
+                    if (callbackContext == null) {
+                        return;
+                    }
+                    callbackContext.error(error.getLocalizedMessage());
+                }
+            });
 		} catch (JSONException e) {
 			callbackContext.error("JSON parse error");
 		}		
@@ -674,22 +695,22 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 			String password = args.getString(0);
 			Notificare.shared().changePassword(password, new NotificareCallback<Boolean>() {
 
-				@Override
-				public void onSuccess(Boolean result) {
-					if (callbackContext == null) {
-						return;
-					}
-					callbackContext.success();
-				}
+                @Override
+                public void onSuccess(Boolean result) {
+                    if (callbackContext == null) {
+                        return;
+                    }
+                    callbackContext.success();
+                }
 
-				@Override
-				public void onError(NotificareError error) {
-					if (callbackContext == null) {
-						return;
-					}
-					callbackContext.error(error.getLocalizedMessage());
-				}
-			});
+                @Override
+                public void onError(NotificareError error) {
+                    if (callbackContext == null) {
+                        return;
+                    }
+                    callbackContext.error(error.getLocalizedMessage());
+                }
+            });
 		} catch (JSONException e) {
 			callbackContext.error("JSON parse error");
 		}		
@@ -707,22 +728,22 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 			String password = args.getString(1);
 			Notificare.shared().userLogin(username, password, new NotificareCallback<Boolean>() {
 
-				@Override
-				public void onSuccess(Boolean result) {
-					if (callbackContext == null) {
-						return;
-					}
-					callbackContext.success();
-				}
+                @Override
+                public void onSuccess(Boolean result) {
+                    if (callbackContext == null) {
+                        return;
+                    }
+                    callbackContext.success();
+                }
 
-				@Override
-				public void onError(NotificareError error) {
-					if (callbackContext == null) {
-						return;
-					}
-					callbackContext.error(error.getLocalizedMessage());
-				}
-			});
+                @Override
+                public void onError(NotificareError error) {
+                    if (callbackContext == null) {
+                        return;
+                    }
+                    callbackContext.error(error.getLocalizedMessage());
+                }
+            });
 		} catch (JSONException e) {
 			callbackContext.error("JSON parse error");
 		}
@@ -737,22 +758,22 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 		Log.d(TAG, "USERLOGOUT");
 		Notificare.shared().userLogout(new NotificareCallback<Boolean>() {
 
-			@Override
-			public void onSuccess(Boolean result) {
-				if (callbackContext == null) {
-					return;
-				}
-				callbackContext.success();
-			}
+            @Override
+            public void onSuccess(Boolean result) {
+                if (callbackContext == null) {
+                    return;
+                }
+                callbackContext.success();
+            }
 
-			@Override
-			public void onError(NotificareError error) {
-				if (callbackContext == null) {
-					return;
-				}
-				callbackContext.error(error.getLocalizedMessage());
-			}
-		});
+            @Override
+            public void onError(NotificareError error) {
+                if (callbackContext == null) {
+                    return;
+                }
+                callbackContext.error(error.getLocalizedMessage());
+            }
+        });
 	}
 
 	/**
@@ -764,26 +785,26 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 		Log.d(TAG, "FETCHUSERDETAILS");
 		Notificare.shared().fetchUserDetails(new NotificareCallback<NotificareUser>() {
 
-			@Override
-			public void onSuccess(NotificareUser result) {
-				if (callbackContext == null) {
-					return;
-				}
-				try {
-					callbackContext.success(result.toJSONObject());
-				} catch (JSONException error) {
-					callbackContext.error(error.getLocalizedMessage());
-				}
-			}
+            @Override
+            public void onSuccess(NotificareUser result) {
+                if (callbackContext == null) {
+                    return;
+                }
+                try {
+                    callbackContext.success(result.toJSONObject());
+                } catch (JSONException error) {
+                    callbackContext.error(error.getLocalizedMessage());
+                }
+            }
 
-			@Override
-			public void onError(NotificareError error) {
-				if (callbackContext == null) {
-					return;
-				}
-				callbackContext.error(error.getLocalizedMessage());
-			}
-		});
+            @Override
+            public void onError(NotificareError error) {
+                if (callbackContext == null) {
+                    return;
+                }
+                callbackContext.error(error.getLocalizedMessage());
+            }
+        });
 	}
 	
 	/**
@@ -795,26 +816,26 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 		Log.d(TAG, "GENERATEACCESSTOKEN");
 		Notificare.shared().generateAccessToken(new NotificareCallback<NotificareUser>() {
 
-			@Override
-			public void onSuccess(NotificareUser result) {
-				if (callbackContext == null) {
-					return;
-				}
-				try {
-					callbackContext.success(result.toJSONObject());
-				} catch (JSONException error) {
-					callbackContext.error(error.getLocalizedMessage());
-				}
-			}
+            @Override
+            public void onSuccess(NotificareUser result) {
+                if (callbackContext == null) {
+                    return;
+                }
+                try {
+                    callbackContext.success(result.toJSONObject());
+                } catch (JSONException error) {
+                    callbackContext.error(error.getLocalizedMessage());
+                }
+            }
 
-			@Override
-			public void onError(NotificareError error) {
-				if (callbackContext == null) {
-					return;
-				}
-				callbackContext.error(error.getLocalizedMessage());
-			}
-		});
+            @Override
+            public void onError(NotificareError error) {
+                if (callbackContext == null) {
+                    return;
+                }
+                callbackContext.error(error.getLocalizedMessage());
+            }
+        });
 	}
 	
 	/**
@@ -838,7 +859,14 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 			.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
 			cordova.getActivity().startActivity(notificationIntent);
+			if (callbackContext == null) {
+				return;
+			}
+			callbackContext.success();
 		} catch (JSONException e) {
+			if (callbackContext == null) {
+				return;
+			}
 			callbackContext.error("JSON parse error");
 		}
 	}
@@ -854,10 +882,135 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 			JSONObject notificationJSON = args.getJSONObject(0);
 			NotificareNotification notification = new NotificareNotification(notificationJSON);
 			Notificare.shared().getEventLogger().logOpenNotification(notification.getNotificationId());
+			if (callbackContext == null) {
+				return;
+			}
+			callbackContext.success();
 		} catch (JSONException e) {
+			if (callbackContext == null) {
+				return;
+			}
 			callbackContext.error("JSON parse error");
 		}
 	}
+
+    /**
+     * Fetch inbox items
+     * @param args
+     * @param callbackContext
+     */
+	protected void fetchInbox(JSONArray args, final CallbackContext callbackContext) {
+		Log.d(TAG, "FETCHINBOX");
+		if (Notificare.shared().getInboxManager() != null) {
+            int max = Notificare.shared().getInboxManager().getItems().size();
+			int limit = args.optInt(1, DEFAULT_LIST_SIZE);
+			if (limit <= 0) {
+			    limit = DEFAULT_LIST_SIZE;
+			}
+			int skip = args.optInt(0);
+			if (skip < 0) {
+			    skip = 0;
+			}
+            if (skip > max) {
+                skip = max;
+            }
+            int end = limit + skip;
+            if (end > max) {
+                end = max;
+            }
+            List<NotificareInboxItem> items = new ArrayList<NotificareInboxItem>(Notificare.shared().getInboxManager().getItems()).subList(skip, end);
+			JSONArray results = new JSONArray();
+			for (NotificareInboxItem item : items) {
+                try {
+					JSONObject result = new JSONObject();
+                    result.put("itemId", item.getItemId());
+                    result.put("notification", item.getNotification().getNotificationId());
+                    result.put("message", item.getNotification().getMessage());
+                    result.put("status", item.getStatus());
+                    result.put("timestamp", dateFormatter.format(item.getTimestamp()));
+                    results.put(result);
+                } catch (JSONException e) {
+                    // Ignore this item
+                    Log.w(TAG, "failed to serialize inboxitem: " + e.getMessage());
+                }
+			}
+			Log.i(TAG, "fetched " + results.length() + " inbox items");
+			if (callbackContext == null) {
+				return;
+			}
+			callbackContext.success(results);
+		} else {
+			if (callbackContext == null) {
+				return;
+			}
+			callbackContext.error("No inbox manager");
+		}
+	}
+
+    protected void markInboxItem(JSONArray args, final CallbackContext callbackContext) {
+        if (Notificare.shared().getInboxManager() != null) {
+            try {
+                JSONObject item = args.getJSONObject(0);
+                final NotificareInboxItem inboxItem = new NotificareInboxItem(item);
+                Notificare.shared().deleteInboxItem(inboxItem.getItemId(), new NotificareCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        Notificare.shared().getInboxManager().markItem(inboxItem);
+						if (callbackContext == null) {
+							return;
+						}
+                        callbackContext.success();
+                    }
+
+                    @Override
+                    public void onError(NotificareError notificareError) {
+						if (callbackContext == null) {
+							return;
+						}
+                        callbackContext.error("Could not delete inbox item");
+                    }
+                });
+            } catch (JSONException e) {
+				if (callbackContext == null) {
+					return;
+				}
+                callbackContext.error("JSON parse error");
+            }
+        } else {
+			if (callbackContext == null) {
+				return;
+			}
+            callbackContext.error("No inbox manager");
+        }
+    }
+
+    protected void clearInbox(JSONArray args, final CallbackContext callbackContext) {
+        if (Notificare.shared().getInboxManager() != null) {
+            Notificare.shared().clearInbox(new NotificareCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean result) {
+                    Notificare.shared().getInboxManager().clearInbox();
+					if (callbackContext == null) {
+						return;
+					}
+                    callbackContext.success();
+                }
+
+                @Override
+                public void onError(NotificareError notificareError) {
+					if (callbackContext == null) {
+						return;
+					}
+                    callbackContext.error("Failed to clear inbox");
+                }
+            });
+        } else {
+			if (callbackContext == null) {
+				return;
+			}
+            callbackContext.error("No inbox manager");
+        }
+    }
 
     /**
      * Log a custom event
@@ -870,7 +1023,14 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 		    String name = args.getString(0);
 			JSONObject dataJSON = args.getJSONObject(1);
 			Notificare.shared().getEventLogger().logCustomEvent(name, dataJSON);
+			if (callbackContext == null) {
+				return;
+			}
+			callbackContext.success();
 		} catch (JSONException e) {
+			if (callbackContext == null) {
+				return;
+			}
 			callbackContext.error("JSON parse error");
 		}
 	}
@@ -953,7 +1113,7 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 
 	/**
 	 * Send the ready event to the webview
-	 * @param deviceId
+	 * @param applicationInfo
 	 */
 	public void sendReady(NotificareApplicationInfo applicationInfo) {
 		Log.d(TAG, "sendReady");
@@ -979,7 +1139,7 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 
 	/**
 	 * Send the registered deviceId (APID) to the webview
-	 * @param deviceId
+	 * @param errorId
 	 */
 	public void sendRegistrationError(String errorId) {
 		Log.d(TAG, "sendRegistrationError");
@@ -988,7 +1148,7 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 
 	/**
 	 * Send the notification to the webview
-	 * @param deviceId
+	 * @param notification
 	 */
 	public void sendNotification(NotificareNotification notification) {
 		Log.d(TAG, "sendNotification");

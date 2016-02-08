@@ -2,7 +2,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="cordova-plugin-notificare-push"
-        version="1.6.5">
+        version="1.7.0">
 
   <name>Notificare Plugin</name>
 
@@ -13,7 +13,7 @@
   <license>Apache</license>
 
   <engines>
-    <engine name="cordova-ios" version=">=3.9.1"/>
+    <engine name="cordova-ios" version=">=4.0.0"/>
     <engine name="cordova-android" version=">=5.0.0"/>
   </engines>
 
@@ -101,7 +101,7 @@
 
     <!-- Depend on latest version of NotificarePushLib -->
     <framework src="src/android/notificare-repo.gradle" custom="true" type="gradleReference" />
-    <framework src="re.notifica:notificare-push-lib-android:1.6.5" />
+    <framework src="re.notifica:notificare-push-lib-android:1.7.1" />
 
 
   </platform>
@@ -166,6 +166,7 @@
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareBeacon.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareContent.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareDevice.h" target-dir="Notificare/NotificarePushLib/Models/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareDeviceInbox.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareNotification.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareProduct.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareSegment.h" target-dir="Notificare/NotificarePushLib/Models/"/>
