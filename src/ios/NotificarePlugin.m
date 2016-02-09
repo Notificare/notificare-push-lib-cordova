@@ -29,7 +29,7 @@
 
 @implementation NotificarePlugin
 
-#define kPluginVersion @"1.6.1"
+#define kPluginVersion @"1.7.0"
 
 - (void)pluginInitialize {
 	NSLog(@"Initializing Notificare Plugin version %@", kPluginVersion);
@@ -107,8 +107,7 @@
 
 
 - (void)disableNotifications:(CDVInvokedUrlCommand*)command {
-    [[UIApplication sharedApplication] unregisterForRemoteNotifications];
-    [[NotificarePushLib shared] unregisterDevice];
+    [[NotificarePushLib shared] unregisterForNotifications];
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
 }
@@ -316,7 +315,77 @@
 
 - (void)logOpenNotification:(CDVInvokedUrlCommand*)command {
     // NotificarePushLib needs the original payload from APNS or a wrapped notification
-    [[NotificarePushLib shared] logOpenNotification:@{@"notification": [command argumentAtIndex:0]}];
+    [[NotificarePushLib shared] logOpenNotification:@{@"notification":[command argumentAtIndex:0]}];
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+}
+
+- (void)fetchInbox:(CDVInvokedUrlCommand*)command {
+    NSNumber *skip = [command argumentAtIndex:0];
+    NSNumber *limit = [command argumentAtIndex:1];
+    [[NotificarePushLib shared] fetchInbox:[NSDate date] skip:skip limit:limit completionHandler:^(NSDictionary *info) {
+        NSMutableArray *inboxResult = [[NSMutableArray alloc] init];
+        if ([info objectForKey:@"inbox"]) {
+            for (NotificareDeviceInbox *inboxItem in [info objectForKey:@"inbox"]) {
+                NSDictionary *inboxItemResult = [NSDictionary dictionaryWithObjectsAndKeys:
+                                                 [inboxItem inboxId], @"itemId",
+                                                 [inboxItem notification], @"notification",
+                                                 [inboxItem message], @"message",
+                                                 [NSNumber numberWithBool:[inboxItem opened]], @"status",
+                                                 [inboxItem time], @"timestamp",
+                                                 nil];
+                [inboxResult addObject:inboxItemResult];
+            }
+        }
+        NSDictionary *result = [NSDictionary dictionaryWithObjectsAndKeys:
+                                inboxResult, @"inbox",
+                                [info objectForKey:@"total"], @"total",
+                                [info objectForKey:@"unread"], @"unread",
+                                nil];
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:result];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    } errorHandler:^(NSError *error) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    }];
+}
+
+- (void)markInboxItem:(CDVInvokedUrlCommand*)command {
+    NSDictionary *inboxJSON = [command argumentAtIndex:0];
+    NotificareDeviceInbox *inboxItemStub = [[NotificareDeviceInbox alloc] init];
+    [inboxItemStub setInboxId:[inboxJSON objectForKey:@"itemId"]];
+    [inboxItemStub setNotification:[inboxJSON objectForKey:@"notification"]];
+    [[NotificarePushLib shared] markAsRead:inboxItemStub completionHandler:^(NSDictionary *info) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    } errorHandler:^(NSError *error) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    }];
+}
+
+- (void)deleteInboxItem:(CDVInvokedUrlCommand*)command {
+    NSDictionary *inboxJSON = [command argumentAtIndex:0];
+    NotificareDeviceInbox *inboxItemStub = [[NotificareDeviceInbox alloc] init];
+    [inboxItemStub setInboxId:[inboxJSON objectForKey:@"itemId"]];
+    [inboxItemStub setNotification:[inboxJSON objectForKey:@"notification"]];
+    [[NotificarePushLib shared] removeFromInbox:inboxItemStub completionHandler:^(NSDictionary *info) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    } errorHandler:^(NSError *error) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    }];
+}
+
+- (void)clearInbox:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] clearInbox:^(NSDictionary *info) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:info];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    } errorHandler:^(NSError *error) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+        [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+    }];
 }
 
 - (void)logCustomEvent:(CDVInvokedUrlCommand*)command {

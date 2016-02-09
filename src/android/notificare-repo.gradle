@@ -1,6 +1,5 @@
 repositories {
 	maven {
-		//url "https://github.com/Notificare/notificare-mvn-repo/raw/master/releases"
-		url "file:///Users/joris/Developer/Projects/notificare-mvn-repo/releases"
+		url "https://github.com/Notificare/notificare-mvn-repo/raw/master/releases"
 	}
 }

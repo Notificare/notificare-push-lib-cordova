@@ -1,0 +1,2 @@
+include ':CordovaLib'
+project(':CordovaLib').projectDir = new File(settingsDir, '../../../cordova-android/framework')

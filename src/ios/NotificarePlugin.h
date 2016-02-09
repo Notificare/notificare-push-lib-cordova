@@ -41,6 +41,10 @@
 - (void)fetchUserDetails:(CDVInvokedUrlCommand *)command;
 - (void)openNotification:(CDVInvokedUrlCommand *)command;
 - (void)logOpenNotification:(CDVInvokedUrlCommand *)command;
+- (void)fetchInbox:(CDVInvokedUrlCommand *)command;
+- (void)markInboxItem:(CDVInvokedUrlCommand *)command;
+- (void)deleteInboxItem:(CDVInvokedUrlCommand *)command;
+- (void)clearInbox:(CDVInvokedUrlCommand *)command;
 - (void)logCustomEvent:(CDVInvokedUrlCommand *)command;
 
 @end
