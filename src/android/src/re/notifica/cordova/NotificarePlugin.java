@@ -66,8 +66,8 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	private static final String SETTINGS_KEY_LOCATION_PERMISSION_REQUESTED = "locationPermissionRequested";
 
 	public static final int MIN_SDK_VERSION = 10701;
-	public static final int PLUGIN_VERSION_CODE = 10700;
-	public static final String PLUGIN_VERSION_NAME = "1.7.0";
+	public static final int PLUGIN_VERSION_CODE = 10701;
+	public static final String PLUGIN_VERSION_NAME = "1.7.1";
     
 	public static final String START = "start";
 	public static final String SETHANDLENOTIFICATION = "setHandleNotification";
@@ -969,28 +969,17 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	 * @param callbackContext
 	 */
     protected void markInboxItem(JSONArray args, final CallbackContext callbackContext) {
+		Log.i(TAG, "mark inbox item");
         if (Notificare.shared().getInboxManager() != null) {
             try {
                 JSONObject item = args.getJSONObject(0);
-                final NotificareInboxItem inboxItem = new NotificareInboxItem(item);
-                Notificare.shared().deleteInboxItem(inboxItem.getItemId(), new NotificareCallback<Boolean>() {
-                    @Override
-                    public void onSuccess(Boolean result) {
-                        Notificare.shared().getInboxManager().markItem(inboxItem);
-						if (callbackContext == null) {
-							return;
-						}
-                        callbackContext.success();
-                    }
-
-                    @Override
-                    public void onError(NotificareError notificareError) {
-						if (callbackContext == null) {
-							return;
-						}
-                        callbackContext.error("Could not delete inbox item");
-                    }
-                });
+                NotificareInboxItem inboxItem = new NotificareInboxItem(item);
+				Notificare.shared().getEventLogger().logOpenNotification(inboxItem.getNotification().getNotificationId());
+				Notificare.shared().getInboxManager().markItem(inboxItem);
+				if (callbackContext == null) {
+					return;
+				}
+				callbackContext.success();
             } catch (JSONException e) {
 				if (callbackContext == null) {
 					return;
