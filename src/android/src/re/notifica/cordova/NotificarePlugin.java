@@ -65,9 +65,9 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	private static final String SETTINGS_PREFERENCES = "re.notifica.preferences.Settings";
 	private static final String SETTINGS_KEY_LOCATION_PERMISSION_REQUESTED = "locationPermissionRequested";
 
-	public static final int MIN_SDK_VERSION = 10701;
-	public static final int PLUGIN_VERSION_CODE = 10701;
-	public static final String PLUGIN_VERSION_NAME = "1.7.1";
+	public static final int MIN_SDK_VERSION = 10702;
+	public static final int PLUGIN_VERSION_CODE = 10702;
+	public static final String PLUGIN_VERSION_NAME = "1.7.2";
     
 	public static final String START = "start";
 	public static final String SETHANDLENOTIFICATION = "setHandleNotification";
