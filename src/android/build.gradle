@@ -25,7 +25,7 @@ repositories {
 
 dependencies {
     compile project(':CordovaLib')
-    compile group: 're.notifica', name: 'notificare-push-lib-android', version:'1.7.1', ext: 'aar', transitive: true
+    compile group: 're.notifica', name: 'notificare-push-lib-android', version:'1.7.4', ext: 'aar', transitive: true
     compile group: 'org.altbeacon', name:'android-beacon-library', version:'2.7.1', ext: 'aar', transitive: true
 }
 

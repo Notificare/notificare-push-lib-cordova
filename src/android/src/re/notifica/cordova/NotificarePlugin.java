@@ -35,6 +35,7 @@ import org.json.JSONObject;
 
 import re.notifica.Notificare;
 import re.notifica.Notificare.OnNotificareReadyListener;
+import re.notifica.Notificare.OnNotificationReceivedListener;
 import re.notifica.Notificare.OnServiceErrorListener;
 import re.notifica.NotificareCallback;
 import re.notifica.NotificareError;
@@ -55,7 +56,7 @@ import android.content.SharedPreferences;
  * Cordova plugin for Notificare 
  * @author Joris Verbogt <joris@notifica.re>
  */
-public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorListener, OnNotificareReadyListener {
+public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorListener, OnNotificareReadyListener, OnNotificationReceivedListener {
 
 	
     protected static final String TAG = NotificarePlugin.class.getSimpleName();
@@ -65,12 +66,13 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	private static final String SETTINGS_PREFERENCES = "re.notifica.preferences.Settings";
 	private static final String SETTINGS_KEY_LOCATION_PERMISSION_REQUESTED = "locationPermissionRequested";
 
-	public static final int MIN_SDK_VERSION = 10702;
-	public static final int PLUGIN_VERSION_CODE = 10702;
-	public static final String PLUGIN_VERSION_NAME = "1.7.2";
+	public static final int MIN_SDK_VERSION = 10704;
+	public static final int PLUGIN_VERSION_CODE = 10704;
+	public static final String PLUGIN_VERSION_NAME = "1.7.4";
     
 	public static final String START = "start";
 	public static final String SETHANDLENOTIFICATION = "setHandleNotification";
+	public static final String SETHANDLEBADGE = "setHandleBadge";
     public static final String ENABLE = "enableNotifications";
     public static final String ENABLELOCATIONS = "enableLocationUpdates";
     public static final String DISABLE = "disableNotifications";
@@ -95,6 +97,8 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	public static final String MARKINBOXITEM = "markInboxItem";
 	public static final String DELETEINBOXITEM = "deleteInboxItem";
 	public static final String CLEARINBOX = "clearInbox";
+	public static final String SETAPPLICATIONICONBADGENUMBER = "setApplicationIconBadgeNumber";
+	public static final String GETAPPLICATIONICONBADGENUMBER = "getApplicationIconBadgeNumber";
 	public static final String LOGCUSTOMEVENT = "logCustomEvent";
 
 	public static final String CALLBACK_TYPE_READY = "ready";
@@ -181,35 +185,37 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	
 	@Override
 	public void onNotificareReady(NotificareApplicationInfo applicationInfo) {
-		Log.d(TAG, "onNotificareReady");
+		Log.i(TAG, "onNotificareReady");
 		sendReady(applicationInfo);
 		sendResultQueue();
 	}
 	
 	@Override
 	public void onPause(boolean multitasking) {
-		Log.d(TAG, "activity paused");
+		Log.i(TAG, "activity paused");
 		super.onPause(multitasking);
 		Notificare.shared().removeServiceErrorListener(this);
+		Notificare.shared().removeNotificationReceivedListener(this);
 		Notificare.shared().setForeground(false);
 		Notificare.shared().getEventLogger().logEndSession();	
 	}
 
 	@Override
 	public void onResume(boolean multitasking) {
-		Log.d(TAG, "activity resumed");
+		Log.i(TAG, "activity resumed");
 		super.onResume(multitasking);
 		Notificare.shared().addServiceErrorListener(this);
 		Notificare.shared().setForeground(true);
+		Notificare.shared().addNotificationReceivedListener(this);
 		Notificare.shared().getEventLogger().logStartSession();	
 	}
 
 	@Override
 	public void onDestroy() {
-		Log.d(TAG, "activity destroyed");
+		Log.i(TAG, "activity destroyed");
 		super.onDestroy();
 		Notificare.shared().removeServiceErrorListener(this);
-		Notificare.shared().removeNotificareReadyListener(this);
+		Notificare.shared().removeNotificationReceivedListener(this);
 		Notificare.shared().setForeground(false);
 		Notificare.shared().getEventLogger().logEndSession();	
 	}
@@ -229,12 +235,28 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	}
 
 	@Override
+	public void onNotificationReceived(NotificareNotification notification) {
+		Log.i(TAG, "notification received");
+		JSONObject result = null;
+		try {
+			result = notification.toJSONObject();
+			result.put("foreground", true);
+		} catch (JSONException e) {
+			Log.w(TAG, "JSON parse error");
+		}
+		sendNotification(result);
+	}
+
+	@Override
 	public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
 		if (START.equals(action)) {
 			start(callbackContext);
 			return true;
 		} else if (SETHANDLENOTIFICATION.equals(action)) {
 			setHandleNotification(args, callbackContext);
+			return true;
+		} else if (SETHANDLEBADGE.equals(action)) {
+			setHandleBadge(args, callbackContext);
 			return true;
 		} else if (ENABLE.equals(action)) {
 			enableNotifications(callbackContext);
@@ -308,6 +330,12 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 		} else if (CLEARINBOX.equals(action)) {
 			clearInbox(args, callbackContext);
 			return true;
+		} else if (SETAPPLICATIONICONBADGENUMBER.equals(action)) {
+			setApplicationIconBadgeNumber(args, callbackContext);
+			return true;
+		} else if (GETAPPLICATIONICONBADGENUMBER.equals(action)) {
+			getApplicationIconBadgeNumber(args, callbackContext);
+			return true;
 		} else if (LOGCUSTOMEVENT.equals(action)) {
 			logCustomEvent(args, callbackContext);
 			return true;
@@ -335,6 +363,15 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 	 */
 	protected void setHandleNotification(JSONArray args, CallbackContext callbackContext) {
 		Log.d(TAG, "SETHANDLENOTIFICATION called on Android, no effect");
+		callbackContext.success();
+	}
+
+	/**
+	 * Handle badge changes: a no-op on Android since there is no badge now
+	 * @param callbackContext
+	 */
+	protected void setHandleBadge(JSONArray args, CallbackContext callbackContext) {
+		Log.d(TAG, "SETHANDLEBADGE called on Android, no effect");
 		callbackContext.success();
 	}
 
@@ -1064,7 +1101,40 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
         }
     }
 
-    /**
+	/**
+	 * Set the application icon badge number, no-op in Android
+	 * @param args
+	 * @param callbackContext
+	 */
+	protected void setApplicationIconBadgeNumber(JSONArray args, final CallbackContext callbackContext) {
+		Log.d(TAG, "SETAPPLICATIONICONBADGENUMBER");
+		if (callbackContext == null) {
+			return;
+		}
+		callbackContext.success();
+	}
+
+	/**
+	 * Get the application icon badge number, returns current unread count
+	 * @param args
+	 * @param callbackContext
+	 */
+	protected void getApplicationIconBadgeNumber(JSONArray args, final CallbackContext callbackContext) {
+		Log.d(TAG, "GETAPPLICATIONICONBADGENUMBER");
+		if (Notificare.shared().getInboxManager() != null) {
+			if (callbackContext == null) {
+				return;
+			}
+			callbackContext.success(Notificare.shared().getInboxManager().getUnreadCount());
+		} else {
+			if (callbackContext == null) {
+				return;
+			}
+			callbackContext.error("No inbox manager");
+		}
+	}
+
+	/**
      * Log a custom event
      * @param args
      * @param callbackContext
@@ -1102,6 +1172,7 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 				if (intent.hasExtra(Notificare.INTENT_EXTRA_INBOX_ITEM_ID)) {
 					result.put("itemId", intent.getStringExtra(Notificare.INTENT_EXTRA_INBOX_ITEM_ID));
 				}
+				result.put("foreground", false);
 			} catch (JSONException e) {
 				Log.w(TAG, "JSON parse error");
 			}

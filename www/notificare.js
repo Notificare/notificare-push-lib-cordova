@@ -103,6 +103,10 @@ Notificare.prototype.setHandleNotification = function(handle, success, fail) {
 	exec(success, fail, 'Notificare', 'setHandleNotification', [handle]);
 };
 
+Notificare.prototype.setHandleBadge = function(handle, success, fail) {
+	exec(success, fail, 'Notificare', 'setHandleBadge', [handle]);
+};
+
 Notificare.prototype.start = function() {
 	exec(this.successCallback.bind(this), this.errorCallback.bind(this), 'Notificare', 'start', []);
 };
@@ -197,6 +201,14 @@ Notificare.prototype.markInboxItem = function(inboxItem, success, fail) {
 
 Notificare.prototype.clearInbox = function(success, fail) {
         exec(success, fail, 'Notificare', 'clearInbox', []);
+};
+
+Notificare.prototype.setApplicationIconBadgeNumber = function(success, fail) {
+	exec(success, fail, 'Notificare', 'setApplicationIconBadgeNumber', [badge]);
+};
+
+Notificare.prototype.getApplicationIconBadgeNumber = function(success, fail) {
+	exec(success, fail, 'Notificare', 'getApplicationIconBadgeNumber', []);
 };
 
 Notificare.prototype.logCustomEvent = function(name, data, success, fail) {
