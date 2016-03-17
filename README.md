@@ -195,11 +195,11 @@ onDeviceReady: function() {
 			// If you do want to log the notification as opened, you should call
 			// Notificare.logOpenNotification(notification);
 
+		} else if (notification.foreground {
+		    // Was received while we are running, perhaps update an inbox list
 		} else {
-
 			// open like normal
 			Notificare.openNotification(notification);
-
 		}
 	});
 	Notificare.start();
