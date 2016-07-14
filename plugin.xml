@@ -2,7 +2,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="cordova-plugin-notificare-push"
-        version="1.7.4">
+        version="1.8.0">
 
   <name>Notificare Plugin</name>
 
@@ -101,7 +101,7 @@
 
     <!-- Depend on latest version of NotificarePushLib -->
     <framework src="src/android/notificare-repo.gradle" custom="true" type="gradleReference" />
-    <framework src="re.notifica:notificare-push-lib-android:1.7.4" />
+    <framework src="re.notifica:notificare-push-lib-android:1.8.2" />
 
 
   </platform>
@@ -167,12 +167,14 @@
     <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/NotificareSRWebSocket.h" target-dir="Notificare/NotificarePushLib/Libraries/SocketRocket/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/NotificareSocketRocket-Prefix.pch" target-dir="Notificare/NotificarePushLib/Libraries/SocketRocket/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareAction.h" target-dir="Notificare/NotificarePushLib/Models/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareAsset.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareAttachment.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareBeacon.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareContent.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareDevice.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareDeviceInbox.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareNotification.h" target-dir="Notificare/NotificarePushLib/Models/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificarePass.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareProduct.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareSegment.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareUser.h" target-dir="Notificare/NotificarePushLib/Models/"/>
@@ -190,9 +192,11 @@
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/Image/NotificareImage.h" target-dir="Notificare/NotificarePushLib/Types/Image/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/Map/NotificareLocation.h" target-dir="Notificare/NotificarePushLib/Types/Map/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/Map/NotificareMap.h" target-dir="Notificare/NotificarePushLib/Types/Map/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/None/NotificareNone.h" target-dir="Notificare/NotificarePushLib/Types/None/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/Passbook/NotificarePassbook.h" target-dir="Notificare/NotificarePushLib/Types/Passbook/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/Rate/NotificareRate.h" target-dir="Notificare/NotificarePushLib/Types/Rate/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/URL/NotificareURL.h" target-dir="Notificare/NotificarePushLib/Types/URL/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/URLScheme/NotificareURLScheme.h" target-dir="Notificare/NotificarePushLib/Types/URLScheme/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/UserPreferences/NotificareBeaconsViewController.h" target-dir="Notificare/NotificarePushLib/Types/UserPreferences/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/UserPreferences/NotificareDeviceViewController.h" target-dir="Notificare/NotificarePushLib/Types/UserPreferences/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/UserPreferences/NotificareInboxViewController.h" target-dir="Notificare/NotificarePushLib/Types/UserPreferences/"/>

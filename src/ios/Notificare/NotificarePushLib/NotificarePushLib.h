@@ -24,6 +24,7 @@
 #import "NotificareProduct.h"
 #import "NotificareDevice.h"
 #import "NotificareDeviceInbox.h"
+#import "NotificarePass.h"
 
 
 /**
@@ -43,6 +44,7 @@ _Pragma("clang diagnostic pop") \
  * Blocks definitions
  * Current blocks used by this library's methods
  */
+typedef void (^SuccessPassBlock)(NotificarePass * pass);
 typedef void (^SuccessDeviceInboxBlock)(NotificareDeviceInbox * inbox);
 typedef void (^SuccessNotificationBlock)(NotificareNotification * notification);
 typedef void (^SuccessProductBlock)(NotificareProduct * product);
@@ -1241,7 +1243,7 @@ typedef enum  {
  *  @discussion
  *  Use this method to allow the user to request a new password for his/her account. This will trigger an email message that will allow the user to create
  *  a new password as described in resetPassword:withToken: methods explained above.
- *  @param token A NSString representing the email address for the account to be recovered
+ *  @param email A NSString representing the email address for the account to be recovered
  */
 - (void)sendPassword:(NSString *)email completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
 /*!
@@ -1425,6 +1427,50 @@ typedef enum  {
  *  @return A NSArray containing PKPasses objects
  */
 -(NSArray *)myPasses;
+/*!
+ *  @abstract Wallet Pass Object
+ *
+ *  @discussion
+ *  Retrieves a Pass object
+ *  @param serial A NSString that indentifies the pass a.k.a serial
+ *  @return A NotificarePass object
+ */
+- (void)fetchPass:(NSString *)serial completionHandler:(SuccessPassBlock)result errorHandler:(ErrorBlock)error;
+
+/*!
+ *  @abstract Asset Group list
+ *
+ *  @discussion
+ *  Retrieves a list of assets from a specific group
+ *  @param group A NSString that indentifies the group name
+ *  @return A NSArray containing NotificareAsset objects
+ */
+- (void)fetchAssets:(NSString *)group completionHandler:(SuccessArrayBlock)result errorHandler:(ErrorBlock)error;
+
+/*!
+ *  @abstract Fetch Do Not Disturb Times
+ *
+ *  @discussion
+ *  Retrieves an object with the do not disturb times for a device
+ *  @return A NSDictionary containing the do not disturb times
+ */
+- (void)fetchDoNotDisturb:(SuccessBlock)result errorHandler:(ErrorBlock)error;
+
+/*!
+ *  @abstract Update Do Not Disturb Times
+ *
+ *  @discussion
+ *  Updates the device do not disturb times
+ */
+- (void)updateDoNotDisturb:(NSDate *)start endTime:(NSDate *)end completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)error;
+
+/*!
+ *  @abstract Clear Do Not Disturb Times
+ *
+ *  @discussion
+ *  Clears the device do not disturb times
+ */
+- (void)clearDoNotDisturb:(SuccessBlock)result errorHandler:(ErrorBlock)error;
 
 @end
 

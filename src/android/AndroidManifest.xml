@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="re.notifica.cordova"
-    android:versionCode="10704"
-    android:versionName="1.7.4" >
+    android:versionCode="10800"
+    android:versionName="1.8.0" >
 
     <uses-sdk
         android:minSdkVersion="14"
