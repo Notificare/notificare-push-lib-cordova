@@ -4,7 +4,7 @@ buildscript {
     }
 
     dependencies {
-	    classpath 'com.android.tools.build:gradle:2.1.2'
+	    classpath 'com.android.tools.build:gradle:2.1.3'
     }
 }
 apply plugin: 'com.android.library'
@@ -25,13 +25,13 @@ repositories {
 
 dependencies {
     compile project(':CordovaLib')
-    compile group: 're.notifica', name: 'notificare-push-lib-android', version:'1.8.2', ext: 'aar', transitive: true
+    compile group: 're.notifica', name: 'notificare-push-lib-android', version:'1.8.5', ext: 'aar', transitive: true
     compile group: 'org.altbeacon', name:'android-beacon-library', version:'2.8.1', ext: 'aar', transitive: true
 }
 
 android {
     compileSdkVersion 24
-    buildToolsVersion "24.0.0"
+    buildToolsVersion "24.0.1"
 
     lintOptions {
         abortOnError false
