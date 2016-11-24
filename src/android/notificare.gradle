@@ -1,0 +1,26 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+	    classpath 'com.android.tools.build:gradle:2.2.2'
+	    classpath 'com.google.gms:google-services:3.0.0'
+    }
+}
+
+repositories {
+    jcenter()
+    maven {
+        url "https://github.com/Notificare/notificare-mvn-repo/raw/master/releases"
+    }
+}
+
+dependencies {
+    compile 're.notifica:notificare-push-lib-android:1.9.1'
+    compile 'com.google.firebase:firebase-core:9.8.0'
+    compile 'com.google.firebase:firebase-messaging:9.8.0'
+    compile 'org.altbeacon:android-beacon-library:2.9.1'
+}
+
+apply plugin: com.google.gms.googleservices.GoogleServicesPlugin

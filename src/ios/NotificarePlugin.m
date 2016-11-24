@@ -17,6 +17,11 @@
 #import "NotificarePlugin.h"
 #import "NotificareAppDelegateSurrogate.h"
 #import "NotificarePushLib.h"
+#import "NotificareInboxManager.h"
+
+@interface NotificareInboxManager (/* Private Methods */)
+- (void)handleNotification:(NSString *)notificationID isOpened:(BOOL)opened;
+@end
 
 @interface NotificarePlugin() {
     BOOL _handleNotification;
@@ -30,7 +35,8 @@
 
 @implementation NotificarePlugin
 
-#define kPluginVersion @"1.8.0"
+#define kPluginVersion @"1.9.0"
+#define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v) ([[[UIDevice currentDevice] systemVersion] compare:(v) options:NSNumericSearch] != NSOrderedAscending)
 
 - (void)pluginInitialize {
 	NSLog(@"Initializing Notificare Plugin version %@", kPluginVersion);
@@ -429,29 +435,61 @@
 
 - (void)logInfluencedOpenNotification:(NSString *)notificationID {
     NSLog(@"NotificarePlugin: Log Influenced Open");
-    [self logNotificationEvent:@"re.notifica.event.notification.Influenced" forNotification:notificationID];
-}
-
-- (void)logReceivedNotification:(NSString *)notificationID {
-    NSLog(@"NotificarePlugin: Log Notification Received");
-    [self logNotificationEvent:@"re.notifica.event.notification.Receive" forNotification:notificationID];
-}
-
-- (void)logNotificationEvent:(NSString *)type forNotification:(NSString *)notificationID {
     NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
     //what to save
     NSMutableDictionary* log = [NSMutableDictionary dictionary];
     [log setValue:[settings objectForKey:@"notificareSessionID"] forKey:@"sessionID"];
-    [log setValue:type forKey:@"type"];
+    [log setValue:@"re.notifica.event.notification.Influenced" forKey:@"type"];
     [log setValue:notificationID forKey:@"notification"];
-    [log setValue:[settings objectForKey:@"userID"] forKey:@"userID"];
-    [log setValue:[settings objectForKey:@"deviceID"] forKey:@"deviceID"];
+    [log setValue:[settings objectForKey:@"notificareUserID"] forKey:@"userID"];
+    [log setValue:[settings objectForKey:@"notificareDeviceToken"] forKey:@"deviceID"];
 
     //make the call
-    [[[NotificarePushLib shared] notificareEngine] eventLog:log completionHandler:^(NSDictionary *result) {
-        // success!
-    } errorHandler:^(NSError *error) {
-        NSLog(@"NotificarePlugin: Event Log Failed: %@", error);
+    [[NotificarePushLib shared] doPushHostOperation:@"POST" path:@"event" URLParams:nil bodyJSON:log successHandler:^(NSDictionary *info) {
+        NSLog(@"NotificarePlugin: Received Notification Log for %@", notificationID);
+    } errorHandler:^(NotificareNetworkOperation *operation, NSError *error) {
+       switch ([error code]) {
+           case kNotificareErrorCodeGatewayTimeout:
+           case kNotificareErrorCodeBadGateway:
+           case kNotificareErrorCodeServiceUnavailable:
+               [self logInfluencedOpenNotification:notificationID];
+               break;
+           default:
+               if([error code] < 0){
+                   [self logInfluencedOpenNotification:notificationID];
+               }
+               break;
+       }
+    }];
+}
+
+- (void)logReceivedNotification:(NSString *)notificationID {
+    NSLog(@"NotificarePlugin: Log Notification Received");
+    NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+    //what to save
+    NSMutableDictionary* log = [NSMutableDictionary dictionary];
+    [log setValue:[settings objectForKey:@"notificareSessionID"] forKey:@"sessionID"];
+    [log setValue:@"re.notifica.event.notification.Receive" forKey:@"type"];
+    [log setValue:notificationID forKey:@"notification"];
+    [log setValue:[settings objectForKey:@"notificareUserID"] forKey:@"userID"];
+    [log setValue:[settings objectForKey:@"notificareDeviceToken"] forKey:@"deviceID"];
+
+    //make the call
+    [[NotificarePushLib shared] doPushHostOperation:@"POST" path:@"event" URLParams:nil bodyJSON:log successHandler:^(NSDictionary *info) {
+        NSLog(@"NotificarePlugin: Received Notification Log for %@", notificationID);
+    } errorHandler:^(NotificareNetworkOperation *operation, NSError *error) {
+       switch ([error code]) {
+           case kNotificareErrorCodeGatewayTimeout:
+           case kNotificareErrorCodeBadGateway:
+           case kNotificareErrorCodeServiceUnavailable:
+               [self logReceivedNotification:notificationID];
+               break;
+           default:
+               if([error code] < 0){
+                   [self logReceivedNotification:notificationID];
+               }
+               break;
+       }
     }];
 }
 
@@ -544,6 +582,46 @@
     [self sendResultQueue];
 }
 
+-(void)notificarePushLib:(NotificarePushLib *)library willHandleNotification:(UNNotification *)notification {
+
+    //Check if there's an id
+    if([[[[[notification request] content] userInfo] allKeys] containsObject:@"id"]){
+
+        //Save only non-nil aps.alert notifications
+        if([[[[notification request] content] userInfo] objectForKey:@"aps"] && [[[[[notification request] content] userInfo] objectForKey:@"aps"] objectForKey:@"alert"]){
+
+
+            //Check if inbox is activated
+            if ([[[[[[NotificarePushLib shared] applicationInfo] objectForKey:@"services"] objectForKey:@"inboxConfig"] objectForKey:@"useInbox"] boolValue]) {
+
+                // No use calling the shared inbox manager if inbox isn't enabled
+                if ([[NotificareInboxManager sharedManager] enabled]) {
+                    [[NotificareInboxManager sharedManager] handleNotification:[[[[notification request] content] userInfo] objectForKey:@"id"] isOpened:NO];
+                }
+
+            }
+
+
+            [[NotificarePushLib shared] getNotification:[[[[notification request] content] userInfo] objectForKey:@"id"] completionHandler:^(NSDictionary *info) {
+                // Info is the full notification object in key "notification"
+                NSMutableDictionary *notificationDictionary = [NSMutableDictionary dictionaryWithDictionary:[[[[notification request] content] userInfo] objectForKey:@"notification"]];
+                [notificationDictionary setObject:[NSNumber numberWithBool:NO] forKey:@"foreground"];
+                [self sendSuccessResultWithType:@"notification" andDictionary:notificationDictionary];
+            } errorHandler:^(NSError *error) {
+                NSLog(@"NotificarePlugin: error fetching notification: %@", error);
+            }];
+        }
+
+        [self refreshBadge];
+
+    } else {
+        //Could not find any id so let's just log and fail
+        NSLog(@"NotificarePlugin: notification object is not valid");
+    }
+
+
+}
+
 - (void)notificarePushLib:(NotificarePushLib *)library didReceiveActivationToken:(NSString *)token {
     [self sendSuccessResultWithType:@"validateUserToken" andString:token];
 }
@@ -562,80 +640,67 @@
     [self sendErrorResultWithType:@"registration" andMessage:[error localizedDescription]];
 }
 
-- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
-    if (_handleNotification) {
-        if ([userInfo objectForKey:@"id"]) {
-            if ([userInfo objectForKey:@"aps"] && [[userInfo objectForKey:@"aps"] objectForKey:@"alert"]) {
-                // Check if notification has to go to JS or not
-                NSLog(@"NotificarePlugin: received notification, fetching and sending to JS");
-                [self logReceivedNotification:[userInfo objectForKey:@"id"]];
-                [[NotificarePushLib shared] getNotification:[userInfo objectForKey:@"id"] completionHandler:^(NSDictionary *info) {
-                    // Info is the full notification object in key "notification"
-                    NSDictionary *notification = [info objectForKey:@"notification"];
-                    [self sendSuccessResultWithType:@"notification" andDictionary:notification];
-                    [self refreshBadge];
-                } errorHandler:^(NSError *error) {
-                    NSLog(@"NotificarePlugin: error fetching notification: %@", error);
-                }];
-            } else {
-                // System push, reload categories
-                [[NotificarePushLib shared] registerUserNotifications];
-            }
-        } else {
-            //Could not find any id so let's just log and fail
-            NSLog(@"NotificarePlugin: notification object is not valid");
-        }
-    } else {
-        // Standard SDK behaviour
-        [[NotificarePushLib shared] handleNotification:userInfo forApplication:application completionHandler:^(NSDictionary *info) {
-            // Success
-        } errorHandler:^(NSError *error) {
-            // Fail
-            NSLog(@"NotificarePlugin: failed to handle notification: %@", error);
-        }];
-    }
-}
-
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
     if (_handleNotification) {
         if ([userInfo objectForKey:@"id"]) {
             if ([userInfo objectForKey:@"aps"] && [[userInfo objectForKey:@"aps"] objectForKey:@"alert"]) {
-                // Check if notification has to go to JS or not
-                    if ([application applicationState] == UIApplicationStateBackground) {
-                        NSLog(@"NotificarePlugin: received notification in background, logging receive");
-                        [self logReceivedNotification:[userInfo objectForKey:@"id"]];
-                        // Put in a receive queue so the receive event doesn't get logged twice
-                        [_receiveQueue addObject:[userInfo objectForKey:@"id"]];
-                        [self refreshBadge];
-                        completionHandler(UIBackgroundFetchResultNewData);
-                    } else {
-                        NSLog(@"NotificarePlugin: received notification, fetching and sending to JS");
-                        if ([_receiveQueue containsObject:[userInfo objectForKey:@"id"]]) {
-                            [_receiveQueue removeObject:[userInfo objectForKey:@"id"]];
-                        } else {
-                            // only log received event the first time
-                            [self logReceivedNotification:[userInfo objectForKey:@"id"]];
-                        }
-                        [[NotificarePushLib shared] getNotification:[userInfo objectForKey:@"id"] completionHandler:^(NSDictionary *info) {
-                            // Info is the full notification object in key "notification"
-                            NSMutableDictionary *notification = [NSMutableDictionary dictionaryWithDictionary:[info objectForKey:@"notification"]];
-                            if ([application applicationState] == UIApplicationStateActive) {
-                                [notification setObject:[NSNumber numberWithBool:YES] forKey:@"foreground"];
-                            } else {
-                                [notification setObject:[NSNumber numberWithBool:NO] forKey:@"foreground"];
-                            }
-                            [self sendSuccessResultWithType:@"notification" andDictionary:notification];
-                            [self refreshBadge];
-                            completionHandler(UIBackgroundFetchResultNewData);
-                        } errorHandler:^(NSError *error) {
-                            NSLog(@"NotificarePlugin: error fetching notification: %@", error);
-                            completionHandler(UIBackgroundFetchResultFailed);
-                        }];
+
+                [self refreshBadge];
+
+                //Check if inbox is activated
+                if ([[[[[[NotificarePushLib shared] applicationInfo] objectForKey:@"services"] objectForKey:@"inboxConfig"] objectForKey:@"useInbox"] boolValue]) {
+
+                    // No use calling the shared inbox manager if inbox isn't enabled
+                    if ([[NotificareInboxManager sharedManager] enabled]) {
+                        [[NotificareInboxManager sharedManager] handleNotification:[userInfo objectForKey:@"id"] isOpened:NO];
                     }
+
+                }
+
+                // Check if notification has to go to JS or not
+                if ([application applicationState] == UIApplicationStateBackground) {
+                    NSLog(@"NotificarePlugin: received notification in background, logging receive");
+                    [self logReceivedNotification:[userInfo objectForKey:@"id"]];
+                    // Put in a receive queue so the receive event doesn't get logged twice
+                    [_receiveQueue addObject:[userInfo objectForKey:@"id"]];
+                    completionHandler(UIBackgroundFetchResultNewData);
+                } else {
+                    NSLog(@"NotificarePlugin: received notification, fetching and sending to JS");
+                    if ([_receiveQueue containsObject:[userInfo objectForKey:@"id"]]) {
+                        [_receiveQueue removeObject:[userInfo objectForKey:@"id"]];
+                    } else {
+                        // only log received event the first time
+                        [self logReceivedNotification:[userInfo objectForKey:@"id"]];
+                    }
+                    [[NotificarePushLib shared] getNotification:[userInfo objectForKey:@"id"] completionHandler:^(NSDictionary *info) {
+                        // Info is the full notification object in key "notification"
+                        NSMutableDictionary *notification = [NSMutableDictionary dictionaryWithDictionary:[info objectForKey:@"notification"]];
+                        if ([application applicationState] == UIApplicationStateActive) {
+                            // Received while app was running
+                            [notification setObject:[NSNumber numberWithBool:YES] forKey:@"foreground"];
+                            [self sendSuccessResultWithType:@"notification" andDictionary:notification];
+                            completionHandler(UIBackgroundFetchResultNewData);
+                        } else {
+                            // Clicked in notification center
+                            if (!SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"10")) {
+                                [notification setObject:[NSNumber numberWithBool:NO] forKey:@"foreground"];
+                                [self sendSuccessResultWithType:@"notification" andDictionary:notification];
+                            }
+                            completionHandler(UIBackgroundFetchResultNewData);
+                        }
+                    } errorHandler:^(NSError *error) {
+                        NSLog(@"NotificarePlugin: error fetching notification: %@", error);
+                        completionHandler(UIBackgroundFetchResultFailed);
+                    }];
+                }
             } else {
-                // System push, reload categories
-                [[NotificarePushLib shared] registerUserNotifications];
-                completionHandler(UIBackgroundFetchResultNoData);
+                // System push, use normal handling
+                [[NotificarePushLib shared] handleNotification:userInfo forApplication:application completionHandler:^(NSDictionary *info) {
+                    completionHandler(UIBackgroundFetchResultNewData);
+                } errorHandler:^(NSError *error) {
+                    NSLog(@"NotificarePlugin: failed to handle notification: %@", error);
+                    completionHandler(UIBackgroundFetchResultNoData);
+                }];
             }
         } else {
             //Could not find any id so let's just log and fail
