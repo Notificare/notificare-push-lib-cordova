@@ -41,7 +41,6 @@
       <!-- Use this to have a standalone notification activity --> 
       <activity 
         android:name="re.notifica.ui.NotificationActivity"
-        android:taskAffinity=""
         android:excludeFromRecents="true" />
       <!-- Use this to start your main activity in the back stack, replace activity name as appropriate -->
       <!--  

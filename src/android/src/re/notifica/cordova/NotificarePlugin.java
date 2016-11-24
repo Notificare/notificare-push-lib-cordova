@@ -1010,6 +1010,9 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
         if (Notificare.shared().getInboxManager() != null) {
             try {
                 JSONObject item = args.getJSONObject(0);
+                item.put("_id", item.getString("itemId"));
+                item.put("opened", item.getBoolean("status"));
+                item.put("time", item.getString("timestamp"));
                 NotificareInboxItem inboxItem = new NotificareInboxItem(item);
 				Notificare.shared().getEventLogger().logOpenNotification(inboxItem.getNotification().getNotificationId());
 				Notificare.shared().getInboxManager().markItem(inboxItem);
@@ -1040,6 +1043,9 @@ public class NotificarePlugin extends CordovaPlugin implements OnServiceErrorLis
 		if (Notificare.shared().getInboxManager() != null) {
 			try {
 				JSONObject item = args.getJSONObject(0);
+                item.put("_id", item.getString("itemId"));
+                item.put("opened", item.getBoolean("status"));
+                item.put("time", item.getString("timestamp"));
 				final NotificareInboxItem inboxItem = new NotificareInboxItem(item);
 				Notificare.shared().deleteInboxItem(inboxItem.getItemId(), new NotificareCallback<Boolean>() {
 					@Override
