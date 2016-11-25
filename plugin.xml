@@ -94,6 +94,7 @@
 
     <resource-file src="src/android/res/xml/preferences.xml" target="res/xml/preferences.xml" />
     <resource-file src="src/android/res/values/strings_preferences.xml" target="res/values/strings_preferences.xml" />
+    <resource-file src="src/android/assets/notificareconfig.properties" target="assets/notificareconfig.properties" />
 
     <!-- Depend on latest version of NotificarePushLib -->
     <framework src="src/android/notificare.gradle" custom="true" type="gradleReference" />
@@ -215,6 +216,8 @@
 
     <resource-file src="src/ios/DefaultTheme.bundle"/>
     <resource-file src="src/ios/NotificareManagedModels.bundle"/>
+    <resource-file src="src/ios/Notificare.plist"/>
+    <resource-file src="src/ios/NotificareTags.plist"/>
 
     <source-file src="src/ios/libNotificarePushLib.a" framework="true"/>
 
