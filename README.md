@@ -11,10 +11,10 @@ To install the plugin to your Cordova project use the Cordova CLI Tool:
 ## Requirements
 
 * `Android`
-	* Minimal required Android SDK version is 10 (Gingerbread / 2.3.x), but latest versions of Cordova require 14 (Ice Cream Sandwich / 4.0.x)
-	* Setup GCM in Notificare (and optionally Google Maps) as described in [Create Application](https://docs.notifica.re/sdk/setup/application) and [Platform Configuration](http://docs.notifica.re/sdk/setup/platform)
+	* Minimal required Android SDK version is 10 (Gingerbread / 2.3.x), but latest versions of Cordova require 16 (JellyBean / 4.1.x)
+	* Setup FCM in Notificare (and optionally Google Maps) as described in [Create Application](https://docs.notifica.re/sdk/setup/application) and [Platform Configuration](http://docs.notifica.re/sdk/setup/platform)
 * `iOS`
-	* iOS 6+. 
+	* iOS 8+. 
 	* Manage certificates and API keys as explained in [Create Application](https://docs.notifica.re/sdk/setup/application) and [Platform Configuration](http://docs.notifica.re/sdk/setup/platform)
 
 ## Setup notes for Android
@@ -40,8 +40,8 @@ Edit the Notificare.plist and enter your keys from the Notificare Dashboard
 
 ### Android
 
-Edit assets/notificareconfig.properties and enter your keys from the Notificare Dashboard plus the SenderId from your Google API Console
-
+Edit assets/notificareconfig.properties and enter your keys from the Notificare Dashboard
+Download your google-services.json from your Firebase Console if not done yet 
 
 Be aware that when you upgrade platforms or the plugin, you may need to change the contents of these files again. Always check after updating.
 
