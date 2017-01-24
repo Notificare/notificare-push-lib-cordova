@@ -35,7 +35,7 @@
 
 @implementation NotificarePlugin
 
-#define kPluginVersion @"1.9.0"
+#define kPluginVersion @"1.9.2"
 #define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v) ([[[UIDevice currentDevice] systemVersion] compare:(v) options:NSNumericSearch] != NSOrderedAscending)
 
 - (void)pluginInitialize {
@@ -63,8 +63,9 @@
             [self logInfluencedOpenNotification:[[options objectForKey:@"UIApplicationLaunchOptionsRemoteNotificationKey"] objectForKey:@"id"]];
             [[NotificarePushLib shared] getNotification:[[options objectForKey:@"UIApplicationLaunchOptionsRemoteNotificationKey"] objectForKey:@"id"] completionHandler:^(NSDictionary *info) {
                 // Info is the full notification object in key "notification"
-                NSDictionary *notification = [info objectForKey:@"notification"];
-                [self sendSuccessResultWithType:@"notification" andDictionary:notification];
+                NSMutableDictionary *notificationDictionary = [NSMutableDictionary dictionaryWithDictionary:[info objectForKey:@"notification"]];
+                [notificationDictionary setObject:[NSNumber numberWithBool:NO] forKey:@"foreground"];
+                [self sendSuccessResultWithType:@"notification" andDictionary:notificationDictionary];
             } errorHandler:^(NSError *error) {
                 NSLog(@"NotificarePlugin: error fetching notification: %@", error);
             }];
@@ -78,8 +79,9 @@
                 // Send it to JS
                 [[NotificarePushLib shared] getNotification:[[options objectForKey:@"UIApplicationLaunchOptionsRemoteNotificationKey"] objectForKey:@"id"] completionHandler:^(NSDictionary *info) {
                     // Info is the full notification object in key "notification"
-                    NSDictionary *notification = [info objectForKey:@"notification"];
-                    [self sendSuccessResultWithType:@"notification" andDictionary:notification];
+                    NSMutableDictionary *notificationDictionary = [NSMutableDictionary dictionaryWithDictionary:[info objectForKey:@"notification"]];
+                    [notificationDictionary setObject:[NSNumber numberWithBool:NO] forKey:@"foreground"];
+                    [self sendSuccessResultWithType:@"notification" andDictionary:notificationDictionary];
                 } errorHandler:^(NSError *error) {
                     NSLog(@"NotificarePlugin: error fetching notification: %@", error);
                 }];
@@ -604,7 +606,7 @@
 
             [[NotificarePushLib shared] getNotification:[[[[notification request] content] userInfo] objectForKey:@"id"] completionHandler:^(NSDictionary *info) {
                 // Info is the full notification object in key "notification"
-                NSMutableDictionary *notificationDictionary = [NSMutableDictionary dictionaryWithDictionary:[[[[notification request] content] userInfo] objectForKey:@"notification"]];
+                NSMutableDictionary *notificationDictionary = [NSMutableDictionary dictionaryWithDictionary:[info objectForKey:@"notification"]];
                 [notificationDictionary setObject:[NSNumber numberWithBool:NO] forKey:@"foreground"];
                 [self sendSuccessResultWithType:@"notification" andDictionary:notificationDictionary];
             } errorHandler:^(NSError *error) {

@@ -25,13 +25,13 @@ repositories {
 
 dependencies {
     compile project(':CordovaLib')
-    compile group: 're.notifica', name: 'notificare-push-lib-android', version:'1.9.1', ext: 'aar', transitive: true
+    compile group: 're.notifica', name: 'notificare-push-lib-android', version:'1.9.2', ext: 'aar', transitive: true
     compile group: 'org.altbeacon', name:'android-beacon-library', version:'2.9.1', ext: 'aar', transitive: true
 }
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.0"
+    buildToolsVersion "25.0.2"
 
     lintOptions {
         abortOnError false
