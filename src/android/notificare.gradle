@@ -17,9 +17,9 @@ repositories {
 }
 
 dependencies {
-    compile 're.notifica:notificare-push-lib-android:1.9.2'
-    compile 'com.google.firebase:firebase-messaging:10.0.1'
-    compile 'org.altbeacon:android-beacon-library:2.9.1'
+    compile 're.notifica:notificare-push-lib-android:1.9.3'
+    compile 'com.google.firebase:firebase-messaging:10.2.0'
+    compile 'org.altbeacon:android-beacon-library:2.9.2'
 }
 
 apply plugin: com.google.gms.googleservices.GoogleServicesPlugin
