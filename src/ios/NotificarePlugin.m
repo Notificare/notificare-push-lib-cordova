@@ -35,7 +35,7 @@
 
 @implementation NotificarePlugin
 
-#define kPluginVersion @"1.9.3"
+#define kPluginVersion @"1.9.4"
 #define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v) ([[[UIDevice currentDevice] systemVersion] compare:(v) options:NSNumericSearch] != NSOrderedAscending)
 
 - (void)pluginInitialize {

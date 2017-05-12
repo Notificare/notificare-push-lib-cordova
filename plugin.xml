@@ -2,7 +2,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="cordova-plugin-notificare-push"
-        version="1.9.3">
+        version="1.9.4">
 
   <name>Notificare Plugin</name>
 
@@ -202,6 +202,7 @@
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/None/NotificareNone.h" target-dir="Notificare/NotificarePushLib/Types/None/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/Passbook/NotificarePassbook.h" target-dir="Notificare/NotificarePushLib/Types/Passbook/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/Rate/NotificareRate.h" target-dir="Notificare/NotificarePushLib/Types/Rate/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Store/NotificareStore.h" target-dir="Notificare/NotificarePushLib/Types/Store/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/URL/NotificareURL.h" target-dir="Notificare/NotificarePushLib/Types/URL/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/URLScheme/NotificareURLScheme.h" target-dir="Notificare/NotificarePushLib/Types/URLScheme/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/UserPreferences/NotificareBeaconsViewController.h" target-dir="Notificare/NotificarePushLib/Types/UserPreferences/"/>
@@ -245,6 +246,6 @@
     <framework src="StoreKit.framework"/>
     <framework src="SafariServices.framework"/>
 
-    <!--<framework src="notificare-push-lib" type="podspec" spec="~> 1.9.6" />-->
+    <!--<framework src="notificare-push-lib" type="podspec" spec="~> 1.9.9" />-->
   </platform>
 </plugin>
