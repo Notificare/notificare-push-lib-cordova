@@ -8,26 +8,30 @@
 
 #import <Foundation/Foundation.h>
 #import <MapKit/MapKit.h>
+#import "NotificareAction.h"
+#import "NotificareContent.h"
+#import "NotificareAttachment.h"
 
 @interface NotificareNotification : NSObject <NSCoding>
 
 
-@property (strong, nonatomic) NSString * notificationID;
-@property (strong, nonatomic) NSDictionary * application;
-@property (strong, nonatomic) NSString * notificationType;
-@property (strong, nonatomic) NSString * notificationTime;
-@property (strong, nonatomic) NSString * notificationMessage;
-@property (strong, nonatomic) NSString * notificationLatitude;
-@property (strong, nonatomic) NSString * notificationLongitude;
-@property (strong, nonatomic) NSString * notificationDistance;
-@property (strong, nonatomic) NSArray * notificationContent;
-@property (strong, nonatomic) NSArray * notificationActions;
-@property (strong, nonatomic) NSArray * notificationAttachments;
-@property (strong, nonatomic) NSArray * notificationTags;
-@property (strong, nonatomic) NSArray * notificationSegments;
-@property (strong, nonatomic) NSDictionary * notificationExtra;
-@property (strong, nonatomic) NSDictionary * notificationInfo;
-@property (strong, nonatomic) NSNumber * displayMessage;
+@property (strong, nonatomic, nullable) NSString * notificationID;
+@property (strong, nonatomic, nonnull) NSDictionary * application;
+@property (strong, nonatomic, nonnull) NSString * notificationType;
+@property (strong, nonatomic, nonnull) NSString * notificationTime;
+@property (strong, nonatomic, nonnull) NSString * notificationMessage;
+@property (strong, nonatomic, nullable) NSString * notificationLatitude;
+@property (strong, nonatomic, nullable) NSString * notificationLongitude;
+@property (strong, nonatomic, nullable) NSString * notificationDistance;
+@property (strong, nonatomic, nullable) NSArray * notificationContent;
+@property (strong, nonatomic, nullable) NSArray * notificationActions;
+@property (strong, nonatomic, nullable) NSArray * notificationAttachments;
+@property (strong, nonatomic, nullable) NSArray * notificationTags;
+@property (strong, nonatomic, nullable) NSArray * notificationSegments;
+@property (strong, nonatomic, nullable) NSDictionary * notificationExtra;
+@property (strong, nonatomic, nullable) NSDictionary * notificationInfo;
+@property (strong, nonatomic, nonnull) NSNumber * displayMessage;
 
+- (void)setValuesWithNotificationJSON:(NSDictionary * _Nonnull)notificationJSON;
 
 @end

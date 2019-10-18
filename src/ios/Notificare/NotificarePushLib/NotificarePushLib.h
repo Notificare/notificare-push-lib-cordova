@@ -8,14 +8,17 @@
 //
 //
 
-#import "NotificareEngine.h"
-#import "NSData+Hex.h"
 #import "Notificare.h"
+#import "NSData+Hex.h"
 #import "NotificareActions.h"
 #import "NotificareSRWebSocket.h"
 #import "NotificareNotification.h"
 #import <CoreLocation/CoreLocation.h>
 #import <StoreKit/StoreKit.h>
+#import <UserNotifications/UserNotifications.h>
+#import <UserNotificationsUI/UserNotificationsUI.h>
+#import <MobileCoreServices/MobileCoreServices.h>
+#import <os/log.h>
 #import "NotificareNXOAuth2.h"
 #import "NotificareUser.h"
 #import "NotificareUserPreference.h"
@@ -23,7 +26,15 @@
 #import "NotificareBeacon.h"
 #import "NotificareProduct.h"
 #import "NotificareDevice.h"
-
+#import "NotificareDeviceInbox.h"
+#import "NotificarePass.h"
+#import "NotificationType.h"
+#import "NotificareNotification.h"
+#import "NotificareAttachment.h"
+#import "NotificareContent.h"
+#import "NotificareAction.h"
+#import "NotificareAsset.h"
+#import "NotificareNetworkHost.h"
 
 /**
  * We will surpress warnings with this macro in order to be able to execute methods triggered by an action
@@ -37,15 +48,19 @@ Selector; \
 _Pragma("clang diagnostic pop") \
 } while (0)
 
-
+NS_ASSUME_NONNULL_BEGIN
 /**
  * Blocks definitions
  * Current blocks used by this library's methods
  */
+typedef void (^SuccessPassBlock)(NotificarePass * pass);
+typedef void (^SuccessDeviceInboxBlock)(NotificareDeviceInbox * inbox);
+typedef void (^SuccessNotificationBlock)(NotificareNotification * notification);
 typedef void (^SuccessProductBlock)(NotificareProduct * product);
 typedef void (^SuccessArrayBlock)(NSArray * info);
 typedef void (^SuccessBlock)(NSDictionary * info);
 typedef void (^ErrorBlock)(NSError * error);
+typedef void (^OperationErrorBlock)(NotificareNetworkOperation *operation, NSError * error);
 
 /*!
  * @typedef kNotificareErrorCode
@@ -105,6 +120,19 @@ typedef enum  {
  * @param reason A NSError object
  */
 - (void)notificarePushLib:(NotificarePushLib *)library didCloseWebsocketConnection:(NSString *)reason;
+
+/*!
+ * @brief Optional. This delegate method will be triggered when a user clicks a notification from the lock screen or notification center.
+ * @param notification A UNNotification object holding the APNS payload
+ */
+- (void)notificarePushLib:(NotificarePushLib *)library willHandleNotification:(UNNotification *)notification;
+
+/*!
+ * @brief Optional. This delegate method will be triggered when a system (silent) remote notification is received.
+ * @param info A NSDictionary containing the notification received
+ */
+- (void)notificarePushLib:(NotificarePushLib *)library didReceiveSystemPush:(NSDictionary *)info;
+
 /*!
  * @brief Optional. This delegate method should return a boolean that represents if you wish for the library to handle the notification.
  * @param info A NSDictionary representing the notification
@@ -137,6 +165,13 @@ typedef enum  {
  */
 - (void)notificarePushLib:(NotificarePushLib *)library didFailToOpenNotification:(NotificareNotification *)notification;
 /*!
+ * @brief Optional. This delegate method will be triggered when a user interacts with clickable content or events in WebView
+ * @param url A NSURL object that represents the URL clicked
+ * @param notification A NotificareNotification object that represents the notification
+ */
+- (void)notificarePushLib:(NotificarePushLib *)library didClickURL:(NSURL *)url inNotification:(NotificareNotification *)notification;
+
+/*!
  * @brief Optional. This delegate method will be triggered just before the action will is executed.
  * @param notification A NotificareNotification object that represents the notification
  */
@@ -147,16 +182,13 @@ typedef enum  {
  */
 - (void)notificarePushLib:(NotificarePushLib *)library didExecuteAction:(NSDictionary *)info;
 /*!
- * @brief Optional. This delegate method will be triggered when the action to be executed will require that you execute a selector method in your own code.
- * @param selector A NSString that represents the method to be called
- * @code -(void)notificarePushLib:(NotificarePushLib *)library shouldPerformSelector:(NSString *)selector{
-    SEL mySelector = NSSelectorFromString(selector);
-    if([self respondsToSelector:mySelector]){
-       Suppressor([self performSelector:mySelector]);
-    }
+ * @brief Optional. This delegate method will be triggered when the user clicks an action of type Custom. you should use it to perform a method in your own code.
+ * @param url A NSURL object
+ * @code -(void)notificarePushLib:(NotificarePushLib *)library shouldPerformSelectorWithURL:(NSURL *)url{
+ [self performSelector:[url host] withObject:[url path]]
  }
  */
-- (void)notificarePushLib:(NotificarePushLib *)library shouldPerformSelector:(NSString *)selector;
+- (void)notificarePushLib:(NotificarePushLib *)library shouldPerformSelectorWithURL:(NSURL *)url;
 /*!
  * @brief Optional. This delegate method will be triggered when the action was cancelled.
  * @param info A NSDictionary object that represents the user selectable action
@@ -196,7 +228,7 @@ typedef enum  {
 /*!
  * @brief Optional. This delegate method will be triggered every time a region starts to be monitored.
  * @constant state A CLRegionState constant that represents the state of the region
- * @param error A NSError object
+ * @param region A CLRegion object
  */
 - (void)notificarePushLib:(NotificarePushLib *)library didDetermineState:(CLRegionState)state forRegion:(CLRegion *)region;
 /*!
@@ -230,7 +262,7 @@ typedef enum  {
  * @brief Optional. This delegate method will be triggered every time user logs out. Use it to update UI.
  * @param error A NSError object
  */
-- (void)notificarePushLib:(NotificarePushLib *)library didFailToRequestAccessNotification:(NSError *)error;
+- (void)notificarePushLib:(NotificarePushLib *)library didFailToRequestAccessNotification:(NSError * _Nullable)error;
 /*!
  * @brief Optional. This delegate method will be triggered in response to a user click in the activation email link.
  * @param token A NSString containing the token for this operation
@@ -312,7 +344,7 @@ typedef enum  {
 @end
 
 
-@interface NotificarePushLib : NSObject <NotificareSRWebSocketDelegate,NotificareDelegate,NotificareActionsDelegate,CLLocationManagerDelegate, SKProductsRequestDelegate, SKPaymentTransactionObserver>
+@interface NotificarePushLib : NSObject <NotificareSRWebSocketDelegate,NotificareDelegate,NotificareActionsDelegate,CLLocationManagerDelegate, SKProductsRequestDelegate, SKPaymentTransactionObserver, UNUserNotificationCenterDelegate>
 
 /*!
  *  @abstract Protocol of NotificarePushLib class that handles events
@@ -323,11 +355,18 @@ typedef enum  {
 
 
 /*!
- *  @abstract The Noticare network requests class
- *  @property NotificareEngine
+ *  @abstract The Noticare Push Api network requests class
+ *  @property NotificarePushNetworkHost
  *
  */
-@property (strong, nonatomic) NotificareEngine * notificareEngine;
+@property (strong, nonatomic) NotificareNetworkHost *notificarePushNetworkHost;
+
+/*!
+ *  @abstract The Noticare Cloud Api network requests class
+ *  @property NotificareCloudNetworkHost
+ *
+ */
+@property (strong, nonatomic) NotificareNetworkHost *notificareCloudNetworkHost;
 
 /*!
  *  @abstract The Notificare Object
@@ -350,7 +389,7 @@ typedef enum  {
 @property (strong, nonatomic) Notificare * currentNotificare;
 /*!
  *  @abstract The NoticareActions requests class
- *  @property NotificareEngine
+ *  @property NotificareActions
  *
  *  @discussion
  *	A NotificareActions object class. Responsible of handling the user selectable actions that might be included in each notification.
@@ -358,6 +397,35 @@ typedef enum  {
  */
 @property (strong, nonatomic) NotificareActions * notificareActions;
 
+/*!
+ *  @abstract The UNUserNotificationCenter object
+ *  @property notificationCenter
+ *
+ *  @discussion
+ *	A UNUserNotificationCenter object holds a reference to the device notification center.
+ *
+ */
+@property (strong, nonatomic) UNUserNotificationCenter * notificationCenter;
+
+/*!
+ *  @abstract The UNNotificationCategoryOptions constants
+ *  @property notificationCategoryOptions
+ *
+ *  @discussion
+ *	A UNNotificationCategoryOptions holds constants indicating how to handle notifications for categories. Possible values are: UNNotificationCategoryOptionNone, UNNotificationCategoryOptionCustomDismissAction, UNNotificationCategoryOptionAllowInCarPlay. If none is provided it will default to UNNotificationCategoryOptionCustomDismissAction.
+ *
+ */
+@property (nonatomic,assign) UNNotificationCategoryOptions notificationCategoryOptions;
+
+/*!
+ *  @abstract The UNNotificationPresentationOptions constants
+ *  @property notificationPresentationOptions
+ *
+ *  @discussion
+ *	A UNNotificationPresentationOptions holds constants indicating how to handle notifications when app is active. Possible values are: UNNotificationPresentationOptionAlert, UNNotificationPresentationOptionBadge, UNNotificationPresentationOptionSound or UNNotificationPresentationOptionNone. If none is provided it will default to UNNotificationPresentationOptionNone.
+ *
+ */
+@property (nonatomic,assign) UNNotificationPresentationOptions notificationPresentationOptions;
 
 /*!
  *  @abstract the apiID key
@@ -439,7 +507,7 @@ typedef enum  {
  *	A NotificareNXOAuth2Account object representing the current account in the keychain
  *
  */
-@property (strong, nonatomic) NotificareNXOAuth2Account * account;
+@property (strong, nonatomic, nullable) NotificareNXOAuth2Account * account;
 
 /*!
  *  @abstract The Notificare User object
@@ -460,14 +528,6 @@ typedef enum  {
  */
 @property (strong, nonatomic) NSString * username __attribute__((deprecated("use myDevice or user instead.")));
 
-/*!
- *  @abstract The notificationTypes
- *
- *  @discussion
- *	A UIRemoteNotificationType list of notification types
- *
- */
-@property (nonatomic, assign) UIRemoteNotificationType notificationTypes;
 
 /*!
  *  @abstract Boolean for checking if notification is open
@@ -483,7 +543,7 @@ typedef enum  {
 
 
 /*!
- *  @abstract Boolean for checking if notification is open
+ *  @abstract Boolean that states if rich content message should present an alert
  *
  */
 @property (assign) BOOL displayMessage;
@@ -495,12 +555,12 @@ typedef enum  {
 @property (strong, nonatomic) CLRegion * currentFence __attribute__((deprecated("use currentRegions instead.")));
 
 /*!
- *  @abstract NSMutableArray containing the CLRegion objects the user is currently inside
+ *  @abstract NSMutableArray containing the region IDs as a NSString
  *
  */
 @property (strong, nonatomic) NSMutableArray * currentRegions;
 /*!
- *  @abstract NSMutableArray containing the CLBeaconRegion objects the user is currently in range
+ *  @abstract NSMutableArray containing the the beacon IDs as a NSString
  *
  */
 @property (strong, nonatomic) NSMutableArray * currentBeacons;
@@ -526,7 +586,7 @@ typedef enum  {
  *  @abstract Location Manager
  *
  *  @discussion
- *	Core Location Manager that handles significant change updates
+ *	Core Location Manager that handles significant change updates and location services
  *
  */
 @property (strong, nonatomic) CLLocationManager *locationManager;
@@ -535,7 +595,7 @@ typedef enum  {
  *  @abstract Last Locations
  *
  *  @discussion
- *	A mutable array that holds lasts readings from Core Location
+ *	A mutable array that holds lasts GPS readings from Core Location
  *
  */
 @property (strong, nonatomic) NSMutableArray *lastLocations;
@@ -544,7 +604,7 @@ typedef enum  {
  *  @abstract Region Session Data
  *
  *  @discussion
- *	A mutable array that holds hold the enter/exit sessions data for a fence
+ *	A mutable array that holds the enter/exit sessions data for a fence
  *
  */
 @property (strong, nonatomic) NSMutableArray * regionSessions;
@@ -563,7 +623,7 @@ typedef enum  {
  *  @abstract Beacon Region
  *
  *  @discussion
- *	A iBeacon region with UUID being monitored
+ *	A CLBeaconRegion currently in range
  *
  */
 @property (strong, nonatomic) CLBeaconRegion *beaconRegion;
@@ -581,10 +641,34 @@ typedef enum  {
 /*!
  *  @abstract Ranging flag
  *  @discussion
- *	A BOOL to flag when iBeacon is in range
+ *	A BOOL to flag when a iBeacon region is ranging
  */
  
 @property (nonatomic, assign) BOOL ranging;
+
+/*!
+ *  @abstract Is deferring updates flag
+ *  @discussion
+ *	A BOOL to flag when a location updates are being deferred
+ */
+
+@property (nonatomic, assign) BOOL isDeferringUpdates;
+
+/*!
+ *  @abstract Allow background location updates flag
+ *  @discussion
+ *	A BOOL to flag when a location manager should allow background updates (mandatory for background mode in iOS9 +)
+ */
+
+@property (nonatomic, assign) BOOL allowsBackgroundLocationUpdates;
+
+/*!
+ *  @abstract Activity type for location manager
+ *  @discussion
+ *	Activity type definition for location manager, by default it is set to CLActivityTypeOther
+ */
+
+@property (nonatomic, assign) CLActivityType activityType;
 
 /*!
  *  @abstract Beacons
@@ -611,7 +695,7 @@ typedef enum  {
  *  @abstract Application info
  *
  *  @discussion
- *	Returns application's public
+ *	Returns application's object for public use
  *
  */
 @property (strong, nonatomic) NSDictionary * applicationInfo;
@@ -620,7 +704,7 @@ typedef enum  {
  *  @abstract Geo-fences
  *
  *  @discussion
- *	Returns Regions being monitored
+ *	Returns regions objects being monitored
  *
  */
 @property (strong, nonatomic) NSMutableArray * geofences;
@@ -631,7 +715,7 @@ typedef enum  {
  *  @abstract Log of entries in a region
  *
  *  @discussion
- *	Returns an array of regions that were triggered by entry
+ *	Returns an array of regions that were triggered by a user entry
  *
  */
 @property (strong, nonatomic) NSMutableArray * stateEntries;
@@ -642,7 +726,7 @@ typedef enum  {
  *  @abstract In-App Billing
  *
  *  @discussion
- *	Methods for the In-App Billing add-on
+ *	Properties for the In-App Billing add-on
  *
  */
 @property (strong, nonatomic) NSMutableSet * productIdentifiers;
@@ -669,20 +753,32 @@ typedef enum  {
 - (void)launch;
 
 /*!
- *  @abstract Register for APNS
- *
- *  @discussion
- *  Registers for APNS with types. This method is deprecated in favour of registerForRemoteNotificationsTypes and will be totally removed after 15 Feb 2015.
- */
-- (void)registerForRemoteNotificationsTypes:(UIRemoteNotificationType)types __attribute__((deprecated("use registerForNotifications instead.")));;
-
-/*!
  *  @abstract Register for APNS + User Notifications
  *
  *  @discussion
  *  This method will register a device for remote notifications and user notifications. Should only be invoked after the delegate method onReady is triggered.
  */
 - (void)registerForNotifications;
+
+/*!
+<<<<<<< HEAD
+ *  @abstract Register for APNS + User Notifications
+=======
+ *  @abstract Unregister for APNS + User Notifications
+>>>>>>> master
+ *
+ *  @discussion
+ *  This method will unregister a device for remote notifications and user notifications. Should only be invoked after the delegate method onReady is triggered.
+ */
+-(void)unregisterForNotifications;
+
+/*!
+ *  @abstract Register for User Notifications
+ *
+ *  @discussion
+ *  Available since iOS 8. This method will prompt the user to accept badges, alerts and sounds. Should only be invoked after the delegate method onReady is triggered. Once the user accepts it, the delegate - (void)application:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *)notificationSettings will be triggered.
+ */
+- (void)registerUserNotifications;
 
 /*!
  *  @abstract Register for User Notifications
@@ -887,7 +983,7 @@ typedef enum  {
  *
  *  @discussion
  *  Displays the notification. Usually used in the delegate didReceiveRemoteNotification: delegate.
- *  @param notificationID A NSString that represents the notification ID
+ *  @param notification A NSString that represents the notification ID
  */
 - (void)openNotification:(NSDictionary *)notification;
 /*!
@@ -898,6 +994,14 @@ typedef enum  {
  *  @param notification A NSDictionary object usually the result of getNotification: or Apple's userInfo dictionary provided in didReceiveRemoteNotification:.
  */
 - (void)logOpenNotification:(NSDictionary *)notification;
+/*!
+ *  @abstract Log Influenced Open notification
+ *
+ *  @discussion
+ *  Logs the influenced open notification manually. This should be used when you don't use the handleOptions.
+ *  @param notification A NSDictionary object usually the result of getNotification: or Apple's userInfo dictionary provided in handleOptions:.
+ */
+- (void)logInfluencedOpenNotification:(NSDictionary *)notification;
 /*!
  *  @abstract Get Notification
  *
@@ -911,7 +1015,7 @@ typedef enum  {
  *  @abstract Delete Notification
  *
  *  @discussion
- *  Deletes a notification. Should be used if you want to remove a notification from our system. This can not be undone.
+ *  Deletes a notification. Should be used if you want to remove a notification from our system. Only applicable for private (sent to a single user or device) notifications. This can not be undone.
  *  @param notification A NSString that represents the notification ID
  */
 - (void)clearNotification:(NSString *)notification;
@@ -963,7 +1067,7 @@ typedef enum  {
  *
  *  @discussion
  *  Add one or more tags to a device.
- *  @param tag A NSArray that contains a list of tags to be added to the device
+ *  @param tags A NSArray that contains a list of tags to be added to the device
  */
 - (void)addTags:(NSArray *)tags;
 /*!
@@ -971,7 +1075,7 @@ typedef enum  {
  *
  *  @discussion
  *  Add one or more tags to a device. This method uses blocks that returns success or failure for this operation.
- *  @param tag A NSArray that contains a list of tags to be added to the device
+ *  @param tags A NSArray that contains a list of tags to be added to the device
  */
 - (void)addTags:(NSArray *)tags completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)error;
 
@@ -1002,7 +1106,7 @@ typedef enum  {
  *  @abstract Start monitoring beacons for region
  *
  *  @discussion
- *  Start monitoring beacons for a specific region using a NSUUID
+ *  Start monitoring beacons for a specific region using a NSUUID. This method is only needed if you are handling location services yourself.
  *  @param uuid A NSUUID that represents the number found in your beacons as the UUID
  */
 - (void)startMonitoringBeaconRegion:(NSUUID *)uuid;
@@ -1010,7 +1114,7 @@ typedef enum  {
  *  @abstract Start monitoring beacons for region
  *
  *  @discussion
- *  Start monitoring beacons for a specific region using a NSUUID and a NSNumber representing the major identifier found in the beacons
+ *  Start monitoring beacons for a specific region using a NSUUID and a NSNumber representing the major identifier found in the beacons. This method is only needed if you are handling location services yourself.
  *  @param uuid A NSUUID that represents the number found in your beacons as the UUID
  *  @param major A NSNumber that represents the number found in your beacons as the major
  */
@@ -1019,7 +1123,7 @@ typedef enum  {
  *  @abstract Start monitoring beacons for region
  *
  *  @discussion
- *  Start monitoring beacons for a specific region using a NSUUID, a NSNumber representing the major identifier and a NSNumber representing the minor identifier found in the beacons
+ *  Start monitoring beacons for a specific region using a NSUUID, a NSNumber representing the major identifier and a NSNumber representing the minor identifier found in the beacons. This method is only needed if you are handling location services yourself.
  *  @param uuid A NSUUID that represents the number found in your beacons as the UUID
  *  @param major A NSNumber that represents the number found in your beacons as the major
  *  @param minor A NSNumber that represents the number found in your beacons as the minor
@@ -1069,7 +1173,7 @@ typedef enum  {
  *  @param label A NSString that represents the label of action button
  *  @param data A NSDictionary that contains any extra data (can be nil)
  */
-- (void)reply:(NSString *)notification withLabel:(NSString *)label andData:(NSDictionary *)data;
+- (void)reply:(NSString *)notification withLabel:(NSString *)label andData:(NSDictionary * _Nullable)data;
 /*!
  *  @abstract Handle action from iOS8 notifications
  *
@@ -1084,7 +1188,7 @@ typedef enum  {
  completion();
  }];
  */
-- (void)handleAction:(NSString *)action forNotification:(NSDictionary *)notification withData:(NSDictionary *)data completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)errorBlock;
+- (void)handleAction:(NSString *)action forNotification:(NSDictionary *)notification withData:(NSDictionary * _Nullable)data completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)errorBlock;
 
 /*!
  *  @abstract Log a Custom Event
@@ -1094,7 +1198,7 @@ typedef enum  {
  *  @param name A NSString that represents the event name
  *  @param data A NSDictionary object that contains any kind of data to be store (can be nil)
  */
-- (void)logCustomEvent:(NSString *)name withData:(NSDictionary *)data completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)error;
+- (void)logCustomEvent:(NSString *)name withData:(NSDictionary * _Nullable)data completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)error;
 /*!
  *  @abstract Save Notification to Inbox
  *
@@ -1104,7 +1208,43 @@ typedef enum  {
  *  @param notification A NSDictionary containing the notification object
  *  @param application A UIApplication object that references to this application
  */
-- (void)saveToInbox:(NSDictionary *)notification forApplication:(UIApplication *)application completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
+- (void)saveToInbox:(NSDictionary *)notification forApplication:(UIApplication *)application completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock  __attribute__((deprecated("use handleNotification:forApplication: instead.")));
+/*!
+ *  @abstract Handle Notification
+ *
+ *  @discussion
+ *  Handles all the events for a notification. To be use in - (void)notificarePushLib:(NotificarePushLib *)library willHandleNotification:(UNNotification *)notification;
+ *  This method will require the background mode in your project capabilities to be set to remote notifications.
+ *  @param notification A UNNotification containing the notification object
+ */
+- (void)handleNotification:(UNNotification *)notification completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
+
+/*!
+ *  @abstract Handle Notification
+ *
+ *  @discussion
+ *  Handles all the events for a notification. To be use in -application didReceiveRemoteNotification:fetchCompletionHandler:
+ *  This method will require the background mode in your project capabilities to be set to remote notifications.
+ *  @param notification A NSDictionary containing the notification object
+ *  @param application A UIApplication object that references to this application
+ */
+- (void)handleNotification:(NSDictionary *)notification forApplication:(UIApplication *)application completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
+
+/*!
+ *  @abstract Get inbox for device
+ *
+ *  @discussion
+ *  Use this method to get a list of all inbox items for a device.
+ */
+- (void)fetchInbox:(NSDate * _Nullable)sinceDate skip:(NSNumber * _Nullable)skip limit:(NSNumber * _Nullable)limit completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)error;
+/*!
+ *  @abstract Open inbox item
+ *
+ *  @discussion
+ *  Displays the inbox item. Should be used with a NotificareDeviceInbox item.
+ *  @param inboxItem A NotificareDeviceInbox object
+ */
+- (void)openInboxItem:(NotificareDeviceInbox *)inboxItem;
 /*!
  *  @abstract Remove Notification from Inbox
  *
@@ -1112,7 +1252,37 @@ typedef enum  {
  *  Remove a notification from the Inbox
  *  @param notification A NSDictionary containing the notification object
  */
-- (void)removeFromInbox:(NSDictionary *)notification;
+- (void)removeFromInbox:(NSDictionary *)notification  __attribute__((deprecated("use removeFromInbox with blocks instead.")));
+/*!
+ *  @abstract Remove Inbox Item from Inbox
+ *
+ *  @discussion
+ *  Remove an inbox item from the Inbox
+ *  @param inboxItem A NotificareDeviceInbox object
+ */
+- (void)removeFromInbox:(NotificareDeviceInbox *)inboxItem completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
+/*!
+ *  @abstract Mark Inbox Item as read
+ *
+ *  @discussion
+ *  Mark an inbox item as read
+ *  @param inboxItem A NotificareDeviceInbox object
+ */
+- (void)markAsRead:(NotificareDeviceInbox *)inboxItem completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
+/*!
+ *  @abstract Remove All Notifications from Inbox
+ *
+ *  @discussion
+ *  Remove all notifications from the Inbox
+ */
+- (void)clearInbox  __attribute__((deprecated("use clearInbox with blocks instead.")));
+/*!
+ *  @abstract Remove All Notifications from Inbox
+ *
+ *  @discussion
+ *  Remove all notifications from the Inbox
+ */
+- (void)clearInbox:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
 
 /*!
  *  @abstract Open Inbox
@@ -1121,7 +1291,7 @@ typedef enum  {
  *  Displays an inbox built-in view where the user can have access to all the notifications received in that device. Users can read and remove any notification in this inbox. This is stored locally in the device, so if the user uninstalls the app, these messages will be gone.
  *
  */
--(void)openInbox;
+-(void)openInbox  __attribute__((deprecated("use Inbox methods instead.")));
 /*!
  *  @abstract Inbox
  *
@@ -1131,7 +1301,7 @@ typedef enum  {
  *  Use these method for a starting to build your own inbox. See also the delegate didUpdateBadge.
  *  @return A NSArray containing the list of messages in the inbox
  */
--(NSArray *)myInbox;
+-(NSArray *)myInbox  __attribute__((deprecated("use fetchMyInbox with blocks instead.")));
 
 /*!
  *  @abstract Badge
@@ -1147,26 +1317,10 @@ typedef enum  {
  *
  *  @discussion
  *  Use this method to create an account. According to the settings of your add-on module, this can trigger the recipient to receive
- *  email messages to activate this account or simply to welcome him/her to your app. Deprecated in favour of createAccount:withName:andPassword:.
- *  @param params A NSDictionary containing the following keys: email, password and userName
- *  @code NSMutableDictionary * params = [NSMutableDictionary dictionary];
- [params setObject:[[self email] text] forKey:@"email"];
- [params setObject:[[self password] text] forKey:@"password"];
- [params setObject:[[self name] text] forKey:@"userName"];
- [[NotificarePushLib shared] createAccount:params completionHandler:^(NSDictionary *info) {
-
- } errorHandler:^(NSError *error) {
-
- }];
- */
-- (void)createAccount:(NSDictionary *)params completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock  __attribute__((deprecated("use createAccount:withName:andPassword: instead.")));
-/*!
- *  @abstract Create Account
- *
- *  @discussion
- *  Use this method to create an account. According to the settings of your add-on module, this can trigger the recipient to receive
  *  email messages to activate this account or simply to welcome him/her to your app.
- *  @param params A NSDictionary containing the following keys: email, password and userName
+ *  @param email A NSString representing the email address
+ *  @param name A NSString representing the name address
+ *  @param password A NSString representing the password address
  *  @code [[NotificarePushLib shared] createAccount:[[self email] text] withName:[[self name] text] andPassword:[[self password] text] completionHandler:^(NSDictionary *info) {
  
  } errorHandler:^(NSError *error) {
@@ -1197,7 +1351,7 @@ typedef enum  {
  *  @discussion
  *  Use this method to allow the user to request a new password for his/her account. This will trigger an email message that will allow the user to create
  *  a new password as described in resetPassword:withToken: methods explained above.
- *  @param token A NSString representing the email address for the account to be recovered
+ *  @param email A NSString representing the email address for the account to be recovered
  */
 - (void)sendPassword:(NSString *)email completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
 /*!
@@ -1234,13 +1388,6 @@ typedef enum  {
  *  Use this method to access the user profile.
  */
 - (void)fetchAccountDetails:(SuccessBlock)info errorHandler:(ErrorBlock)error;
-/*!
- *  @abstract Email Token
- *
- *  @discussion
- *  Use this method to generate a new email token for this user. (Deprecated please use the Access Token)
- */
-- (void)generateEmailToken:(SuccessBlock)info errorHandler:(ErrorBlock)error __attribute__((deprecated("use generateAccessToken:completionHandler:errorHandler: instead.")));
 /*!
  *  @abstract Access Token
  *
@@ -1388,6 +1535,119 @@ typedef enum  {
  *  @return A NSArray containing PKPasses objects
  */
 -(NSArray *)myPasses;
+/*!
+ *  @abstract Wallet Pass Object
+ *
+ *  @discussion
+ *  Retrieves a Pass object
+ *  @param serial A NSString that indentifies the pass a.k.a serial
+ */
+- (void)fetchPass:(NSString *)serial completionHandler:(SuccessPassBlock)result errorHandler:(ErrorBlock)error;
+
+/*!
+ *  @abstract Asset Group list
+ *
+ *  @discussion
+ *  Retrieves a list of assets from a specific group
+ *  @param group A NSString that indentifies the group name
+ */
+- (void)fetchAssets:(NSString *)group completionHandler:(SuccessArrayBlock)result errorHandler:(ErrorBlock)error;
+
+/*!
+ *  @abstract Fetch Do Not Disturb Times
+ *
+ *  @discussion
+ *  Retrieves an object with the do not disturb times for a device
+ */
+- (void)fetchDoNotDisturb:(SuccessBlock)result errorHandler:(ErrorBlock)error;
+
+/*!
+ *  @abstract Update Do Not Disturb Times
+ *
+ *  @discussion
+ *  Updates the device do not disturb times
+ */
+- (void)updateDoNotDisturb:(NSDate *)start endTime:(NSDate *)end completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)error;
+
+/*!
+ *  @abstract Clear Do Not Disturb Times
+ *
+ *  @discussion
+ *  Clears the device do not disturb times
+ */
+- (void)clearDoNotDisturb:(SuccessBlock)result errorHandler:(ErrorBlock)error;
+
+/*!
+ * @abstract Basic request method for Push API
+ *
+ * @discussion
+ * Creates and executes a Push API request.
+ * @param HTTPMethod HTTP method, i.e. @"POST"
+ * @param path The relative path of the request, i.e. device
+ * @param URLParams URL encoded parameters that are added to the request's URL
+ * @param bodyJSON The JSON payload for the request's body
+ * @param successHandler SuccessBlock code block that is executed when the request completes successfully
+ * @param errorHandler OperationErrorBlock code block that is executed when the request fails
+ * @return The NotificareNetworkOperation that is being executed
+ */
+- (NotificareNetworkOperation *)doPushHostOperation:(NSString *)HTTPMethod path:(NSString *)path URLParams:(NSDictionary<NSString *, NSString *> * _Nullable)URLParams bodyJSON:(id _Nullable)bodyJSON successHandler:(SuccessBlock)successHandler errorHandler:(OperationErrorBlock)errorHandler;
+
+/*!
+ * @abstract Basic request method for Cloud API
+ *
+ * @discussion
+ * Creates and executes a Cloud API request.
+ * @param HTTPMethod HTTP method, i.e. @"POST"
+ * @param path The relative path of the request, i.e. device
+ * @param URLParams URL encoded parameters that are added to the request's URL
+ * @param bodyJSON The JSON payload for the request's body
+ * @param successHandler SuccessBlock code block that is executed when the request completes successfully
+ * @param errorHandler OperationErrorBlock code block that is executed when the request fails
+ * @return The NotificareNetworkOperation that is being executed
+ */
+- (NotificareNetworkOperation *)doCloudHostOperation:(NSString *)HTTPMethod path:(NSString *)path URLParams:(NSDictionary<NSString *, NSString *> * _Nullable)URLParams bodyJSON:(id _Nullable)bodyJSON successHandler:(SuccessBlock)successHandler errorHandler:(OperationErrorBlock)errorHandler;
+/*!
+ * @abstract Basic request method for Cloud API
+ *
+ * @discussion
+ * Creates and executes a Cloud API request.
+ * @param HTTPMethod HTTP method, i.e. @"POST"
+ * @param path The relative path of the request, i.e. device
+ * @param URLParams URL encoded parameters that are added to the request's URL
+ * @param customHeaders Key/value pairs for optional custom HTTPS headers
+ * @param bodyJSON The JSON payload for the request's body
+ * @param successHandler SuccessBlock code block that is executed when the request completes successfully
+ * @param errorHandler OperationErrorBlock code block that is executed when the request fails
+ * @return The NotificareNetworkOperation that is being executed
+ */
+- (NotificareNetworkOperation *)doCloudHostOperation:(NSString *)HTTPMethod path:(NSString *)path URLParams:(NSDictionary<NSString *, NSString *> * _Nullable)URLParams customHeaders:(NSDictionary<NSString *, NSString *> * _Nullable)customHeaders bodyJSON:(id _Nullable)bodyJSON successHandler:(SuccessBlock)successHandler errorHandler:(OperationErrorBlock)errorHandler;
+
+/*!
+ *  @abstract Fetch Rich Content Attachments
+ *
+ *  @discussion
+ *  Helper method to Retrieve the attachment of a rich content notification
+ *  @param notification A NSDictionary holding the APNS payload
+ */
+- (void)fetchAttachment:(NSDictionary *)notification completionHandler:(SuccessArrayBlock)result errorHandler:(ErrorBlock)error;
+
+/*!
+ *  @abstract Fetch User Data
+ *
+ *  @discussion
+ *  Invoke this method to retrieve userDataFields associated with this device
+ */
+- (void)fetchUserData:(SuccessBlock)info errorHandler:(ErrorBlock)errorBlock;
+
+/*!
+ *  @abstract Update User Data
+ *
+ *  @discussion
+ *  Invoke this method to update userDataFields associated with this device. Only fields added to the application will be considered.
+ *  @param data A NSDictionary holding the userDataFields to be updated
+ */
+- (void)updateUserData:(NSDictionary *)data completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)errorBlock;
 
 @end
 
+NS_ASSUME_NONNULL_END

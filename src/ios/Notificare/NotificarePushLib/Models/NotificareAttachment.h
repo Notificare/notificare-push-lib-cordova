@@ -11,8 +11,9 @@
 @interface NotificareAttachment : NSObject
 
 
-@property (strong, nonatomic) NSString * attachmentURI;
-@property (strong, nonatomic) NSString * attachmentMimeType;
+@property (strong, nonatomic, nonnull) NSString * attachmentURI;
+@property (strong, nonatomic, nonnull) NSString * attachmentMimeType;
 
+- (void)setValuesWithAttachmentJSON:(NSDictionary * _Nonnull)attachmentJSON;
 
 @end

@@ -25,71 +25,58 @@
  POSSIBILITY OF SUCH DAMAGE. 
  */
 
+#import <Foundation/Foundation.h>
 #import <SystemConfiguration/SystemConfiguration.h>
 
-#import <sys/socket.h>
-#import <netinet/in.h>
-#import <netinet6/in6.h>
-#import <arpa/inet.h>
-#import <ifaddrs.h>
-#import <netdb.h>
+//! Project version number for MacOSReachability.
+FOUNDATION_EXPORT double ReachabilityVersionNumber;
 
-/**
- * Does ARC support support GCD objects?
- * It does if the minimum deployment target is iOS 6+ or Mac OS X 8+
+//! Project version string for MacOSReachability.
+FOUNDATION_EXPORT const unsigned char ReachabilityVersionString[];
+
+/** 
+ * Create NS_ENUM macro if it does not exist on the targeted version of iOS or OS X.
+ *
+ * @see http://nshipster.com/ns_enum-ns_options/
  **/
-#if TARGET_OS_IPHONE
-
-// Compiling for iOS
-
-#if __IPHONE_OS_VERSION_MIN_REQUIRED >= 60000 // iOS 6.0 or later
-#define NEEDS_DISPATCH_RETAIN_RELEASE 0
-#else                                         // iOS 5.X or earlier
-#define NEEDS_DISPATCH_RETAIN_RELEASE 1
+#ifndef NS_ENUM
+#define NS_ENUM(_type, _name) enum _name : _type _name; enum _name : _type
 #endif
 
-#else
+extern NSString *const kNotificareReachabilityChangedNotification;
 
-// Compiling for Mac OS X
+typedef NS_ENUM(NSInteger, NotificareNetworkStatus) {
+    // Apple NetworkStatus Compatible Names.
+    NotificareNotReachable = 0,
+    NotificareReachableViaWiFi = 2,
+    NotificareReachableViaWWAN = 1
+};
 
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= 1080     // Mac OS X 10.8 or later
-#define NEEDS_DISPATCH_RETAIN_RELEASE 0
-#else
-#define NEEDS_DISPATCH_RETAIN_RELEASE 1     // Mac OS X 10.7 or earlier
-#endif
+@class NotificareNetworkReachability;
 
-#endif
+typedef void (^NetworkReachable)(NotificareNetworkReachability * reachability);
+typedef void (^NetworkUnreachable)(NotificareNetworkReachability * reachability);
+typedef void (^NetworkReachability)(NotificareNetworkReachability * reachability, SCNetworkConnectionFlags flags);
 
 
-extern NSString *const knReachabilityChangedNotification;
+@interface NotificareNetworkReachability : NSObject
 
-typedef enum 
-{
-	// Apple NetworkStatus Compatible Names.
-	_NotReachable     = 0,
-	_ReachableViaWiFi = 2,
-	_ReachableViaWWAN = 1
-} NotificareNetworkStatus;
-
-@class NotificareReachability;
-
-typedef void (^nNetworkReachable)(NotificareReachability * reachability);
-typedef void (^nNetworkUnreachable)(NotificareReachability * reachability);
-
-@interface NotificareReachability : NSObject
-
-@property (nonatomic, copy) nNetworkReachable    reachableBlock;
-@property (nonatomic, copy) nNetworkUnreachable  unreachableBlock;
-
+@property (nonatomic, copy) NetworkReachable    reachableBlock;
+@property (nonatomic, copy) NetworkUnreachable  unreachableBlock;
+@property (nonatomic, copy) NetworkReachability reachabilityBlock;
 
 @property (nonatomic, assign) BOOL reachableOnWWAN;
 
-+(NotificareReachability*)reachabilityWithHostname:(NSString*)hostname;
-+(NotificareReachability*)reachabilityForInternetConnection;
-+(NotificareReachability*)reachabilityWithAddress:(const struct sockaddr_in*)hostAddress;
-+(NotificareReachability*)reachabilityForLocalWiFi;
 
--(NotificareReachability *)initWithReachabilityRef:(SCNetworkReachabilityRef)ref;
++(instancetype)reachabilityWithHostname:(NSString*)hostname;
+// This is identical to the function above, but is here to maintain
+//compatibility with Apples original code. (see .m)
++(instancetype)reachabilityWithHostName:(NSString*)hostname;
++(instancetype)reachabilityForInternetConnection;
++(instancetype)reachabilityWithAddress:(void *)hostAddress;
++(instancetype)reachabilityForLocalWiFi;
+
+-(instancetype)initWithReachabilityRef:(SCNetworkReachabilityRef)ref;
 
 -(BOOL)startNotifier;
 -(void)stopNotifier;

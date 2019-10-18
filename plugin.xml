@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
+<<<<<<< HEAD
         id="cordova-plugin-notificare"
         version="1.5.0">
+=======
+        id="cordova-plugin-notificare-push"
+        version="1.9.5">
+>>>>>>> master
 
   <name>Notificare Plugin</name>
 
@@ -10,10 +15,15 @@
     This plugin allows your application to register for, receive and handle push notifications with Notificare on both Android and iOS devices.
   </description>
 
-  <license>MIT</license>
+  <license>Apache</license>
 
   <engines>
+<<<<<<< HEAD
     <engine name="cordova" version=">=5.0.0"/>
+=======
+    <engine name="cordova-ios" version=">=4.3.0"/>
+    <engine name="cordova-android" version=">=6.0.0"/>
+>>>>>>> master
   </engines>
 
   <js-module src="www/notificare.js" name="Notificare">
@@ -29,24 +39,17 @@
     </config-file>
 
     <config-file target="AndroidManifest.xml" parent="/manifest">
-      <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
-      <uses-permission android:name="android.permission.WAKE_LOCK"/>
       <uses-permission android:name="android.permission.INTERNET"/>
       <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-      <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-      <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
       <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
       <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
       <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
-      <permission android:name=".permission.C2D_MESSAGE" android:protectionLevel="signature"/>
-      <uses-permission android:name=".permission.C2D_MESSAGE"/>
     </config-file>
 
     <config-file target="AndroidManifest.xml" parent="/manifest/application">
       <!-- Use this to have a standalone notification activity --> 
       <activity 
         android:name="re.notifica.ui.NotificationActivity"
-        android:taskAffinity=""
         android:excludeFromRecents="true" />
       <!-- Use this to start your main activity in the back stack, replace activity name as appropriate -->
       <!--  
@@ -58,17 +61,31 @@
         		android:value=".MainActivity"/>
       </activity>
       -->
-      <receiver 
-        android:name="re.notifica.push.gcm.PushReceiver" 
-        android:permission="com.google.android.c2dm.permission.SEND">
+      <activity
+              android:name="re.notifica.ui.PassbookActivity"
+              android:configChanges="keyboardHidden|orientation|screenSize"
+              android:hardwareAccelerated="true" />
+      <service android:name="re.notifica.push.fcm.PushService"
+        android:label="Notificare Push Service"
+        android:exported="false">
         <intent-filter>
-          <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
-          <action android:name="com.google.android.c2dm.intent.REGISTRATION"/>
-          <category android:name="$PACKAGE_NAME"/>
+          <action android:name="com.google.firebase.MESSAGING_EVENT" />
         </intent-filter>
-      </receiver>
-      <service android:name="re.notifica.push.gcm.PushService"
-        android:label="Notificare Push Service" />
+      </service>
+      <service android:name="re.notifica.push.fcm.InstanceIDService"
+               android:exported="false">
+        <intent-filter>
+          <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+        </intent-filter>
+      </service>
+      <service android:name="re.notifica.push.fcm.RegistrationService" android:exported="false" />
+      <service android:name="re.notifica.push.gcm.TaskService"
+               android:permission="com.google.android.gms.permission.BIND_NETWORK_TASK_SERVICE"
+               android:exported="true">
+        <intent-filter>
+          <action android:name="com.google.android.gms.gcm.ACTION_TASK_READY"/>
+        </intent-filter>
+      </service>
       <receiver android:name="re.notifica.cordova.IntentReceiver" />
 
       <meta-data  android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version"/>
@@ -88,6 +105,7 @@
     <resource-file src="src/android/res/values/strings_preferences.xml" target="res/values/strings_preferences.xml" />
     <resource-file src="src/android/assets/notificareconfig.properties" target="assets/notificareconfig.properties" />
 
+<<<<<<< HEAD
       <!-- Depend on latest version of GCM from play services -->
       <framework src="com.google.android.gms:play-services-gcm:+" />
       <!-- Depend on v21 of appcompat-v7 support library -->
@@ -95,6 +113,11 @@
       <!-- Depend on library project included in plugin -->
       <framework src="src/android/rules.gradle" custom="true" type="gradleReference" />
       <framework src="re.notifica:notificare-push-lib-android:1.4.3" />
+=======
+    <!-- Depend on latest version of NotificarePushLib -->
+    <framework src="src/android/notificare.gradle" custom="true" type="gradleReference" />
+
+>>>>>>> master
   </platform>
 
   <!-- ios -->
@@ -104,8 +127,29 @@
         <param name="ios-package" value="NotificarePlugin" />
       </feature>
     </config-file>
+    <preference name="LOCATION_USAGE_DESCRIPTION" default=" " />
     <config-file target="*-Info.plist" parent="NSLocationAlwaysUsageDescription">
-      <string></string>
+      <string>$LOCATION_USAGE_DESCRIPTION</string>
+    </config-file>
+    <preference name="CAMERA_USAGE_DESCRIPTION" default=" " />
+    <config-file target="*-Info.plist" parent="NSCameraUsageDescription">
+      <string>$CAMERA_USAGE_DESCRIPTION</string>
+    </config-file>
+    <preference name="PHOTOLIBRARY_USAGE_DESCRIPTION" default=" " />
+    <config-file target="*-Info.plist" parent="NSPhotoLibraryUsageDescription">
+      <string>$PHOTOLIBRARY_USAGE_DESCRIPTION</string>
+    </config-file>
+    <config-file target="*-Info.plist" parent="UIBackgroundModes">
+      <array>
+        <string>remote-notification</string>
+      </array>
+    </config-file>
+    <config-file parent="aps-environment" target="*/Entitlements-Debug.plist">
+      <string>development</string>
+    </config-file>
+
+    <config-file parent="aps-environment" target="*/Entitlements-Release.plist">
+      <string>production</string>
     </config-file>
     <header-file src="src/ios/NotificarePlugin.h"/>
     <source-file src="src/ios/NotificarePlugin.m"/>
@@ -120,16 +164,10 @@
     <header-file src="src/ios/Notificare/NotificarePushLib/Actions/Telephone/NotificareTelephone.h" target-dir="Notificare/NotificarePushLib/Actions/Telephone/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Actions/ActionDelegate.h" target-dir="Notificare/NotificarePushLib/Actions/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Actions/ActionType.h" target-dir="Notificare/NotificarePushLib/Actions/"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/NSData+NotificareMKBase64.h" target-dir="Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/NSDate+NotificareRFC1123.h" target-dir="Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/NSDictionary+NotificareRequestEncoding.h" target-dir="Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/NSString+NotificareMKNetworkKitAdditions.h" target-dir="Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/UIAlertView+NotificareMKNetworkKitAdditions.h" target-dir="Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/UIImageView+NotificareMKNetworkKitAdditions.h" target-dir="Notificare/NotificarePushLib/Libraries/MKNetworkKit/Categories/"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/Reachability/NotificareReachability.h" target-dir="Notificare/NotificarePushLib/Libraries/MKNetworkKit/Reachability/"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/NotificareMKNetworkEngine.h" target-dir="Notificare/NotificarePushLib/Libraries/MKNetworkKit/"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/NotificareMKNetworkKit.h" target-dir="Notificare/NotificarePushLib/Libraries/MKNetworkKit/"/>
-    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/MKNetworkKit/NotificareMKNetworkOperation.h" target-dir="Notificare/NotificarePushLib/Libraries/MKNetworkKit/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Components/NotificareBaseInboxViewController.h" target-dir="Notificare/NotificarePushLib/Components/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NotificareNetworkLib/NotificareNetworkHost.h" target-dir="Notificare/NotificarePushLib/Libraries/NotificareNetworkLib/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NotificareNetworkLib/NotificareNetworkOperation.h" target-dir="Notificare/NotificarePushLib/Libraries/NotificareNetworkLib/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NotificareNetworkLib/NotificareNetworkReachability.h" target-dir="Notificare/NotificarePushLib/Libraries/NotificareNetworkLib/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2.h" target-dir="Notificare/NotificarePushLib/Libraries/NXOAuth2Client/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2AccessToken.h" target-dir="Notificare/NotificarePushLib/Libraries/NXOAuth2Client/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/NXOAuth2Client/NotificareNXOAuth2Account+Private.h" target-dir="Notificare/NotificarePushLib/Libraries/NXOAuth2Client/"/>
@@ -153,11 +191,15 @@
     <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/NotificareSRWebSocket.h" target-dir="Notificare/NotificarePushLib/Libraries/SocketRocket/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Libraries/SocketRocket/NotificareSocketRocket-Prefix.pch" target-dir="Notificare/NotificarePushLib/Libraries/SocketRocket/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareAction.h" target-dir="Notificare/NotificarePushLib/Models/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareAsset.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareAttachment.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareBeacon.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareContent.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareDevice.h" target-dir="Notificare/NotificarePushLib/Models/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareDeviceInbox.h" target-dir="Notificare/NotificarePushLib/Models/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareManagedDeviceInbox.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareNotification.h" target-dir="Notificare/NotificarePushLib/Models/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificarePass.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareProduct.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareSegment.h" target-dir="Notificare/NotificarePushLib/Models/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Models/NotificareUser.h" target-dir="Notificare/NotificarePushLib/Models/"/>
@@ -173,11 +215,15 @@
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/Beacons/NotificareBeacons.h" target-dir="Notificare/NotificarePushLib/Types/Beacons/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/Form/NotificareForm.h" target-dir="Notificare/NotificarePushLib/Types/Form/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/Image/NotificareImage.h" target-dir="Notificare/NotificarePushLib/Types/Image/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Inbox/NotificareInbox.h" target-dir="Notificare/NotificarePushLib/Types/Inbox/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/Map/NotificareLocation.h" target-dir="Notificare/NotificarePushLib/Types/Map/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/Map/NotificareMap.h" target-dir="Notificare/NotificarePushLib/Types/Map/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/None/NotificareNone.h" target-dir="Notificare/NotificarePushLib/Types/None/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/Passbook/NotificarePassbook.h" target-dir="Notificare/NotificarePushLib/Types/Passbook/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/Rate/NotificareRate.h" target-dir="Notificare/NotificarePushLib/Types/Rate/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/Store/NotificareStore.h" target-dir="Notificare/NotificarePushLib/Types/Store/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/URL/NotificareURL.h" target-dir="Notificare/NotificarePushLib/Types/URL/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/Types/URLScheme/NotificareURLScheme.h" target-dir="Notificare/NotificarePushLib/Types/URLScheme/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/UserPreferences/NotificareBeaconsViewController.h" target-dir="Notificare/NotificarePushLib/Types/UserPreferences/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/UserPreferences/NotificareDeviceViewController.h" target-dir="Notificare/NotificarePushLib/Types/UserPreferences/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/Types/UserPreferences/NotificareInboxViewController.h" target-dir="Notificare/NotificarePushLib/Types/UserPreferences/"/>
@@ -191,27 +237,34 @@
     <header-file src="src/ios/Notificare/NotificarePushLib/Notificare.h" target-dir="Notificare/NotificarePushLib/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/NotificareActions.h" target-dir="Notificare/NotificarePushLib/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/NotificareEngine.h" target-dir="Notificare/NotificarePushLib/"/>
+    <header-file src="src/ios/Notificare/NotificarePushLib/NotificareInboxManager.h" target-dir="Notificare/NotificarePushLib/"/>
     <header-file src="src/ios/Notificare/NotificarePushLib/NotificarePushLib.h" target-dir="Notificare/NotificarePushLib/"/>
-    
-	<resource-file src="src/ios/DefaultTheme.bundle"/>
+
+    <resource-file src="src/ios/DefaultTheme.bundle"/>
+    <resource-file src="src/ios/NotificareManagedModels.bundle"/>
     <resource-file src="src/ios/Notificare.plist"/>
     <resource-file src="src/ios/NotificareTags.plist"/>
-    
+
     <source-file src="src/ios/libNotificarePushLib.a" framework="true"/>
-    
+
+    <framework src="CoreData.framework"/>
     <framework src="CoreLocation.framework"/>
+    <framework src="UserNotifications.framework" weak="true"/>
     <framework src="MobileCoreServices.framework"/>
     <framework src="MessageUI.framework"/>
     <framework src="libicucore.dylib"/>
     <framework src="UIKit.framework"/>
     <framework src="Foundation.framework"/>
     <framework src="CoreGraphics.framework"/>
-    <framework src="PassKit.framework"/>
+    <framework src="PassKit.framework" weak="true"/>
     <framework src="MapKit.framework"/>
     <framework src="SystemConfiguration.framework"/>
     <framework src="Security.framework"/>
     <framework src="CFNetwork.framework"/>
     <framework src="ImageIO.framework"/>
     <framework src="StoreKit.framework"/>
+    <framework src="SafariServices.framework"/>
+
+    <!--<framework src="notificare-push-lib" type="podspec" spec="~> 1.9.9" />-->
   </platform>
 </plugin>

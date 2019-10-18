@@ -2,6 +2,8 @@
 "cancel" = "Cancel";
 "actions" = "Actions";
 "close" = "Close Message";
+"remove_all" = "Clear Inbox";
+"send" = "send";
 
 /* Location Services purpose text (after iOS6 this has to be included in the app's .plist with the key NSLocationUsageDescription and translated in InfoPlist.strings) */
 "why_location_updates_text" = "We would like to use your location to easily provide you maps, directions, updates and alerts based on your location.";
@@ -47,3 +49,10 @@
 "weeks_ago" = "%d weeks ago";
 "years_ago" = "%d years ago";
 "yesterday" = "yesterday";
+
+/* Mail Client*/
+"your_subject" = "Your subject";
+"your_message" = "Your message";
+
+/* Lock screen keyboard text field placeholder */
+"type_some_text" = "Type here";

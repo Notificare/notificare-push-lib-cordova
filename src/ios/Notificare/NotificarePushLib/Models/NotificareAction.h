@@ -11,11 +11,12 @@
 @interface NotificareAction : NSObject
 
 
-@property (strong, nonatomic) NSString * actionType;
-@property (strong, nonatomic) NSString * actionLabel;
-@property (strong, nonatomic) NSString * actionTarget;
+@property (strong, nonatomic, nonnull) NSString * actionType;
+@property (strong, nonatomic, nonnull) NSString * actionLabel;
+@property (strong, nonatomic, nullable) NSString * actionTarget;
 @property (nonatomic, assign) BOOL actionKeyboard;
 @property (nonatomic, assign) BOOL actionCamera;
 
+- (void)setValuesWithActionJSON:(NSDictionary * _Nonnull)actionJSON;
 
 @end

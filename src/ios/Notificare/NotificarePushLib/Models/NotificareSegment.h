@@ -10,8 +10,11 @@
 
 @interface NotificareSegment : NSObject
 
-@property (strong, nonatomic) NSString * segmentLabel;
-@property (strong, nonatomic) NSString * segmentId;
+@property (strong, nonatomic, nonnull) NSString * segmentLabel;
+@property (strong, nonatomic, nonnull) NSString * segmentId;
 @property (assign, nonatomic) BOOL selected;
+
+- (void)setValuesWithSegmentJSON:(NSDictionary * _Nonnull)segmentJSON;
+- (void)setValuesWithPreferenceOptionJSON:(NSDictionary * _Nonnull)preferenceOptionJSON;
 
 @end
