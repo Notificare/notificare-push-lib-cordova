@@ -25,19 +25,862 @@
 - (void)launch:(CDVInvokedUrlCommand*)command {
     [self setMainCallbackId:[command callbackId]];
     [[NotificarePushLib shared] launch];
-    [self handleSendPluginResultSuccess:command];
+
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
+-(void)setAuthorizationOptions:(CDVInvokedUrlCommand*)command {
+
+    NSArray *options = [command argumentAtIndex:0];
+
+    if (@available(iOS 10.0, *)) {
+        UNAuthorizationOptions authorizationOptions = UNAuthorizationOptionNone;
+
+        for (NSString * option in options) {
+            if ([option isEqualToString:@"alert"]) {
+                authorizationOptions = authorizationOptions + UNAuthorizationOptionAlert;
+            }
+            if ([option isEqualToString:@"badge"]) {
+                authorizationOptions = authorizationOptions + UNAuthorizationOptionBadge;
+            }
+            if ([option isEqualToString:@"sound"]) {
+                authorizationOptions = authorizationOptions + UNAuthorizationOptionSound;
+            }
+            if (@available(iOS 12.0, *)) {
+                if ([option isEqualToString:@"providesAppNotificationSettings"]) {
+                    authorizationOptions = authorizationOptions + UNAuthorizationOptionProvidesAppNotificationSettings;
+                }
+                if ([option isEqualToString:@"provisional"]) {
+                    authorizationOptions = authorizationOptions + UNAuthorizationOptionProvisional;
+                }
+                if ([option isEqualToString:@"criticalAlert"]) {
+                    authorizationOptions = authorizationOptions + UNAuthorizationOptionCriticalAlert;
+                }
+            }
+            if (@available(iOS 13.0, *)) {
+                if ([option isEqualToString:@"announcement"]) {
+                    authorizationOptions = authorizationOptions + UNAuthorizationOptionAnnouncement;
+                }
+            }
+        }
+
+        if (authorizationOptions) {
+            [[NotificarePushLib shared] setAuthorizationOptions:authorizationOptions];
+        }
+    }
+
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
+-(void)setPresentationOptions:(CDVInvokedUrlCommand*)command {
+
+    NSArray *options = [command argumentAtIndex:0];
+
+    if (@available(iOS 10.0, *)) {
+        UNNotificationPresentationOptions presentationOptions = UNNotificationPresentationOptionNone;
+
+        for (NSString * option in options) {
+            if ([option isEqualToString:@"alert"]) {
+                presentationOptions = presentationOptions + UNNotificationPresentationOptionAlert;
+            }
+            if ([option isEqualToString:@"badge"]) {
+                presentationOptions = presentationOptions + UNNotificationPresentationOptionBadge;
+            }
+            if ([option isEqualToString:@"sound"]) {
+                presentationOptions = presentationOptions + UNNotificationPresentationOptionSound;
+            }
+        }
+
+        if (presentationOptions) {
+            [[NotificarePushLib shared] setPresentationOptions:presentationOptions];
+        }
+    }
+
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
+
+-(void)setCategoryOptions:(CDVInvokedUrlCommand*)command {
+
+    NSArray *options = [command argumentAtIndex:0];
+
+    if (@available(iOS 10.0, *)) {
+        UNNotificationCategoryOptions categoryOptions = UNNotificationCategoryOptionNone;
+
+        for (NSString * option in options) {
+            if ([option isEqualToString:@"customDismissAction"]) {
+                categoryOptions = categoryOptions + UNNotificationCategoryOptionCustomDismissAction;
+            }
+            if ([option isEqualToString:@"allowInCarPlay"]) {
+                categoryOptions = categoryOptions + UNNotificationCategoryOptionAllowInCarPlay;
+            }
+            if (@available(iOS 11.0, *)) {
+                if ([option isEqualToString:@"hiddenPreviewsShowTitle"]) {
+                    categoryOptions = categoryOptions + UNNotificationCategoryOptionHiddenPreviewsShowTitle;
+                }
+                if ([option isEqualToString:@"hiddenPreviewsShowSubtitle"]) {
+                    categoryOptions = categoryOptions + UNNotificationCategoryOptionHiddenPreviewsShowSubtitle;
+                }
+            }
+            if (@available(iOS 13.0, *)) {
+                if ([option isEqualToString:@"allowAnnouncement"]) {
+                    categoryOptions = categoryOptions + UNNotificationCategoryOptionAllowAnnouncement;
+                }
+            }
+        }
+
+        if (categoryOptions) {
+            [[NotificarePushLib shared] setCategoryOptions:categoryOptions];
+        }
+    }
+
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self handleCallback:pluginResult withCommand:command];
 }
 
 - (void)registerForNotifications:(CDVInvokedUrlCommand*)command {
     [[NotificarePushLib shared] registerForNotifications];
-    [self handleSendPluginResultSuccess:command];
+
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self handleCallback:pluginResult withCommand:command];
 }
 
 - (void)unregisterForNotifications:(CDVInvokedUrlCommand*)command {
     [[NotificarePushLib shared] unregisterForNotifications];
-    [self handleSendPluginResultSuccess:command];
+
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self handleCallback:pluginResult withCommand:command];
 }
 
+-(void)isRemoteNotificationsEnabled:(CDVInvokedUrlCommand*)command {
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[[NotificarePushLib shared] remoteNotificationsEnabled]];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
+-(void)isAllowedUIEnabled:(CDVInvokedUrlCommand*)command {
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[[NotificarePushLib shared] allowedUIEnabled]];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
+-(void)isNotificationFromNotificare:(CDVInvokedUrlCommand*)command {
+    NSDictionary *notification = [command argumentAtIndex:0];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[[NotificarePushLib shared] isNotificationFromNotificare:notification]];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
+-(void)fetchNotificationSettings:(CDVInvokedUrlCommand*)command {
+    if (@available(iOS 10.0, *)) {
+         [[[NotificarePushLib shared] userNotificationCenter] getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings * _Nonnull settings) {
+             CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[[NotificarePushLibCordovaUtils shared] dictionaryFromNotificationSettings:settings]];
+             [self handleCallback:pluginResult withCommand:command];
+         }];
+    } else {
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+        [self handleCallback:pluginResult withCommand:command];
+    }
+}
+
+-(void)startLocationUpdates:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] startLocationUpdates];
+
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
+-(void)stopLocationUpdates:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] stopLocationUpdates];
+
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
+-(void)clearLocation:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] clearDeviceLocation:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)isLocationServicesEnabled:(CDVInvokedUrlCommand*)command {
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[[NotificarePushLib shared] locationServicesEnabled]];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
+-(void)registerDevice:(CDVInvokedUrlCommand*)command {
+    NSString *userID = ([command argumentAtIndex:0]) ? [command argumentAtIndex:0] : nil;
+    NSString *userName = ([command argumentAtIndex:1]) ?  [command argumentAtIndex:1] : nil;
+
+    [[NotificarePushLib shared] registerDevice:userID withUsername:userName completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[[NotificarePushLibCordovaUtils shared] dictionaryFromDevice:response]];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)fetchDevice:(CDVInvokedUrlCommand*)command {
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[[NotificarePushLibCordovaUtils shared] dictionaryFromDevice:[[NotificarePushLib shared] myDevice]]];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
+-(void)fetchPreferredLanguage:(CDVInvokedUrlCommand*)command {
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[[NotificarePushLib shared] preferredLanguage]];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
+-(void)updatePreferredLanguage:(CDVInvokedUrlCommand*)command {
+    NSString *preferredLanguage = ([command argumentAtIndex:0]) ? [command argumentAtIndex:0] : nil;
+    [[NotificarePushLib shared] updatePreferredLanguage:preferredLanguage completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)fetchTags:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] fetchTags:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:response];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)addTag:(CDVInvokedUrlCommand*)command {
+    NSString *tag = [command argumentAtIndex:0];
+     [[NotificarePushLib shared] addTag:tag completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+         if (!error) {
+             CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+             [self handleCallback:pluginResult withCommand:command];
+         } else {
+             CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+             [self handleCallback:pluginResult withCommand:command];
+         }
+     }];
+}
+
+
+-(void)addTags:(CDVInvokedUrlCommand*)command {
+    NSArray *tags = [command argumentAtIndex:0];
+     [[NotificarePushLib shared] addTags:tags completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+         if (!error) {
+             CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+             [self handleCallback:pluginResult withCommand:command];
+         } else {
+             CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+             [self handleCallback:pluginResult withCommand:command];
+         }
+     }];
+}
+
+-(void)removeTag:(CDVInvokedUrlCommand*)command {
+    NSString *tag = [command argumentAtIndex:0];
+     [[NotificarePushLib shared] removeTag:tag completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+         if (!error) {
+             CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+             [self handleCallback:pluginResult withCommand:command];
+         } else {
+             CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+             [self handleCallback:pluginResult withCommand:command];
+         }
+     }];
+}
+
+-(void)removeTags:(CDVInvokedUrlCommand*)command {
+    NSArray *tags = [command argumentAtIndex:0];
+     [[NotificarePushLib shared] removeTags:tags completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+         if (!error) {
+             CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+             [self handleCallback:pluginResult withCommand:command];
+         } else {
+             CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+             [self handleCallback:pluginResult withCommand:command];
+         }
+     }];
+}
+
+-(void)clearTags:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] clearTags:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)fetchUserData:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] fetchUserData:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            NSMutableArray * payload = [NSMutableArray array];
+            for (NotificareUserData * userData in response) {
+                [payload addObject:[[NotificarePushLibCordovaUtils shared] dictionaryFromUserData:userData]];
+            }
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:payload];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)updateUserData:(CDVInvokedUrlCommand*)command {
+    NSArray *userData = [command argumentAtIndex:0];
+    NSMutableArray * data = [NSMutableArray array];
+    for (NSDictionary * field in userData) {
+        [data addObject:[[NotificarePushLibCordovaUtils shared] userDataFromDictionary:field]];
+    }
+    [[NotificarePushLib shared] updateUserData:data completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            NSMutableArray * payload = [NSMutableArray array];
+            for (NotificareUserData * userData in response) {
+                [payload addObject:[[NotificarePushLibCordovaUtils shared] dictionaryFromUserData:userData]];
+            }
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:payload];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)fetchDoNotDisturb:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] fetchDoNotDisturb:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[[NotificarePushLibCordovaUtils shared] dictionaryFromDeviceDnD:response]];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)updateDoNotDisturb:(CDVInvokedUrlCommand*)command {
+    NSDictionary *deviceDnD = [command argumentAtIndex:0];
+    [[NotificarePushLib shared] updateDoNotDisturb:[[NotificarePushLibCordovaUtils shared] deviceDnDFromDictionary:deviceDnD] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[[NotificarePushLibCordovaUtils shared] dictionaryFromDeviceDnD:response]];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)clearDoNotDisturb:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] clearDoNotDisturb:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)fetchNotification:(CDVInvokedUrlCommand*)command {
+    NSDictionary *notification = [command argumentAtIndex:0];
+    [[NotificarePushLib shared] fetchNotification:notification completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[[NotificarePushLibCordovaUtils shared] dictionaryFromNotification:response]];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)fetchNotificationForInboxItem:(CDVInvokedUrlCommand*)command {
+    NSDictionary *inboxItem = [command argumentAtIndex:0];
+    [[NotificarePushLib shared] fetchNotification:[inboxItem objectForKey:@"inboxId"] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[[NotificarePushLibCordovaUtils shared] dictionaryFromNotification:response]];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)presentNotification:(CDVInvokedUrlCommand*)command {
+    NSDictionary *notification = [command argumentAtIndex:0];
+    NotificareNotification * item = [[NotificarePushLibCordovaUtils shared] notificationFromDictionary:notification];
+    id controller = [[NotificarePushLib shared] controllerForNotification:item];
+    if ([self isViewController:controller]) {
+        UINavigationController *navController = [self navigationControllerForViewControllers:controller];
+        [navController setModalPresentationStyle:UIModalPresentationFullScreen];
+        [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:NO completion:^{
+            [[NotificarePushLib shared] presentNotification:item inNavigationController:navController withController:controller];
+        }];
+    } else {
+        [[NotificarePushLib shared] presentNotification:item inNavigationController:[self navigationControllerForRootViewController] withController:controller];
+    }
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
+-(void)fetchInbox:(CDVInvokedUrlCommand*)command {
+    [[[NotificarePushLib shared] inboxManager] fetchInbox:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            NSMutableArray * payload = [NSMutableArray array];
+            for (NotificareDeviceInbox * inboxItem in response) {
+                [payload addObject:[[NotificarePushLibCordovaUtils shared] dictionaryFromDeviceInbox:inboxItem]];
+            }
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:payload];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)presentInboxItem:(CDVInvokedUrlCommand*)command {
+    NSDictionary *inboxItem = [command argumentAtIndex:0];
+     NotificareDeviceInbox * item = [[NotificarePushLibCordovaUtils shared] deviceInboxFromDictionary:inboxItem];
+     [[[NotificarePushLib shared] inboxManager] openInboxItem:item completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+         if (!error) {
+             if ([self isViewController:response]) {
+                 UINavigationController *navController = [self navigationControllerForViewControllers:response];
+                 [navController setModalPresentationStyle:UIModalPresentationFullScreen];
+                 [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:NO completion:^{
+                     [[NotificarePushLib shared] presentInboxItem:item inNavigationController:navController withController:response];
+                 }];
+             } else {
+                 [[NotificarePushLib shared] presentInboxItem:item inNavigationController:[self navigationControllerForRootViewController] withController:response];
+             }
+         }
+     }];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
+-(void)removeFromInbox:(CDVInvokedUrlCommand*)command {
+    NSDictionary *inboxItem = [command argumentAtIndex:0];
+    [[[NotificarePushLib shared] inboxManager] removeFromInbox:[[NotificarePushLibCordovaUtils shared] deviceInboxFromDictionary:inboxItem] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+          CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[[NotificarePushLibCordovaUtils shared] dictionaryFromDeviceInbox:response]];
+          [self handleCallback:pluginResult withCommand:command];
+        } else {
+          CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+          [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)markAsRead:(CDVInvokedUrlCommand*)command {
+    NSDictionary *inboxItem = [command argumentAtIndex:0];
+    [[[NotificarePushLib shared] inboxManager] markAsRead:[[NotificarePushLibCordovaUtils shared] deviceInboxFromDictionary:inboxItem] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+          CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[[NotificarePushLibCordovaUtils shared] dictionaryFromDeviceInbox:response]];
+          [self handleCallback:pluginResult withCommand:command];
+        } else {
+          CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+          [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)clearInbox:(CDVInvokedUrlCommand*)command {
+    [[[NotificarePushLib shared] inboxManager] clearInbox:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+          CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+          [self handleCallback:pluginResult withCommand:command];
+        } else {
+          CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+          [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)fetchAssets:(CDVInvokedUrlCommand*)command {
+    NSString *group = [command argumentAtIndex:0];
+    [[NotificarePushLib shared] fetchAssets:group completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            NSMutableArray * payload = [NSMutableArray array];
+            for (NotificareAsset * asset in response) {
+                [payload addObject:[[NotificarePushLibCordovaUtils shared] dictionaryFromAsset:asset]];
+            }
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:payload];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+          CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+          [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)fetchPassWithSerial:(CDVInvokedUrlCommand*)command {
+    NSString *serial = [command argumentAtIndex:0];
+    [[NotificarePushLib shared] fetchPassWithSerial:serial completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[[NotificarePushLibCordovaUtils shared] dictionaryFromPass:response]];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)fetchPassWithBarcode:(CDVInvokedUrlCommand*)command {
+    NSString *barcode = [command argumentAtIndex:0];
+    [[NotificarePushLib shared] fetchPassWithBarcode:barcode completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[[NotificarePushLibCordovaUtils shared] dictionaryFromPass:response]];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)fetchProducts:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] fetchProducts:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            NSMutableArray * payload = [NSMutableArray array];
+            for (NotificareProduct * product in response) {
+                [payload addObject:[[NotificarePushLibCordovaUtils shared] dictionaryFromProduct:product]];
+            }
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:payload];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)fetchPurchasedProducts:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] fetchPurchasedProducts:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            NSMutableArray * payload = [NSMutableArray array];
+            for (NotificareProduct * product in response) {
+                [payload addObject:[[NotificarePushLibCordovaUtils shared] dictionaryFromProduct:product]];
+            }
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:payload];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)fetchProduct:(CDVInvokedUrlCommand*)command {
+    NSDictionary *product = [command argumentAtIndex:0];
+    [[NotificarePushLib shared] fetchProduct:[product objectForKey:@"productIdentifier"] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[[NotificarePushLibCordovaUtils shared] dictionaryFromProduct:response]];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)buyProduct:(CDVInvokedUrlCommand*)command {
+    NSDictionary *product = [command argumentAtIndex:0];
+    [[NotificarePushLib shared] fetchProduct:[product objectForKey:@"productIdentifier"] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            [[NotificarePushLib shared] buyProduct:response];
+        }
+    }];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
+-(void)logCustomEvent:(CDVInvokedUrlCommand*)command {
+    NSString *name = [command argumentAtIndex:0];
+    NSDictionary *data = ([command argumentAtIndex:0]) ? [command argumentAtIndex:0] : nil;
+    [[NotificarePushLib shared] logCustomEvent:name withData:data completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)logOpenNotification:(CDVInvokedUrlCommand*)command {
+    NSDictionary *notification = [command argumentAtIndex:0];
+    NSMutableDictionary * eventData = [NSMutableDictionary dictionary];
+    [eventData setObject:[notification objectForKey:@"id"] forKey:@"notification"];
+    [[NotificarePushLib shared] logEvent:kNotificareEventNotificationOpen withData:eventData completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)logInfluencedNotification:(CDVInvokedUrlCommand*)command {
+    NSDictionary *notification = [command argumentAtIndex:0];
+    NSMutableDictionary * eventData = [NSMutableDictionary dictionary];
+    [eventData setObject:[notification objectForKey:@"id"] forKey:@"notification"];
+    [[NotificarePushLib shared] logEvent:kNotificareEventNotificationInfluenced withData:eventData completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)logReceiveNotification:(CDVInvokedUrlCommand*)command {
+    NSDictionary *notification = [command argumentAtIndex:0];
+    NSMutableDictionary * eventData = [NSMutableDictionary dictionary];
+    [eventData setObject:[notification objectForKey:@"id"] forKey:@"notification"];
+    [[NotificarePushLib shared] logEvent:kNotificareEventNotificationReceive withData:eventData completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)doCloudHostOperation:(CDVInvokedUrlCommand*)command {
+    NSString *verb = [command argumentAtIndex:0];
+    NSString *path = [command argumentAtIndex:1];
+    NSDictionary *headers = ([command argumentAtIndex:2]) ? [command argumentAtIndex:2] : nil;
+    NSDictionary *params = ([command argumentAtIndex:3]) ? [command argumentAtIndex:3] : nil;
+    NSDictionary *body = ([command argumentAtIndex:4]) ? [command argumentAtIndex:4] : nil;
+    [[NotificarePushLib shared] doCloudHostOperation:verb path:path URLParams:params customHeaders:headers bodyJSON:body completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:response];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)createAccount:(CDVInvokedUrlCommand*)command {
+    NSString *email = [command argumentAtIndex:0];
+    NSString *name = [command argumentAtIndex:1];
+    NSString *password = [command argumentAtIndex:2];
+    [[[NotificarePushLib shared] authManager] createAccount:email withName:name andPassword:password completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)validateAccount:(CDVInvokedUrlCommand*)command {
+    NSString *token = [command argumentAtIndex:0];
+    [[[NotificarePushLib shared] authManager] validateAccount:token completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)resetPassword:(CDVInvokedUrlCommand*)command {
+    NSString *password = [command argumentAtIndex:0];
+    NSString *token = [command argumentAtIndex:1];
+    [[[NotificarePushLib shared] authManager] resetPassword:password withToken:token completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)sendPassword:(CDVInvokedUrlCommand*)command {
+    NSString *email = [command argumentAtIndex:0];
+    [[[NotificarePushLib shared] authManager] sendPassword:email completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)login:(CDVInvokedUrlCommand*)command {
+    NSString *email = [command argumentAtIndex:0];
+    NSString *password = [command argumentAtIndex:1];
+    [[[NotificarePushLib shared] authManager] loginWithUsername:email andPassword:password completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)logout:(CDVInvokedUrlCommand*)command {
+    [[[NotificarePushLib shared] authManager] logoutAccount];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
+-(void)isLoggedIn:(CDVInvokedUrlCommand*)command {
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[[[NotificarePushLib shared] authManager] isLoggedIn]];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
+-(void)generateAccessToken:(CDVInvokedUrlCommand*)command {
+    [[[NotificarePushLib shared] authManager] generateAccessToken:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[[NotificarePushLibCordovaUtils shared] dictionaryFromUser:response]];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)changePassword:(CDVInvokedUrlCommand*)command {
+    NSString *password = [command argumentAtIndex:0];
+    [[[NotificarePushLib shared] authManager] changePassword:password completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[[NotificarePushLibCordovaUtils shared] dictionaryFromUser:response]];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)fetchAccountDetails:(CDVInvokedUrlCommand*)command {
+    [[[NotificarePushLib shared] authManager] fetchAccountDetails:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[[NotificarePushLibCordovaUtils shared] dictionaryFromUser:response]];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)fetchUserPreferences:(CDVInvokedUrlCommand*)command {
+    [[[NotificarePushLib shared] authManager] fetchUserPreferences:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            NSMutableArray * payload = [NSMutableArray array];
+            for (NotificareUserPreference * preference in response) {
+                [payload addObject:[[NotificarePushLibCordovaUtils shared] dictionaryFromUserPreference:preference]];
+            }
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:payload];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)addSegmentToUserPreference:(CDVInvokedUrlCommand*)command {
+    NSDictionary *segment = [command argumentAtIndex:0];
+    NSDictionary *userPreference = [command argumentAtIndex:1];
+    [[[NotificarePushLib shared] authManager] addSegment:[[NotificarePushLibCordovaUtils shared] segmentFromDictionary:segment] toPreference:[[NotificarePushLibCordovaUtils shared] userPreferenceFromDictionary:userPreference] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)removeSegmentFromUserPreference:(CDVInvokedUrlCommand*)command {
+    NSDictionary *segment = [command argumentAtIndex:0];
+    NSDictionary *userPreference = [command argumentAtIndex:1];
+    [[[NotificarePushLib shared] authManager] removeSegment:[[NotificarePushLibCordovaUtils shared] segmentFromDictionary:segment] fromPreference:[[NotificarePushLibCordovaUtils shared] userPreferenceFromDictionary:userPreference] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
+-(void)startScannableSession:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] startScannableSessionWithQRCode:[self navigationControllerForRootViewController] asModal:YES];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
+-(void)presentScannable:(CDVInvokedUrlCommand*)command {
+    NSDictionary *scannable = [command argumentAtIndex:0];
+    NotificareScannable * item = [[NotificarePushLibCordovaUtils shared] scannableFromDictionary:scannable];
+    [[NotificarePushLib shared] openScannable:item completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            if ([self isViewController:response]) {
+                UINavigationController *navController = [self navigationControllerForViewControllers:response];
+                [navController setModalPresentationStyle:UIModalPresentationFullScreen];
+                [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:NO completion:^{
+                    [[NotificarePushLib shared] presentScannable:item inNavigationController:navController withController:response];
+                }];
+            } else {
+                [[NotificarePushLib shared] presentScannable:item inNavigationController:[self navigationControllerForRootViewController] withController:response];
+            }
+        }
+    }];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self handleCallback:pluginResult withCommand:command];
+}
 
 #pragma Notificare Delegates
 -(void)notificarePushLib:(NotificarePushLib *)library onReady:(NotificareApplication *)application{
@@ -474,17 +1317,9 @@
     return result;
 }
 
--(void)handleSendPluginResultSuccess:(CDVInvokedUrlCommand*)command{
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [pluginResult setKeepCallbackAsBool:YES];
-    [[self commandDelegate] sendPluginResult:pluginResult callbackId:command.callbackId];
+-(void)handleCallback:(CDVPluginResult*)result withCommand:(CDVInvokedUrlCommand*)command{
+    [result setKeepCallbackAsBool:YES];
+    [[self commandDelegate] sendPluginResult:result callbackId:command.callbackId];
 }
-
--(void)handleSendPluginResultError:(CDVInvokedUrlCommand*)command{
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
-    [pluginResult setKeepCallbackAsBool:YES];
-    [[self commandDelegate] sendPluginResult:pluginResult callbackId:command.callbackId];
-}
-
 
 @end
