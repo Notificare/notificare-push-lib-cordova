@@ -15,6 +15,7 @@
 @end
 
 @implementation NotificarePushLibCordova
+
 - (void)pluginInitialize {
     [self setEventQueue:[NSMutableArray new]];
     [[NotificarePushLib shared] initializeWithKey:nil andSecret:nil];

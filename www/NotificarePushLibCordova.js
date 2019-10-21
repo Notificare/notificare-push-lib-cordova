@@ -90,6 +90,250 @@ Notificare.prototype.unregisterForNotifications = function(success, fail) {
     exec(success, fail, 'NotificarePushLibCordova', 'unregisterForNotifications', []);
 };
 
+Notificare.prototype.setAuthorizationOptions = function(options, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'setAuthorizationOptions', [options]);
+};
+
+Notificare.prototype.setPresentationOptions = function(options, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'setPresentationOptions', [options]);
+};
+
+Notificare.prototype.setCategoryOptions = function(options, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'setCategoryOptions', [options]);
+};
+
+Notificare.prototype.isRemoteNotificationsEnabled = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'isRemoteNotificationsEnabled', []);
+};
+
+Notificare.prototype.isAllowedUIEnabled = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'isAllowedUIEnabled', []);
+};
+
+Notificare.prototype.isNotificationFromNotificare = function(notification, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'isNotificationFromNotificare', [notification]);
+};
+
+Notificare.prototype.fetchNotificationSettings = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'fetchNotificationSettings', []);
+};
+
+Notificare.prototype.startLocationUpdates = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'startLocationUpdates', []);
+};
+
+Notificare.prototype.stopLocationUpdates = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'stopLocationUpdates', []);
+};
+
+Notificare.prototype.clearLocation = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'clearLocation', []);
+};
+
+Notificare.prototype.isLocationServicesEnabled = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'isLocationServicesEnabled', []);
+};
+
+Notificare.prototype.registerDevice = function(userID, userName, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'registerDevice', [userID, userName]);
+};
+
+Notificare.prototype.fetchDevice = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'fetchDevice', []);
+};
+
+Notificare.prototype.fetchPreferredLanguage = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'fetchPreferredLanguage', []);
+};
+
+Notificare.prototype.updatePreferredLanguage = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'updatePreferredLanguage', []);
+};
+
+Notificare.prototype.fetchTags = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'fetchTags', []);
+};
+
+Notificare.prototype.addTag = function(tag, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'addTag', [tag]);
+};
+
+Notificare.prototype.addTags = function(tags, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'addTags', [tags]);
+};
+
+Notificare.prototype.removeTag = function(tag, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'removeTag', [tag]);
+};
+
+Notificare.prototype.removeTags = function(tags, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'removeTags', [tags]);
+};
+
+Notificare.prototype.clearTags = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'clearTags', []);
+};
+
+Notificare.prototype.fetchUserData = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'fetchUserData', []);
+};
+
+Notificare.prototype.updateUserData = function(userData, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'updateUserData', [userData]);
+};
+
+Notificare.prototype.fetchDoNotDisturb = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'fetchDoNotDisturb', []);
+};
+
+Notificare.prototype.updateDoNotDisturb = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'updateDoNotDisturb', []);
+};
+
+Notificare.prototype.clearDoNotDisturb = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'clearDoNotDisturb', []);
+};
+
+Notificare.prototype.fetchNotification = function(notification, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'fetchNotification', [notification]);
+};
+
+Notificare.prototype.fetchNotificationForInboxItem = function(inboxItem, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'fetchNotification', [inboxItem]);
+};
+
+Notificare.prototype.presentNotification = function(notification, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'presentNotification', [notification]);
+};
+
+Notificare.prototype.fetchInbox = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'fetchInbox', []);
+};
+
+Notificare.prototype.presentInboxItem = function(inboxItem, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'presentInboxItem', [inboxItem]);
+};
+
+Notificare.prototype.removeFromInbox = function(inboxItem, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'removeFromInbox', [inboxItem]);
+};
+
+Notificare.prototype.markAsRead = function(inboxItem, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'markAsRead', [inboxItem]);
+};
+
+Notificare.prototype.clearInbox = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'clearInbox', []);
+};
+
+Notificare.prototype.fetchAssets = function(group, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'fetchAssets', [group]);
+};
+
+Notificare.prototype.fetchPassWithSerial = function(serial, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'fetchPassWithSerial', [serial]);
+};
+
+Notificare.prototype.fetchPassWithBarcode = function(barcode, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'fetchPassWithBarcode', [barcode]);
+};
+
+Notificare.prototype.fetchProducts = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'fetchProducts', []);
+};
+
+Notificare.prototype.fetchPurchasedProducts = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'fetchPurchasedProducts', []);
+};
+
+Notificare.prototype.fetchProduct = function(product, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'fetchProduct', [product]);
+};
+
+Notificare.prototype.buyProduct = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'buyProduct', []);
+};
+
+Notificare.prototype.logCustomEvent = function(event, data, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'logCustomEvent', [event, data]);
+};
+
+Notificare.prototype.logOpenNotification = function(notification, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'logOpenNotification', [notification]);
+};
+
+Notificare.prototype.logInfluencedNotification = function(notification, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'logInfluencedNotification', [notification]);
+};
+
+Notificare.prototype.logReceiveNotification = function(notification, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'logReceiveNotification', [notification]);
+};
+
+Notificare.prototype.doCloudHostOperation = function(verb, path, headers, params, body, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'doCloudHostOperation', [verb, path, headers, params, body]);
+};
+
+Notificare.prototype.createAccount = function(email, name, password, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'createAccount', [email, name, password]);
+};
+
+Notificare.prototype.validateAccount = function(token, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'validateAccount', [token]);
+};
+
+Notificare.prototype.resetPassword = function(password, token, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'resetPassword', [password, token]);
+};
+
+Notificare.prototype.sendPassword = function(email, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'resetPassword', [email]);
+};
+
+Notificare.prototype.login = function(email, password, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'login', [email, password]);
+};
+
+Notificare.prototype.logout = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'logout', []);
+};
+
+Notificare.prototype.isLoggedIn = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'isLoggedIn', []);
+};
+
+Notificare.prototype.generateAccessToken = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'generateAccessToken', []);
+};
+
+Notificare.prototype.changePassword = function(password, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'changePassword', [password]);
+};
+
+Notificare.prototype.fetchAccountDetails = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'fetchAccountDetails', []);
+};
+
+Notificare.prototype.fetchUserPreferences = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'fetchUserPreferences', []);
+};
+
+Notificare.prototype.addSegmentToUserPreference = function(segment, preference, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'addSegmentToUserPreference', [segment, preference]);
+};
+
+Notificare.prototype.removeSegmentFromUserPreference = function(segment, preference, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'removeSegmentFromUserPreference', [segment, preference]);
+};
+
+Notificare.prototype.startScannableSession = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'startScannableSession', []);
+};
+
+Notificare.prototype.presentScannable = function(scannable, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'startScannableSession', [scannable]);
+};
+
 
 Notificare.prototype.successCallback = function(payload) {
     if (payload && payload.type) {
