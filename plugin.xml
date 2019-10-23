@@ -43,6 +43,14 @@
             </array>
         </config-file>
 
+        <config-file parent="aps-environment" target="*/Entitlements-Debug.plist">
+            <string>development</string>
+        </config-file>
+
+        <config-file parent="aps-environment" target="*/Entitlements-Release.plist">
+            <string>production</string>
+        </config-file>
+
         <source-file src="src/ios/NotificarePushLibCordova.m" />
         <header-file src="src/ios/NotificarePushLibCordovaUtils.h" />
         <source-file src="src/ios/NotificarePushLibCordovaUtils.m" />
@@ -63,9 +71,71 @@
                 <param name="android-package" value="notificare-push-lib-cordova.NotificarePushLibCordova" />
             </feature>
         </config-file>
-        <config-file parent="/*" target="AndroidManifest.xml">
+
+        <config-file target="AndroidManifest.xml" parent="/manifest">
+            <uses-permission android:name="android.permission.INTERNET"/>
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+            <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+            <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+            <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
+        </config-file>
+
+        <config-file target="AndroidManifest.xml" parent="/manifest/application">
+            <!-- Use this to have a standalone notification activity -->
+            <activity android:name="re.notifica.ui.NotificationActivity" android:excludeFromRecents="true" />
+            <!-- Use this to start your main activity in the back stack, replace activity name as appropriate -->
+            <!--
+            <activity
+              android:name="re.notifica.ui.NotificationActivity"
+              android:parentActivityName=".MainActivity">
+              <meta-data
+                      android:name="android.support.PARENT_ACTIVITY"
+                      android:value=".MainActivity"/>
+            </activity>
+            -->
+            <activity
+                    android:name="re.notifica.ui.PassbookActivity"
+                    android:configChanges="keyboardHidden|orientation|screenSize"
+                    android:hardwareAccelerated="true" />
+            <service android:name="re.notifica.push.fcm.PushService"
+                     android:label="Notificare Push Service"
+                     android:exported="false">
+                <intent-filter>
+                    <action android:name="com.google.firebase.MESSAGING_EVENT" />
+                </intent-filter>
+            </service>
+            <service android:name="re.notifica.push.fcm.InstanceIDService" android:exported="false">
+                <intent-filter>
+                    <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+                </intent-filter>
+            </service>
+            <service android:name="re.notifica.push.fcm.RegistrationService" android:exported="false" />
+            <service android:name="re.notifica.push.gcm.TaskService"
+                     android:permission="com.google.android.gms.permission.BIND_NETWORK_TASK_SERVICE"
+                     android:exported="true">
+                <intent-filter>
+                    <action android:name="com.google.android.gms.gcm.ACTION_TASK_READY"/>
+                </intent-filter>
+            </service>
+            <receiver android:name="re.notifica.cordova.IntentReceiver" />
+
+            <meta-data  android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version"/>
+            <!-- API key for Google Maps -->
+            <meta-data
+                    android:name="com.google.android.maps.v2.API_KEY"
+                    android:value="COPY GOOGLE MAPS KEY FROM GOOGLE API CONSOLE" />
 
         </config-file>
-        <source-file src="src/android/NotificarePushLibCordova.java" target-dir="src/notificare-push-lib-cordova/NotificarePushLibCordova" />
+
+        <source-file src="src/android/NotificarePushLibCordova.java" target-dir="src/re/notifica/cordova/" />
+        <source-file src="src/android/BaseApplication.java" target-dir="src/re/notifica/cordova/" />
+        <source-file src="src/android/NotificarePushLibCordovaUtils.java" target-dir="src/re/notifica/cordova/" />
+
+
+        <resource-file src="src/android/notificareconfig.properties" target="assets/notificareconfig.properties" />
+
+        <!-- Depend on latest version of NotificarePushLib -->
+        <framework src="src/android/notificare.gradle" custom="true" type="gradleReference" />
+
     </platform>
 </plugin>

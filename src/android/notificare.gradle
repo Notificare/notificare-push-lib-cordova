@@ -1,0 +1,32 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            url 'https://maven.google.com'
+        }
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.5.1'
+        classpath 'com.google.gms:google-services:4.3.2'
+    }
+}
+
+repositories {
+    jcenter()
+    maven {
+        url 'https://maven.google.com'
+    }
+    maven {
+        url "https://github.com/Notificare/notificare-mvn-repo/raw/master/releases"
+    }
+}
+
+dependencies {
+    implementation 're.notifica:notificare-core:2.1.2'
+    implementation 're.notifica:notificare-location:2.1.2'
+    implementation 're.notifica:notificare-beacon:2.1.2'
+    implementation 're.notifica:notificare-scannable:2.1.2'
+}
+
+apply plugin: com.google.gms.googleservices.GoogleServicesPlugin
