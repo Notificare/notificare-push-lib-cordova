@@ -2,6 +2,7 @@ package re.notifica.cordova;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
@@ -21,6 +22,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedSet;
 
 import re.notifica.Notificare;
@@ -139,14 +141,144 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
         } else if (action.equals("fetchTags")) {
             this.fetchTags(args, callbackContext);
             return true;
+        } else if (action.equals("addTag")) {
+            this.addTag(args, callbackContext);
+            return true;
+        } else if (action.equals("addTags")) {
+            this.addTags(args, callbackContext);
+            return true;
+        } else if (action.equals("removeTag")) {
+            this.removeTag(args, callbackContext);
+            return true;
+        } else if (action.equals("removeTags")) {
+            this.removeTags(args, callbackContext);
+            return true;
+        } else if (action.equals("clearTags")) {
+            this.clearTags(args, callbackContext);
+            return true;
+        } else if (action.equals("fetchUserData")) {
+            this.fetchUserData(args, callbackContext);
+            return true;
+        } else if (action.equals("updateUserData")) {
+            this.updateUserData(args, callbackContext);
+            return true;
+        } else if (action.equals("fetchDoNotDisturb")) {
+            this.fetchDoNotDisturb(args, callbackContext);
+            return true;
+        } else if (action.equals("updateDoNotDisturb")) {
+            this.updateDoNotDisturb(args, callbackContext);
+            return true;
+        } else if (action.equals("clearDoNotDisturb")) {
+            this.clearDoNotDisturb(args, callbackContext);
+            return true;
+        } else if (action.equals("fetchNotificationForInboxItem")) {
+            this.fetchNotificationForInboxItem(args, callbackContext);
+            return true;
+        }  else if (action.equals("presentNotification")) {
+            this.presentNotification(args, callbackContext);
+            return true;
+        }  else if (action.equals("fetchInbox")) {
+            this.fetchInbox(args, callbackContext);
+            return true;
+        } else if (action.equals("presentInboxItem")) {
+            this.presentInboxItem(args, callbackContext);
+            return true;
+        } else if (action.equals("removeFromInbox")) {
+            this.removeFromInbox(args, callbackContext);
+            return true;
+        } else if (action.equals("markAsRead")) {
+            this.markAsRead(args, callbackContext);
+            return true;
+        } else if (action.equals("clearInbox")) {
+            this.clearInbox(args, callbackContext);
+            return true;
+        } else if (action.equals("fetchAssets")) {
+            this.fetchAssets(args, callbackContext);
+            return true;
+        } else if (action.equals("fetchPassWithSerial")) {
+            this.fetchPassWithSerial(args, callbackContext);
+            return true;
+        } else if (action.equals("fetchPassWithBarcode")) {
+            this.fetchPassWithBarcode(args, callbackContext);
+            return true;
+        } else if (action.equals("fetchProducts")) {
+            this.fetchProducts(args, callbackContext);
+            return true;
+        } else if (action.equals("fetchPurchasedProducts")) {
+            this.fetchPurchasedProducts(args, callbackContext);
+            return true;
+        } else if (action.equals("fetchProduct")) {
+            this.fetchProduct(args, callbackContext);
+            return true;
+        } else if (action.equals("buyProduct")) {
+            this.buyProduct(args, callbackContext);
+            return true;
+        } else if (action.equals("logCustomEvent")) {
+            this.logCustomEvent(args, callbackContext);
+            return true;
+        } else if (action.equals("logOpenNotification")) {
+            this.logOpenNotification(args, callbackContext);
+            return true;
+        } else if (action.equals("logInfluencedNotification")) {
+            this.logInfluencedNotification(args, callbackContext);
+            return true;
+        } else if (action.equals("doCloudHostOperation")) {
+            this.doCloudHostOperation(args, callbackContext);
+            return true;
+        } else if (action.equals("createAccount")) {
+            this.createAccount(args, callbackContext);
+            return true;
+        } else if (action.equals("validateAccount")) {
+            this.validateAccount(args, callbackContext);
+            return true;
+        } else if (action.equals("resetPassword")) {
+            this.resetPassword(args, callbackContext);
+            return true;
+        } else if (action.equals("sendPassword")) {
+            this.sendPassword(args, callbackContext);
+            return true;
+        } else if (action.equals("login")) {
+            this.login(args, callbackContext);
+            return true;
+        } else if (action.equals("logout")) {
+            this.logout(args, callbackContext);
+            return true;
+        } else if (action.equals("isLoggedIn")) {
+            this.isLoggedIn(args, callbackContext);
+            return true;
+        } else if (action.equals("generateAccessToken")) {
+            this.generateAccessToken(args, callbackContext);
+            return true;
+        } else if (action.equals("changePassword")) {
+            this.changePassword(args, callbackContext);
+            return true;
+        } else if (action.equals("fetchAccountDetails")) {
+            this.fetchAccountDetails(args, callbackContext);
+            return true;
+        } else if (action.equals("fetchUserPreferences")) {
+            this.fetchUserPreferences(args, callbackContext);
+            return true;
+        } else if (action.equals("addSegmentToUserPreference")) {
+            this.addSegmentToUserPreference(args, callbackContext);
+            return true;
+        } else if (action.equals("removeSegmentFromUserPreference")) {
+            this.removeSegmentFromUserPreference(args, callbackContext);
+            return true;
+        } else if (action.equals("startScannableSession")) {
+            this.startScannableSession(args, callbackContext);
+            return true;
+        } else if (action.equals("presentScannable")) {
+            this.presentScannable(args, callbackContext);
+            return true;
         }
 
         return false;
     }
 
-    /**
+    /************************************************************************************************************************************************************
      * Notificare Cordova Plugin Methods
-     */
+     ************************************************************************************************************************************************************/
+
 
     private void launch(JSONArray args, CallbackContext callbackContext) {
         mainCallback = callbackContext;
@@ -317,9 +449,1016 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
         });
     }
 
-    /**
+    private void addTag(JSONArray args, CallbackContext callbackContext) {
+        try {
+            if (args.getString(0) != null  && args.getString(0) instanceof String) {
+                Notificare.shared().addDeviceTag(args.getString(0), new NotificareCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean aBoolean) {
+                        callbackContext.success();
+                    }
+
+                    @Override
+                    public void onError(NotificareError notificareError) {
+                        callbackContext.error(notificareError.getLocalizedMessage());
+                    }
+                });
+            } else {
+                NotificareError notificareError = new NotificareError("invalid parameters");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void addTags(JSONArray args, CallbackContext callbackContext) {
+        try {
+            if (args.getJSONArray(0) != null) {
+                List<String> tagsList = new ArrayList<>();
+                for (int i = 0; i < args.getJSONArray(0).length(); i++) {
+                    tagsList.add(args.getJSONArray(0).optString(i));
+                }
+                Notificare.shared().addDeviceTags(tagsList, new NotificareCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean aBoolean) {
+                        callbackContext.success();
+                    }
+
+                    @Override
+                    public void onError(NotificareError notificareError) {
+                        callbackContext.error(notificareError.getLocalizedMessage());
+                    }
+                });
+            } else {
+                NotificareError notificareError = new NotificareError("invalid parameters");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void removeTag(JSONArray args, CallbackContext callbackContext) {
+        try {
+            if (args.getString(0) != null  && args.getString(0) instanceof String) {
+                Notificare.shared().removeDeviceTag(args.getString(0), new NotificareCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean aBoolean) {
+                        callbackContext.success();
+                    }
+
+                    @Override
+                    public void onError(NotificareError notificareError) {
+                        callbackContext.error(notificareError.getLocalizedMessage());
+                    }
+                });
+            } else {
+                NotificareError notificareError = new NotificareError("invalid parameters");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void removeTags(JSONArray args, CallbackContext callbackContext) {
+        try {
+            if (args.getJSONArray(0) != null) {
+                List<String> tagsList = new ArrayList<>();
+                for (int i = 0; i < args.getJSONArray(0).length(); i++) {
+                    tagsList.add(args.getJSONArray(0).optString(i));
+                }
+                Notificare.shared().removeDeviceTags(tagsList, new NotificareCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean aBoolean) {
+                        callbackContext.success();
+                    }
+
+                    @Override
+                    public void onError(NotificareError notificareError) {
+                        callbackContext.error(notificareError.getLocalizedMessage());
+                    }
+                });
+            } else {
+                NotificareError notificareError = new NotificareError("invalid parameters");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void clearTags(JSONArray args, CallbackContext callbackContext) {
+        Notificare.shared().clearDeviceTags(new NotificareCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean aBoolean) {
+                callbackContext.success();
+            }
+
+            @Override
+            public void onError(NotificareError notificareError) {
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        });
+    }
+
+    private void fetchUserData(JSONArray args, CallbackContext callbackContext) {
+        Notificare.shared().fetchUserData(new NotificareCallback<NotificareUserData>() {
+            @Override
+            public void onSuccess(NotificareUserData notificareUserData) {
+                JSONArray userDataFields = new JSONArray();
+                try {
+                    for (HashMap.Entry<String, NotificareUserDataField> field : Notificare.shared().getApplicationInfo().getUserDataFields().entrySet()) {
+                        JSONObject userDataMap = new JSONObject();
+                        userDataMap.put("key", field.getValue().getKey());
+                        userDataMap.put("label", field.getValue().getLabel());
+                        userDataMap.put("value", notificareUserData.getValue(field.getKey()));
+                        userDataFields.put(userDataMap);
+                    }
+                } catch (JSONException e) {
+                    // ignore, send list as is
+                }
+                callbackContext.success(userDataFields);
+            }
+
+            @Override
+            public void onError(NotificareError notificareError) {
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        });
+    }
+
+    private void updateUserData(JSONArray args, CallbackContext callbackContext) {
+        try {
+            JSONObject fields = args.getJSONObject(0);
+            if (fields != null) {
+                NotificareUserData data = new NotificareUserData();
+                while (fields.keys().hasNext()) {
+                    String key = fields.keys().next();
+                    if (fields.optString(key, null) != null) {
+                        data.setValue(key, fields.optString(key));
+                    }
+                }
+                Notificare.shared().updateUserData(data, new NotificareCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean aBoolean) {
+                        callbackContext.success();
+                    }
+
+                    @Override
+                    public void onError(NotificareError notificareError) {
+                        callbackContext.error(notificareError.getLocalizedMessage());
+                    }
+                });
+            } else {
+                NotificareError notificareError = new NotificareError("invalid user data");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+
+    }
+
+    private void fetchDoNotDisturb(JSONArray args, CallbackContext callbackContext) {
+        Notificare.shared().fetchDoNotDisturb(new NotificareCallback<NotificareTimeOfDayRange>() {
+            @Override
+            public void onSuccess(NotificareTimeOfDayRange dnd) {
+                try {
+                    callbackContext.success(NotificarePushLibCordovaUtils.mapTimeOfDayRange(dnd));
+                } catch (JSONException e) {
+                    callbackContext.error(e.getLocalizedMessage());
+                }
+            }
+
+            @Override
+            public void onError(NotificareError notificareError) {
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        });
+    }
+
+    private void updateDoNotDisturb(JSONArray args, CallbackContext callbackContext) {
+        try {
+            JSONObject deviceDnd = args.getJSONObject(0);
+            if (deviceDnd != null && deviceDnd.optString("start", null) != null && deviceDnd.optString("end", null) != null) {
+                String[] s = deviceDnd.optString("start").split(":");
+                String[] e = deviceDnd.optString("end").split(":");
+                final NotificareTimeOfDayRange range = new NotificareTimeOfDayRange(
+                        new NotificareTimeOfDay(Integer.parseInt(s[0]),Integer.parseInt(s[1])),
+                        new NotificareTimeOfDay(Integer.parseInt(e[0]),Integer.parseInt(e[1])));
+
+                Notificare.shared().updateDoNotDisturb(range, new NotificareCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean aBoolean) {
+                        try {
+                            callbackContext.success(NotificarePushLibCordovaUtils.mapTimeOfDayRange(range));
+                        } catch (JSONException e) {
+                            callbackContext.error(e.getLocalizedMessage());
+                        }
+                    }
+
+                    @Override
+                    public void onError(NotificareError notificareError) {
+                        callbackContext.error(notificareError.getLocalizedMessage());
+                    }
+                });
+            } else {
+                NotificareError notificareError = new NotificareError("invalid device dnd");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void clearDoNotDisturb(JSONArray args, CallbackContext callbackContext) {
+        Notificare.shared().clearDoNotDisturb(new NotificareCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean aBoolean) {
+                callbackContext.success();
+            }
+
+            @Override
+            public void onError(NotificareError notificareError) {
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        });
+    }
+
+    private void fetchNotificationForInboxItem(JSONArray args, CallbackContext callbackContext) {
+        try {
+            if (Notificare.shared().getInboxManager() != null) {
+                JSONObject inboxItem = args.getJSONObject(0);
+                if (inboxItem != null && inboxItem.optString("inboxId", null) != null && Notificare.shared().getInboxManager() != null) {
+                    NotificareInboxItem notificareInboxItem = Notificare.shared().getInboxManager().getItem(inboxItem.optString("inboxId"));
+                    if (notificareInboxItem != null) {
+                        try {
+                            callbackContext.success(NotificarePushLibCordovaUtils.mapNotification(notificareInboxItem.getNotification()));
+                        } catch (JSONException e) {
+                            NotificareError notificareError = new NotificareError("invalid inbox item");
+                            callbackContext.error(notificareError.getLocalizedMessage());
+                        }
+                    } else {
+                        NotificareError notificareError = new NotificareError("inbox item not found");
+                        callbackContext.error(notificareError.getLocalizedMessage());
+                    }
+                } else {
+                    NotificareError notificareError = new NotificareError("inbox item not found");
+                    callbackContext.error(notificareError.getLocalizedMessage());
+                }
+            } else {
+                NotificareError notificareError = new NotificareError("inbox not enabled");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void presentNotification(JSONArray args, CallbackContext callbackContext) {
+        try {
+            JSONObject notification = args.getJSONObject(0);
+            handlePresentNotification(notification);
+            callbackContext.success();
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void fetchInbox(JSONArray args, CallbackContext callbackContext) {
+        if (Notificare.shared().getInboxManager() != null) {
+            JSONArray inbox = new JSONArray();
+            try {
+                for (NotificareInboxItem item : Notificare.shared().getInboxManager().getItems()) {
+                    inbox.put(NotificarePushLibCordovaUtils.mapInboxItem(item));
+                }
+            } catch (JSONException e) {
+                // ignore exceptions, just return the list as is
+            }
+            callbackContext.success(inbox);
+        } else {
+            NotificareError notificareError = new NotificareError("inbox not enabled");
+            callbackContext.error(notificareError.getLocalizedMessage());
+        }
+    }
+
+    private void presentInboxItem(JSONArray args, CallbackContext callbackContext) {
+        try {
+            if (Notificare.shared().getInboxManager() != null) {
+                JSONObject inboxItem = args.getJSONObject(0);
+                if (inboxItem != null && inboxItem.optString("inboxId", null) != null) {
+                    NotificareInboxItem notificareInboxItem = Notificare.shared().getInboxManager().getItem(inboxItem.optString("inboxId"));
+                    if (notificareInboxItem != null) {
+                        Notificare.shared().openInboxItem(cordova.getActivity(), notificareInboxItem);
+                        callbackContext.success();
+                    }
+                }
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void removeFromInbox(JSONArray args, CallbackContext callbackContext) {
+        try {
+            if (Notificare.shared().getInboxManager() != null) {
+                JSONObject inboxItem = args.getJSONObject(0);
+                if (inboxItem != null && inboxItem.optString("inboxId", null) != null) {
+                    NotificareInboxItem notificareInboxItem = Notificare.shared().getInboxManager().getItem(inboxItem.optString("inboxId"));
+                    if (notificareInboxItem != null) {
+                        Notificare.shared().getInboxManager().removeItem(notificareInboxItem, new NotificareCallback<Boolean>() {
+                            @Override
+                            public void onSuccess(Boolean aBoolean) {
+                                try {
+                                    callbackContext.success(NotificarePushLibCordovaUtils.mapInboxItem(notificareInboxItem));
+                                } catch (JSONException e) {
+                                    NotificareError notificareError = new NotificareError("invalid response");
+                                    callbackContext.error(notificareError.getLocalizedMessage());
+                                }
+                            }
+
+                            @Override
+                            public void onError(NotificareError error) {
+                                callbackContext.error(error.getLocalizedMessage());
+                            }
+                        });
+                    } else {
+                        NotificareError notificareError = new NotificareError("inbox item not found");
+                        callbackContext.error(notificareError.getLocalizedMessage());
+                    }
+                } else {
+                    NotificareError notificareError = new NotificareError("inbox item not found");
+                    callbackContext.error(notificareError.getLocalizedMessage());
+                }
+            } else {
+                NotificareError notificareError = new NotificareError("inbox not enabled");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void markAsRead(JSONArray args, CallbackContext callbackContext) {
+        try {
+            if (Notificare.shared().getInboxManager() != null) {
+                JSONObject inboxItem = args.getJSONObject(0);
+                if (inboxItem != null && inboxItem.optString("inboxId", null) != null) {
+                    NotificareInboxItem notificareInboxItem = Notificare.shared().getInboxManager().getItem(inboxItem.optString("inboxId"));
+                    if (notificareInboxItem != null) {
+                        Notificare.shared().getInboxManager().markItem(notificareInboxItem, new NotificareCallback<Boolean>() {
+                            @Override
+                            public void onSuccess(Boolean aBoolean) {
+                                try {
+                                    callbackContext.success(NotificarePushLibCordovaUtils.mapInboxItem(notificareInboxItem));
+                                } catch (JSONException e) {
+                                    NotificareError notificareError = new NotificareError("invalid response");
+                                    callbackContext.error(notificareError.getLocalizedMessage());
+                                }
+                            }
+
+                            @Override
+                            public void onError(NotificareError error) {
+                                callbackContext.error(error.getLocalizedMessage());
+                            }
+                        });
+                    } else {
+                        NotificareError notificareError = new NotificareError("inbox item not found");
+                        callbackContext.error(notificareError.getLocalizedMessage());
+                    }
+                } else {
+                    NotificareError notificareError = new NotificareError("inbox item not found");
+                    callbackContext.error(notificareError.getLocalizedMessage());
+                }
+            } else {
+                NotificareError notificareError = new NotificareError("inbox not enabled");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void clearInbox(JSONArray args, CallbackContext callbackContext) {
+        if (Notificare.shared().getInboxManager() != null) {
+            Notificare.shared().getInboxManager().clearInbox(new NotificareCallback<Integer>() {
+                @Override
+                public void onSuccess(Integer count) {
+                    callbackContext.success();
+                }
+
+                @Override
+                public void onError(NotificareError notificareError) {
+                    callbackContext.error(notificareError.getLocalizedMessage());
+                }
+            });
+        } else {
+            NotificareError notificareError = new NotificareError("inbox not enabled");
+            callbackContext.error(notificareError.getLocalizedMessage());
+        }
+    }
+
+    private void fetchAssets(JSONArray args, CallbackContext callbackContext) {
+        try {
+            if (args.getString(0) != null  && args.getString(0) instanceof String) {
+                Notificare.shared().fetchAssets(args.getString(0), new NotificareCallback<List<NotificareAsset>>() {
+                    @Override
+                    public void onSuccess(List<NotificareAsset> notificareAssets) {
+                        JSONArray assetsArray = new JSONArray();
+                        try {
+                            for (NotificareAsset asset : notificareAssets) {
+                                assetsArray.put(NotificarePushLibCordovaUtils.mapAsset(asset));
+                            }
+                        } catch (JSONException e) {
+                            // ignore, send list of assets as is
+                        }
+                        callbackContext.success(assetsArray);
+                    }
+
+                    @Override
+                    public void onError(NotificareError notificareError) {
+                        callbackContext.error(notificareError.getLocalizedMessage());
+                    }
+                });
+            } else {
+                NotificareError notificareError = new NotificareError("invalid parameters");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void fetchPassWithSerial(JSONArray args, CallbackContext callbackContext) {
+        try {
+            if (args.getString(0) != null  && args.getString(0) instanceof String) {
+                Notificare.shared().fetchPass(args.getString(0), new NotificareCallback<NotificarePass>() {
+                    @Override
+                    public void onSuccess(NotificarePass notificarePass) {
+                        try {
+                            callbackContext.success(NotificarePushLibCordovaUtils.mapPass(notificarePass));
+                        } catch (JSONException e) {
+                            NotificareError notificareError = new NotificareError("invalid response");
+                            callbackContext.error(notificareError.getLocalizedMessage());
+                        }
+                    }
+
+                    @Override
+                    public void onError(NotificareError notificareError) {
+                        callbackContext.error(notificareError.getLocalizedMessage());
+                    }
+                });
+            } else {
+                NotificareError notificareError = new NotificareError("invalid parameters");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void fetchPassWithBarcode(JSONArray args, CallbackContext callbackContext) {
+        try {
+            if (args.getString(0) != null  && args.getString(0) instanceof String) {
+                Notificare.shared().fetchPass(args.getString(0), new NotificareCallback<NotificarePass>() {
+                    @Override
+                    public void onSuccess(NotificarePass notificarePass) {
+                        try {
+                            callbackContext.success(NotificarePushLibCordovaUtils.mapPass(notificarePass));
+                        } catch (JSONException e) {
+                            NotificareError notificareError = new NotificareError("invalid response");
+                            callbackContext.error(notificareError.getLocalizedMessage());
+                        }
+                    }
+
+                    @Override
+                    public void onError(NotificareError notificareError) {
+                        callbackContext.error(notificareError.getLocalizedMessage());
+                    }
+                });
+            } else {
+                NotificareError notificareError = new NotificareError("invalid parameters");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void fetchProducts(JSONArray args, CallbackContext callbackContext) {
+        if (Notificare.shared().getBillingManager() != null) {
+            callbackContext.success(NotificarePushLibCordovaUtils.mapProducts(Notificare.shared().getBillingManager().getProducts()));
+        } else {
+            NotificareError notificareError = new NotificareError("billing not enabled");
+            callbackContext.error(notificareError.getLocalizedMessage());
+        }
+    }
+
+    private void fetchPurchasedProducts(JSONArray args, CallbackContext callbackContext) {
+        if (Notificare.shared().getBillingManager() != null) {
+            List<Purchase> purchases = Notificare.shared().getBillingManager().getPurchases();
+            List<NotificareProduct> products = new ArrayList<>();
+            for (Purchase purchase : purchases) {
+                NotificareProduct product = Notificare.shared().getBillingManager().getProduct(purchase.getProductId());
+                if (product != null) {
+                    products.add(product);
+                }
+            }
+            callbackContext.success(NotificarePushLibCordovaUtils.mapProducts(products));
+        } else {
+            NotificareError notificareError = new NotificareError("billing not enabled");
+            callbackContext.error(notificareError.getLocalizedMessage());
+        }
+    }
+
+    private void fetchProduct(JSONArray args, CallbackContext callbackContext) {
+        try {
+            if (Notificare.shared().getBillingManager() != null) {
+                JSONObject product = args.getJSONObject(0);
+                if (product != null && product.optString("productIdentifier", null) != null) {
+                    NotificareProduct theProduct = Notificare.shared().getBillingManager().getProduct(product.optString("productIdentifier"));
+                    if (theProduct != null) {
+                        try {
+                            callbackContext.success(NotificarePushLibCordovaUtils.mapProduct(theProduct));
+                        } catch (JSONException e) {
+                            NotificareError notificareError = new NotificareError("invalid response");
+                            callbackContext.error(notificareError.getLocalizedMessage());
+                        }
+                    } else {
+                        NotificareError notificareError = new NotificareError("product not found");
+                        callbackContext.error(notificareError.getLocalizedMessage());
+                    }
+                } else {
+                    NotificareError notificareError = new NotificareError("product not found");
+                    callbackContext.error(notificareError.getLocalizedMessage());
+                }
+            } else {
+                NotificareError notificareError = new NotificareError("billing not enabled");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void buyProduct(JSONArray args, CallbackContext callbackContext) {
+        try {
+            if (Notificare.shared().getBillingManager() != null && cordova.getActivity() != null) {
+                JSONObject product = args.getJSONObject(0);
+                if (product != null && product.optString("productIdentifier", null) != null) {
+                    NotificareProduct notificareProduct = Notificare.shared().getBillingManager().getProduct(product.optString("identifier"));
+                    final Activity activity = cordova.getActivity();
+                    activity.runOnUiThread(() -> Notificare.shared().getBillingManager().launchPurchaseFlow(activity, notificareProduct, this));
+                }
+            }
+            callbackContext.success();
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void logCustomEvent(JSONArray args, CallbackContext callbackContext) {
+        try {
+            JSONObject data = args.getJSONObject(1);
+            if (args.getString(0) != null  && args.getString(0) instanceof String) {
+                Notificare.shared().getEventLogger().logCustomEvent(args.getString(0), data, new NotificareCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean aBoolean) {
+                        callbackContext.success();
+                    }
+
+                    @Override
+                    public void onError(NotificareError notificareError) {
+                        callbackContext.error(notificareError.getLocalizedMessage());
+                    }
+                });
+            } else {
+                NotificareError notificareError = new NotificareError("invalid parameters");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void logOpenNotification(JSONArray args, CallbackContext callbackContext) {
+        try {
+            JSONObject notification = args.getJSONObject(0);
+            if (notification != null && notification.optString("id", null) != null) {
+                Notificare.shared().getEventLogger().logOpenNotification(notification.optString("id"), new NotificareCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean aBoolean) {
+                        callbackContext.success();
+                    }
+
+                    @Override
+                    public void onError(NotificareError notificareError) {
+                        callbackContext.error(notificareError.getLocalizedMessage());
+                    }
+                });
+            } else {
+                NotificareError notificareError = new NotificareError("invalid notification");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void logInfluencedNotification(JSONArray args, CallbackContext callbackContext) {
+        try {
+            JSONObject notification = args.getJSONObject(0);
+            if (notification != null && notification.optString("id", null) != null) {
+                Notificare.shared().getEventLogger().logOpenNotificationInfluenced(notification.optString("id"), new NotificareCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean aBoolean) {
+                        callbackContext.success();
+                    }
+
+                    @Override
+                    public void onError(NotificareError notificareError) {
+                        callbackContext.error(notificareError.getLocalizedMessage());
+                    }
+                });
+            } else {
+                NotificareError notificareError = new NotificareError("invalid notification");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void doCloudHostOperation(JSONArray args, CallbackContext callbackContext) {
+        try {
+
+            if ((args.getString(0) != null  && args.getString(0) instanceof String) && (args.getString(1) != null  && args.getString(1) instanceof String)) {
+                JSONObject body = args.getJSONObject(2);
+                JSONObject params = args.getJSONObject(3);
+                JSONObject headers = args.getJSONObject(4);
+
+                Map<String, String> paramsMap = new HashMap<>();
+                if (params != null) {
+                    while (params.keys().hasNext()) {
+                        String key = params.keys().next();
+                        paramsMap.put(key, params.optString(key, null));
+                    }
+                }
+                Map<String, String> headersMap = new HashMap<>();
+                if (headers != null) {
+                    while (headers.keys().hasNext()) {
+                        String key = headers.keys().next();
+                        headersMap.put(key, headers.optString(key, null));
+                    }
+                }
+                Notificare.shared().doCloudRequest(args.getString(0), args.getString(1), paramsMap, body, headersMap, new NotificareCallback<JSONObject>() {
+                    @Override
+                    public void onSuccess(JSONObject jsonObject) {
+                        callbackContext.success(jsonObject);
+                    }
+
+                    @Override
+                    public void onError(NotificareError notificareError) {
+                        callbackContext.error(notificareError.getLocalizedMessage());
+                    }
+                });
+            } else {
+                NotificareError notificareError = new NotificareError("invalid parameters");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void createAccount(JSONArray args, CallbackContext callbackContext) {
+        try {
+
+            if ((args.getString(0) != null  && args.getString(0) instanceof String) &&
+                    (args.getString(1) != null  && args.getString(1) instanceof String) &&
+                    (args.getString(2) != null  && args.getString(2) instanceof String)) {
+
+                String email = args.getString(0);
+                String name = args.getString(1);
+                String password = args.getString(2);
+
+                Notificare.shared().createAccount(email, password, name, new NotificareCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean aBoolean) {
+                        callbackContext.success();
+                    }
+
+                    @Override
+                    public void onError(NotificareError notificareError) {
+                        callbackContext.error(notificareError.getLocalizedMessage());
+                    }
+                });
+            } else {
+                NotificareError notificareError = new NotificareError("invalid parameters");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void validateAccount(JSONArray args, CallbackContext callbackContext) {
+        try {
+
+            if (args.getString(0) != null  && args.getString(0) instanceof String) {
+
+                Notificare.shared().validateUser(args.getString(0), new NotificareCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean aBoolean) {
+                        callbackContext.success();
+                    }
+
+                    @Override
+                    public void onError(NotificareError notificareError) {
+                        callbackContext.error(notificareError.getLocalizedMessage());
+                    }
+                });
+
+            } else {
+                NotificareError notificareError = new NotificareError("invalid parameters");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void resetPassword(JSONArray args, CallbackContext callbackContext) {
+        try {
+
+            if ((args.getString(0) != null  && args.getString(0) instanceof String) &&
+                    (args.getString(1) != null  && args.getString(1) instanceof String)) {
+
+                Notificare.shared().resetPassword(args.getString(0), args.getString(1), new NotificareCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean aBoolean) {
+                        callbackContext.success();
+                    }
+
+                    @Override
+                    public void onError(NotificareError notificareError) {
+                        callbackContext.error(notificareError.getLocalizedMessage());
+                    }
+                });
+
+            } else {
+                NotificareError notificareError = new NotificareError("invalid parameters");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void sendPassword(JSONArray args, CallbackContext callbackContext) {
+        try {
+
+            if (args.getString(0) != null  && args.getString(0) instanceof String) {
+
+                Notificare.shared().sendPassword(args.getString(0), new NotificareCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean aBoolean) {
+                        callbackContext.success();
+                    }
+
+                    @Override
+                    public void onError(NotificareError notificareError) {
+                        callbackContext.error(notificareError.getLocalizedMessage());
+                    }
+                });
+
+            } else {
+                NotificareError notificareError = new NotificareError("invalid parameters");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void login(JSONArray args, CallbackContext callbackContext) {
+        try {
+
+            if ((args.getString(0) != null  && args.getString(0) instanceof String) &&
+                    (args.getString(1) != null  && args.getString(1) instanceof String)) {
+
+                Notificare.shared().userLogin(args.getString(0), args.getString(1), new NotificareCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean aBoolean) {
+                        callbackContext.success();
+                    }
+
+                    @Override
+                    public void onError(NotificareError notificareError) {
+                        callbackContext.error(notificareError.getLocalizedMessage());
+                    }
+                });
+
+            } else {
+                NotificareError notificareError = new NotificareError("invalid parameters");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void logout(JSONArray args, CallbackContext callbackContext) {
+        Notificare.shared().userLogout(new NotificareCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean aBoolean) {
+                callbackContext.success();
+            }
+
+            @Override
+            public void onError(NotificareError notificareError) {
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        });
+    }
+
+    private void isLoggedIn(JSONArray args, CallbackContext callbackContext) {
+        callbackContext.success((Notificare.shared().isLoggedIn()) ? 1 : 0);
+    }
+
+    private void generateAccessToken(JSONArray args, CallbackContext callbackContext) {
+        Notificare.shared().generateAccessToken(new NotificareCallback<NotificareUser>() {
+            @Override
+            public void onSuccess(NotificareUser notificareUser) {
+                try {
+                    callbackContext.success(NotificarePushLibCordovaUtils.mapUser(notificareUser));
+                } catch (JSONException e) {
+                    NotificareError notificareError = new NotificareError("invalid response");
+                    callbackContext.error(notificareError.getLocalizedMessage());
+                }
+            }
+
+            @Override
+            public void onError(NotificareError notificareError) {
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        });
+    }
+
+    private void changePassword(JSONArray args, CallbackContext callbackContext) {
+        try {
+
+            if (args.getString(0) != null  && args.getString(0) instanceof String) {
+
+                Notificare.shared().changePassword(args.getString(0), new NotificareCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean aBoolean) {
+                        callbackContext.success();
+                    }
+
+                    @Override
+                    public void onError(NotificareError notificareError) {
+                        callbackContext.error(notificareError.getLocalizedMessage());
+                    }
+                });
+
+            } else {
+                NotificareError notificareError = new NotificareError("invalid parameters");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void fetchAccountDetails(JSONArray args, CallbackContext callbackContext) {
+        Notificare.shared().fetchUserDetails(new NotificareCallback<NotificareUser>() {
+            @Override
+            public void onSuccess(NotificareUser notificareUser) {
+                try {
+                    callbackContext.success(NotificarePushLibCordovaUtils.mapUser(notificareUser));
+                } catch (JSONException e) {
+                    NotificareError notificareError = new NotificareError("invalid response");
+                    callbackContext.error(notificareError.getLocalizedMessage());
+                }
+            }
+
+            @Override
+            public void onError(NotificareError notificareError) {
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        });
+    }
+
+    private void fetchUserPreferences(JSONArray args, CallbackContext callbackContext) {
+        Notificare.shared().fetchUserPreferences(new NotificareCallback<List<NotificareUserPreference>>() {
+            @Override
+            public void onSuccess(List<NotificareUserPreference> notificareUserPreferences) {
+                JSONArray preferencesArray = new JSONArray();
+                try {
+                    for (NotificareUserPreference preference : notificareUserPreferences) {
+                        preferencesArray.put(NotificarePushLibCordovaUtils.mapUserPreference(preference));
+                    }
+                } catch (JSONException e) {
+                    // ignore, send list as is
+                }
+                callbackContext.success(preferencesArray);
+            }
+
+            @Override
+            public void onError(NotificareError notificareError) {
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        });
+    }
+
+    private void addSegmentToUserPreference(JSONArray args, CallbackContext callbackContext) {
+        try {
+            JSONObject segment = args.getJSONObject(0);
+            JSONObject preference = args.getJSONObject(1);
+            if (segment != null && preference != null) {
+                NotificareUserSegment userSegment = NotificarePushLibCordovaUtils.createUserSegment(segment);
+                NotificareUserPreference userPreference = NotificarePushLibCordovaUtils.createUserPreference(preference);
+                if (userSegment != null && userPreference != null) {
+                    Notificare.shared().userSegmentAddToUserPreference(userSegment, userPreference, new NotificareCallback<Boolean>() {
+                        @Override
+                        public void onSuccess(Boolean aBoolean) {
+                            callbackContext.success();
+                        }
+
+                        @Override
+                        public void onError(NotificareError notificareError) {
+                            callbackContext.error(notificareError.getLocalizedMessage());
+                        }
+                    });
+                } else {
+                    NotificareError notificareError = new NotificareError("invalid parameters");
+                    callbackContext.error(notificareError.getLocalizedMessage());
+                }
+            } else {
+                NotificareError notificareError = new NotificareError("invalid parameters");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void removeSegmentFromUserPreference(JSONArray args, CallbackContext callbackContext) {
+        try {
+            JSONObject segment = args.getJSONObject(0);
+            JSONObject preference = args.getJSONObject(1);
+            if (segment != null && preference != null) {
+                NotificareUserSegment userSegment = NotificarePushLibCordovaUtils.createUserSegment(segment);
+                NotificareUserPreference userPreference = NotificarePushLibCordovaUtils.createUserPreference(preference);
+                if (userSegment != null && userPreference != null) {
+                    Notificare.shared().userSegmentRemoveFromUserPreference(userSegment, userPreference, new NotificareCallback<Boolean>() {
+                        @Override
+                        public void onSuccess(Boolean aBoolean) {
+                            callbackContext.success();
+                        }
+
+                        @Override
+                        public void onError(NotificareError notificareError) {
+                            callbackContext.error(notificareError.getLocalizedMessage());
+                        }
+                    });
+                } else {
+                    NotificareError notificareError = new NotificareError("invalid parameters");
+                    callbackContext.error(notificareError.getLocalizedMessage());
+                }
+            } else {
+                NotificareError notificareError = new NotificareError("invalid parameters");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void startScannableSession(JSONArray args, CallbackContext callbackContext) {
+        if (cordova.getActivity() != null) {
+            Notificare.shared().startScannableActivity(cordova.getActivity(), SCANNABLE_REQUEST_CODE);
+        }
+        callbackContext.success();
+    }
+
+    private void presentScannable(JSONArray args, CallbackContext callbackContext) {
+        try {
+            JSONObject scannable = args.getJSONObject(0);
+            if (scannable != null && scannable.optJSONObject("notification") != null) {
+                handlePresentNotification(scannable.optJSONObject("notification"));
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    /************************************************************************************************************************************************************
      * Notificare Events
-     */
+     ************************************************************************************************************************************************************/
 
     @Override
     public void onNotificareReady(NotificareApplicationInfo notificareApplicationInfo) {
@@ -332,6 +1471,44 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
         }
     }
 
+    /************************************************************************************************************************************************************
+     * Notificare Helper Methods
+     ************************************************************************************************************************************************************/
+
+    /**
+     * Present Notification helper
+     * @param notification
+     */
+    private void handlePresentNotification(JSONObject notification) {
+        if (notification != null && notification.has("id")) {
+            String notificationId = notification.optString("id");
+            if (notification.has("inboxItemId") && notification.optString("inboxItemId", null) != null && Notificare.shared().getInboxManager() != null) {
+                // This is an item opened with inboxItemId, so coming from NotificationManager open
+                NotificareInboxItem notificareInboxItem = Notificare.shared().getInboxManager().getItem(notification.optString("inboxItemId"));
+                if (notificareInboxItem != null) {
+                    Notificare.shared().openInboxItem(cordova.getActivity(), notificareInboxItem);
+                }
+            } else if (notificationId != null && !notificationId.isEmpty()) {
+                // We have a notificationId, let's see if we can create a notification from the payload, otherwise fetch from API
+                NotificareNotification notificareNotification = NotificarePushLibCordovaUtils.createNotification(notification);
+                if (notificareNotification != null) {
+                    Notificare.shared().openNotification(cordova.getActivity(), notificareNotification);
+                } else {
+                    Notificare.shared().fetchNotification(notificationId, new NotificareCallback<NotificareNotification>() {
+                        @Override
+                        public void onSuccess(NotificareNotification notificareNotification) {
+                            Notificare.shared().openNotification(cordova.getActivity(), notificareNotification);
+                        }
+
+                        @Override
+                        public void onError(NotificareError notificareError) {
+                            Log.e(TAG, "error fetching notification: " + notificareError.getMessage());
+                        }
+                    });
+                }
+            }
+        }
+    }
     /**
      * Helper Method to send or queue events
      * @param type
@@ -412,9 +1589,9 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
         return null;
     }
 
-    /**
-     * Notificare implemented interfaces
-     */
+    /************************************************************************************************************************************************************
+     * Notificare Interfaces
+     ************************************************************************************************************************************************************/
 
     @Override
     public void onChanged(@Nullable SortedSet<NotificareInboxItem> notificareInboxItems) {
