@@ -10,6 +10,7 @@ public class BaseApplication extends Application {
 	public void onCreate() {
 		super.onCreate();
 	    Notificare.shared().launch(this);
+	    Notificare.shared().setIntentReceiver(IntentReceiver.class);
 	}
 
 }

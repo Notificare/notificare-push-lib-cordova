@@ -127,8 +127,9 @@
 
         </config-file>
 
-        <source-file src="src/android/NotificarePushLibCordova.java" target-dir="src/re/notifica/cordova/" />
         <source-file src="src/android/BaseApplication.java" target-dir="src/re/notifica/cordova/" />
+        <source-file src="src/android/IntentReceiver.java" target-dir="src/re/notifica/cordova/" />
+        <source-file src="src/android/NotificarePushLibCordova.java" target-dir="src/re/notifica/cordova/" />
         <source-file src="src/android/NotificarePushLibCordovaUtils.java" target-dir="src/re/notifica/cordova/" />
 
 
