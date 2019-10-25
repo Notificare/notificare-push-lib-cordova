@@ -102,6 +102,10 @@ Notificare.prototype.setCategoryOptions = function(options, success, fail) {
     exec(success, fail, 'NotificarePushLibCordova', 'setCategoryOptions', [options]);
 };
 
+Notificare.prototype.didChangeAppLifecycleState = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'didChangeAppLifecycleState', []);
+};
+
 Notificare.prototype.isRemoteNotificationsEnabled = function(success, fail) {
     exec(success, fail, 'NotificarePushLibCordova', 'isRemoteNotificationsEnabled', []);
 };
@@ -132,6 +136,14 @@ Notificare.prototype.clearLocation = function(success, fail) {
 
 Notificare.prototype.isLocationServicesEnabled = function(success, fail) {
     exec(success, fail, 'NotificarePushLibCordova', 'isLocationServicesEnabled', []);
+};
+
+Notificare.prototype.enableBeacons = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'enableBeacons', []);
+};
+
+Notificare.prototype.disableBeacons = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'disableBeacons', []);
 };
 
 Notificare.prototype.registerDevice = function(userID, userName, success, fail) {
@@ -252,6 +264,14 @@ Notificare.prototype.fetchProduct = function(product, success, fail) {
 
 Notificare.prototype.buyProduct = function(success, fail) {
     exec(success, fail, 'NotificarePushLibCordova', 'buyProduct', []);
+};
+
+Notificare.prototype.enableBilling = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'enableBilling', []);
+};
+
+Notificare.prototype.disableBilling = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'disableBilling', []);
 };
 
 Notificare.prototype.logCustomEvent = function(event, data, success, fail) {

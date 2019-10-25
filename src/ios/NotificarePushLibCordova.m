@@ -142,6 +142,11 @@
     [self handleCallback:pluginResult withCommand:command];
 }
 
+-(void)didChangeAppLifecycleState:(CDVInvokedUrlCommand*)command {
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
 - (void)registerForNotifications:(CDVInvokedUrlCommand*)command {
     [[NotificarePushLib shared] registerForNotifications];
 
@@ -212,6 +217,16 @@
 
 -(void)isLocationServicesEnabled:(CDVInvokedUrlCommand*)command {
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[[NotificarePushLib shared] locationServicesEnabled]];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
+-(void)enableBeacons:(CDVInvokedUrlCommand*)command {
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
+-(void)disableBeacons:(CDVInvokedUrlCommand*)command {
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
     [self handleCallback:pluginResult withCommand:command];
 }
 
@@ -617,6 +632,16 @@
         }
     }];
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
+-(void)enableBilling:(CDVInvokedUrlCommand*)command {
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
+-(void)disableBilling:(CDVInvokedUrlCommand*)command {
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
     [self handleCallback:pluginResult withCommand:command];
 }
 
