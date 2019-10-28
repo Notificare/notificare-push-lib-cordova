@@ -19,7 +19,7 @@ import re.notifica.model.NotificareSystemNotification;
 
 public class IntentReceiver extends DefaultIntentReceiver {
 
-    private static final String TAG = AppReceiver.class.getSimpleName();
+    private static final String TAG = IntentReceiver.class.getSimpleName();
 
     @Override
     public void onNotificationReceived(NotificareRemoteMessage message) {
