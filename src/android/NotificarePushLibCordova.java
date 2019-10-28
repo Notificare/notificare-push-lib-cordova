@@ -11,9 +11,11 @@ import androidx.annotation.Nullable;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
 
+import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
 
+import org.apache.cordova.CordovaWebView;
 import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -65,6 +67,13 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
 
     public NotificarePushLibCordova() {
         eventQueue = new ArrayList<PluginResult>();
+    }
+
+    @Override
+    public void initialize(CordovaInterface cordova, CordovaWebView webView) {
+        super.initialize(cordova, webView);
+        Notificare.shared().addServiceErrorListener(this);
+
     }
 
     @Override
@@ -282,8 +291,10 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
 
     private void launch(JSONArray args, CallbackContext callbackContext) {
         mainCallback = callbackContext;
-        callbackContext.success();
         Notificare.shared().addNotificareReadyListener(this);
+        PluginResult result = new PluginResult(PluginResult.Status.NO_RESULT);
+        result.setKeepCallback(true);
+        callbackContext.sendPluginResult(result);
     }
 
     private void didChangeAppLifecycleState(JSONArray args, CallbackContext callbackContext) {
@@ -1531,11 +1542,6 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
             mainCallback.sendPluginResult(pluginResult);
         }
         eventQueue.clear();
-    }
-
-    public void handleCallback(PluginResult result, CallbackContext callbackContext){
-        result.setKeepCallback(true);
-        callbackContext.sendPluginResult(result);
     }
 
     /**

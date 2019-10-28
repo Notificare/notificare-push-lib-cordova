@@ -4,6 +4,9 @@
     <js-module name="NotificarePushLibCordova" src="www/NotificarePushLibCordova.js">
         <clobbers target="Notificare" />
     </js-module>
+
+    <hook type="after_prepare" src="hooks/change_android_app_name.js" />
+
     <platform name="ios">
         <config-file parent="/*" target="config.xml">
             <feature name="NotificarePushLibCordova">
@@ -65,6 +68,7 @@
             </pods>
         </podspec>
     </platform>
+
     <platform name="android">
         <config-file parent="/*" target="res/xml/config.xml">
             <feature name="NotificarePushLibCordova">
@@ -110,4 +114,5 @@
         <framework src="src/android/notificare.gradle" custom="true" type="gradleReference" />
 
     </platform>
+
 </plugin>
