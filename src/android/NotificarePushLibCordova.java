@@ -50,9 +50,7 @@ import re.notifica.model.NotificareUserDataField;
 import re.notifica.model.NotificareUserPreference;
 import re.notifica.model.NotificareUserSegment;
 
-/**
- * This class echoes a string called from JavaScript.
- */
+
 public class NotificarePushLibCordova extends CordovaPlugin implements Observer<SortedSet<NotificareInboxItem>>, Notificare.OnNotificareReadyListener, Notificare.OnServiceErrorListener, Notificare.OnNotificareNotificationListener, BeaconRangingListener, Notificare.OnBillingReadyListener, BillingManager.OnRefreshFinishedListener, BillingManager.OnPurchaseFinishedListener {
 
     private static final String TAG = NotificarePushLibCordova.class.getSimpleName();
@@ -66,15 +64,61 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
     private List<PluginResult> eventQueue;
 
     public NotificarePushLibCordova() {
-        eventQueue = new ArrayList<PluginResult>();
+        eventQueue = new ArrayList<>();
     }
 
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
-        Notificare.shared().addServiceErrorListener(this);
-
     }
+
+
+    @Override
+    public void onPause(boolean multitasking) {
+        Log.i(TAG, "activity paused");
+        super.onPause(multitasking);
+        Notificare.shared().removeServiceErrorListener(this);
+        Notificare.shared().removeNotificareNotificationListener(this);
+        if (Notificare.shared().getBeaconClient() != null) {
+            Notificare.shared().getBeaconClient().removeRangingListener(this);
+        }
+        if (mInboxItems != null) {
+            mInboxItems.removeObserver(this);
+        }
+        Notificare.shared().removeBillingReadyListener(this);
+    }
+
+    @Override
+    public void onResume(boolean multitasking) {
+        Log.i(TAG, "activity resumed");
+        super.onResume(multitasking);
+        Notificare.shared().addServiceErrorListener(this);
+        Notificare.shared().addNotificareNotificationListener(this);
+        if (Notificare.shared().getBeaconClient() != null) {
+            Notificare.shared().getBeaconClient().addRangingListener(this);
+        }
+        if (Notificare.shared().getInboxManager() != null) {
+            mInboxItems = Notificare.shared().getInboxManager().getObservableItems();
+            mInboxItems.observeForever(this);
+        }
+        Notificare.shared().addBillingReadyListener(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.i(TAG, "activity destroyed");
+        super.onDestroy();
+        Notificare.shared().removeServiceErrorListener(this);
+        Notificare.shared().removeNotificareNotificationListener(this);
+        if (Notificare.shared().getBeaconClient() != null) {
+            Notificare.shared().getBeaconClient().removeRangingListener(this);
+        }
+        if (mInboxItems != null) {
+            mInboxItems.removeObserver(this);
+        }
+        Notificare.shared().removeBillingReadyListener(this);
+    }
+
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
@@ -1474,8 +1518,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
     @Override
     public void onNotificareReady(NotificareApplicationInfo notificareApplicationInfo) {
         try {
-            PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, NotificarePushLibCordovaUtils.mapApplicationInfo(notificareApplicationInfo));
-            handleEvent("ready", pluginResult);
+            handleEventPayload(PluginResult.Status.OK, "ready", NotificarePushLibCordovaUtils.mapApplicationInfo(notificareApplicationInfo));
             handleQueue();
         } catch (JSONException e) {
             // ignore
@@ -1520,12 +1563,62 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
             }
         }
     }
+
+    public void handleEventPayload(PluginResult.Status status, String type, JSONObject payload) {
+        JSONObject result = new JSONObject();
+        try {
+            result.put("type", type);
+            result.put("data", payload);
+            PluginResult pluginResult = new PluginResult(status, result);
+            handleEvent(pluginResult);
+        } catch (JSONException e) {
+            // ignore
+        }
+    }
+
+    public void handleEventPayload(PluginResult.Status status, String type, JSONArray payload) {
+        JSONObject result = new JSONObject();
+        try {
+            result.put("type", type);
+            result.put("data", payload);
+            PluginResult pluginResult = new PluginResult(status, result);
+            handleEvent(pluginResult);
+        } catch (JSONException e) {
+            // ignore
+        }
+    }
+
+    public void handleEventPayload(PluginResult.Status status, String type, int payload) {
+        JSONObject result = new JSONObject();
+        try {
+            result.put("type", type);
+            result.put("data", payload);
+            PluginResult pluginResult = new PluginResult(status, result);
+            handleEvent(pluginResult);
+        } catch (JSONException e) {
+            // ignore
+        }
+    }
+
+    public void handleEventPayload(PluginResult.Status status, String type, String payload) {
+        JSONObject result = new JSONObject();
+        try {
+            result.put("type", type);
+            result.put("data", payload);
+            PluginResult pluginResult = new PluginResult(status, result);
+            handleEvent(pluginResult);
+        } catch (JSONException e) {
+            // ignore
+        }
+    }
+
+
     /**
      * Helper Method to send or queue events
-     * @param type
+
      * @param pluginResult
      */
-    public void handleEvent(String type,PluginResult pluginResult) {
+    public void handleEvent(PluginResult pluginResult) {
         pluginResult.setKeepCallback(true);
         if (mainCallback != null) {
             mainCallback.sendPluginResult(pluginResult);
@@ -1553,8 +1646,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
             JSONObject tokenMap = new JSONObject();
             try {
                 tokenMap.put("token", token);
-                PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, tokenMap);
-                handleEvent("activationTokenReceived", pluginResult);
+                handleEventPayload(PluginResult.Status.OK, "activationTokenReceived", tokenMap);
             } catch (JSONException e) {
                 // ignore
             }
@@ -1570,8 +1662,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
             JSONObject tokenMap = new JSONObject();
             try {
                 tokenMap.put("token", token);
-                PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, tokenMap);
-                handleEvent("resetPasswordTokenReceived", pluginResult);
+                handleEventPayload(PluginResult.Status.OK, "resetPasswordTokenReceived", tokenMap);
             } catch (JSONException e) {
                 // ignore
             }
@@ -1610,10 +1701,8 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
             } catch (JSONException e) {
                 // ignore, send list as is
             }
-            PluginResult inboxResult = new PluginResult(PluginResult.Status.OK, inbox);
-            handleEvent("inboxLoaded", inboxResult);
-            PluginResult badgeResult = new PluginResult(PluginResult.Status.OK, Notificare.shared().getInboxManager().getUnreadCount());
-            handleEvent("badgeUpdated", badgeResult);
+            handleEventPayload(PluginResult.Status.OK, "inboxLoaded", inbox);
+            handleEventPayload(PluginResult.Status.OK, "badgeUpdated", Notificare.shared().getInboxManager().getUnreadCount());
         }
     }
 
@@ -1633,8 +1722,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
                 if (inboxItem != null) {
                     notificationMap.put("inboxItemId", inboxItem.getItemId());
                 }
-                PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, notificationMap);
-                handleEvent("remoteNotificationReceivedInForeground", pluginResult);
+                handleEventPayload(PluginResult.Status.OK, "remoteNotificationReceivedInForeground", notificationMap);
             } catch (JSONException e) {
                 // ignore
             }
@@ -1663,8 +1751,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
                     payload.put("region", NotificarePushLibCordovaUtils.mapRegionForBeacon(beacons.get(0)));
                 }
             }
-            PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, payload);
-            handleEvent("beaconsInRangeForRegion", pluginResult);
+            handleEventPayload(PluginResult.Status.OK, "beaconsInRangeForRegion", payload);
         } catch (JSONException e) {
             // ignore
         }
@@ -1681,11 +1768,9 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
             }
             if (billingResult.isFailure()) {
                 payload.put("error", billingResult.getMessage());
-                PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, payload);
-                handleEvent("productTransactionFailed", pluginResult);
+                handleEventPayload(PluginResult.Status.OK, "productTransactionFailed", payload);
             } else if (billingResult.isSuccess()) {
-                PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, payload);
-                handleEvent("productTransactionCompleted", pluginResult);
+                handleEventPayload(PluginResult.Status.OK, "productTransactionCompleted", payload);
             }
         } catch (JSONException e) {
             //ignore
@@ -1694,14 +1779,12 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
 
     @Override
     public void onRefreshFinished() {
-        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, NotificarePushLibCordovaUtils.mapProducts(Notificare.shared().getBillingManager().getProducts()));
-        handleEvent("storeLoaded", pluginResult);
+        handleEventPayload(PluginResult.Status.OK, "storeLoaded", NotificarePushLibCordovaUtils.mapProducts(Notificare.shared().getBillingManager().getProducts()));
     }
 
     @Override
     public void onRefreshFailed(NotificareError notificareError) {
-        PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR);
-        handleEvent("storeFailedToLoad", pluginResult);
+        handleEventPayload(PluginResult.Status.ERROR, "storeFailedToLoad", "");
     }
 
     @Override
@@ -1715,25 +1798,20 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
                         NotificareScannable scannable = Notificare.shared().extractScannableFromActivityResult(data);
                         if (scannable != null) {
                             try {
-                                PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, NotificarePushLibCordovaUtils.mapScannable(scannable));
-                                handleEvent("scannableDetected", pluginResult);
+                                handleEventPayload(PluginResult.Status.OK, "scannableDetected", NotificarePushLibCordovaUtils.mapScannable(scannable));
                             } catch (JSONException e) {
                                 // ignore
                             }
                         } else {
-                            PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "scannable not found");
-                            handleEvent("scannableSessionInvalidatedWithError", pluginResult);
+                            handleEventPayload(PluginResult.Status.ERROR, "scannableSessionInvalidatedWithError", "scannable not found");
                         }
                     } else {
-                        PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "scan did not return any results");
-                        handleEvent("scannableSessionInvalidatedWithError", pluginResult);
+                        handleEventPayload(PluginResult.Status.ERROR, "scannableSessionInvalidatedWithError", "scan did not return any results");
                     }
                 } else if (resultCode == CommonStatusCodes.CANCELED) {
-                    PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "scan was canceled");
-                    handleEvent("scannableSessionInvalidatedWithError", pluginResult);
+                    handleEventPayload(PluginResult.Status.ERROR, "scannableSessionInvalidatedWithError", "scan was canceled");
                 } else {
-                    PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "unknown error");
-                    handleEvent("scannableSessionInvalidatedWithError", pluginResult);
+                    handleEventPayload(PluginResult.Status.ERROR, "scannableSessionInvalidatedWithError", "unknown error");
                 }
             } else if (Notificare.shared().getBillingManager() != null && Notificare.shared().getBillingManager().handleActivityResult(requestCode, resultCode, data)) {
                 // Billingmanager handled the result
@@ -1748,8 +1826,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
         super.onNewIntent(intent);
         JSONObject notificationMap = parseNotificationIntent(intent);
         if (notificationMap != null) {
-            PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, notificationMap);
-            handleEvent("remoteNotificationReceivedInBackground", pluginResult);
+            handleEventPayload(PluginResult.Status.OK, "remoteNotificationReceivedInBackground", notificationMap);
         }
     }
 

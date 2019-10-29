@@ -5,8 +5,6 @@
         <clobbers target="Notificare" />
     </js-module>
 
-    <hook type="after_prepare" src="hooks/change_android_app_name.js" />
-
     <platform name="ios">
         <config-file parent="/*" target="config.xml">
             <feature name="NotificarePushLibCordova">
