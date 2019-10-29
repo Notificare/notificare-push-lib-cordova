@@ -55,7 +55,6 @@
         <source-file src="src/ios/NotificarePushLibCordova.m" />
         <header-file src="src/ios/NotificarePushLibCordovaUtils.h" />
         <source-file src="src/ios/NotificarePushLibCordovaUtils.m" />
-        <resource-file src="src/ios/Notificare.plist"/>
 
         <podspec>
             <config>
@@ -70,16 +69,20 @@
     <platform name="android">
         <config-file parent="/*" target="res/xml/config.xml">
             <feature name="NotificarePushLibCordova">
-                <param name="android-package" value="re.notifica.cordova.NotificarePushLibCordova" />
+                <param name="android-package" value="re.notifica.cordova.NotificarePlugin" />
                 <param name="onload" value="true" />
             </feature>
         </config-file>
 
         <config-file target="AndroidManifest.xml" parent="/manifest/application">
             <!-- Use this to have a standalone notification activity -->
-            <activity android:name="re.notifica.ui.NotificationActivity" android:excludeFromRecents="true" />
+            <activity
+                    android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+                    android:name="re.notifica.ui.NotificationActivity"
+                    android:excludeFromRecents="true" />
 
             <activity
+                    android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
                     android:name="re.notifica.ui.PassbookActivity"
                     android:configChanges="keyboardHidden|orientation|screenSize"
                     android:hardwareAccelerated="true" />
@@ -102,11 +105,8 @@
 
         <source-file src="src/android/BaseApplication.java" target-dir="src/re/notifica/cordova/" />
         <source-file src="src/android/IntentReceiver.java" target-dir="src/re/notifica/cordova/" />
-        <source-file src="src/android/NotificarePushLibCordova.java" target-dir="src/re/notifica/cordova/" />
-        <source-file src="src/android/NotificarePushLibCordovaUtils.java" target-dir="src/re/notifica/cordova/" />
-
-
-        <resource-file src="src/android/notificareconfig.properties" target="assets/notificareconfig.properties" />
+        <source-file src="src/android/NotificarePlugin.java" target-dir="src/re/notifica/cordova/" />
+        <source-file src="src/android/NotificareUtils.java" target-dir="src/re/notifica/cordova/" />
 
         <!-- Depend on latest version of NotificarePushLib -->
         <framework src="src/android/notificare.gradle" custom="true" type="gradleReference" />

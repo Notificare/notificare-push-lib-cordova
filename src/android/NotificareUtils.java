@@ -29,7 +29,7 @@ import re.notifica.model.NotificareUserPreferenceOption;
 import re.notifica.model.NotificareUserSegment;
 import re.notifica.util.ISODateFormatter;
 
-public class NotificarePushLibCordovaUtils {
+public class NotificareUtils {
 
     /**
      * Map application info

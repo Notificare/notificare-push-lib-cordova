@@ -2,6 +2,7 @@ package re.notifica.cordova;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
@@ -37,6 +38,7 @@ import re.notifica.billing.Purchase;
 import re.notifica.model.NotificareApplicationInfo;
 import re.notifica.model.NotificareAsset;
 import re.notifica.model.NotificareBeacon;
+import re.notifica.model.NotificareDevice;
 import re.notifica.model.NotificareInboxItem;
 import re.notifica.model.NotificareNotification;
 import re.notifica.model.NotificarePass;
@@ -51,11 +53,13 @@ import re.notifica.model.NotificareUserPreference;
 import re.notifica.model.NotificareUserSegment;
 
 
-public class NotificarePushLibCordova extends CordovaPlugin implements Observer<SortedSet<NotificareInboxItem>>, Notificare.OnNotificareReadyListener, Notificare.OnServiceErrorListener, Notificare.OnNotificareNotificationListener, BeaconRangingListener, Notificare.OnBillingReadyListener, BillingManager.OnRefreshFinishedListener, BillingManager.OnPurchaseFinishedListener {
+public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSet<NotificareInboxItem>>, Notificare.OnNotificareReadyListener, Notificare.OnServiceErrorListener, Notificare.OnNotificareNotificationListener, BeaconRangingListener, Notificare.OnBillingReadyListener, BillingManager.OnRefreshFinishedListener, BillingManager.OnPurchaseFinishedListener {
 
-    private static final String TAG = NotificarePushLibCordova.class.getSimpleName();
+    private static final String TAG = NotificarePlugin.class.getSimpleName();
 
     private static final int SCANNABLE_REQUEST_CODE = 9004;
+
+    public static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
     private LiveData<SortedSet<NotificareInboxItem>> mInboxItems;
     private boolean mIsBillingReady = false;
@@ -63,8 +67,31 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
     private CallbackContext mainCallback;
     private List<PluginResult> eventQueue;
 
-    public NotificarePushLibCordova() {
+    /**
+     * Shared instance
+     */
+    private static NotificarePlugin instance;
+    final static Object lock = new Object();
+
+    /**
+     * Constructor
+     */
+    public NotificarePlugin() {
+        instance = this;
         eventQueue = new ArrayList<>();
+    }
+
+    /**
+     * Singleton method
+     * @return the shared instance of the plugin
+     */
+    public static NotificarePlugin shared() {
+        synchronized (lock) {
+            if (instance == null) {
+                instance = new NotificarePlugin();
+            }
+            return instance;
+        }
     }
 
     @Override
@@ -379,7 +406,11 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
     }
 
     private void startLocationUpdates(JSONArray args, CallbackContext callbackContext) {
-        Notificare.shared().enableLocationUpdates();
+        if (!Notificare.shared().hasLocationPermissionGranted()) {
+            cordova.requestPermissions(this, LOCATION_PERMISSION_REQUEST_CODE, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION});
+        } else {
+            Notificare.shared().enableLocationUpdates();
+        }
         callbackContext.success();
     }
 
@@ -439,7 +470,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
                 @Override
                 public void onSuccess(String s) {
                     try {
-                        callbackContext.success(NotificarePushLibCordovaUtils.mapDevice(Notificare.shared().getRegisteredDevice()));
+                        callbackContext.success(NotificareUtils.mapDevice(Notificare.shared().getRegisteredDevice()));
                     } catch (JSONException e) {
                         callbackContext.error(e.getLocalizedMessage());
                     }
@@ -457,7 +488,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
 
     private void fetchDevice(JSONArray args, CallbackContext callbackContext) {
         try {
-            callbackContext.success(NotificarePushLibCordovaUtils.mapDevice(Notificare.shared().getRegisteredDevice()));
+            callbackContext.success(NotificareUtils.mapDevice(Notificare.shared().getRegisteredDevice()));
         } catch (JSONException e) {
             callbackContext.error(e.getLocalizedMessage());
         }
@@ -681,7 +712,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
             @Override
             public void onSuccess(NotificareTimeOfDayRange dnd) {
                 try {
-                    callbackContext.success(NotificarePushLibCordovaUtils.mapTimeOfDayRange(dnd));
+                    callbackContext.success(NotificareUtils.mapTimeOfDayRange(dnd));
                 } catch (JSONException e) {
                     callbackContext.error(e.getLocalizedMessage());
                 }
@@ -708,7 +739,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
                     @Override
                     public void onSuccess(Boolean aBoolean) {
                         try {
-                            callbackContext.success(NotificarePushLibCordovaUtils.mapTimeOfDayRange(range));
+                            callbackContext.success(NotificareUtils.mapTimeOfDayRange(range));
                         } catch (JSONException e) {
                             callbackContext.error(e.getLocalizedMessage());
                         }
@@ -750,7 +781,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
                     NotificareInboxItem notificareInboxItem = Notificare.shared().getInboxManager().getItem(inboxItem.optString("inboxId"));
                     if (notificareInboxItem != null) {
                         try {
-                            callbackContext.success(NotificarePushLibCordovaUtils.mapNotification(notificareInboxItem.getNotification()));
+                            callbackContext.success(NotificareUtils.mapNotification(notificareInboxItem.getNotification()));
                         } catch (JSONException e) {
                             NotificareError notificareError = new NotificareError("invalid inbox item");
                             callbackContext.error(notificareError.getLocalizedMessage());
@@ -787,7 +818,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
             JSONArray inbox = new JSONArray();
             try {
                 for (NotificareInboxItem item : Notificare.shared().getInboxManager().getItems()) {
-                    inbox.put(NotificarePushLibCordovaUtils.mapInboxItem(item));
+                    inbox.put(NotificareUtils.mapInboxItem(item));
                 }
             } catch (JSONException e) {
                 // ignore exceptions, just return the list as is
@@ -827,7 +858,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
                             @Override
                             public void onSuccess(Boolean aBoolean) {
                                 try {
-                                    callbackContext.success(NotificarePushLibCordovaUtils.mapInboxItem(notificareInboxItem));
+                                    callbackContext.success(NotificareUtils.mapInboxItem(notificareInboxItem));
                                 } catch (JSONException e) {
                                     NotificareError notificareError = new NotificareError("invalid response");
                                     callbackContext.error(notificareError.getLocalizedMessage());
@@ -867,7 +898,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
                             @Override
                             public void onSuccess(Boolean aBoolean) {
                                 try {
-                                    callbackContext.success(NotificarePushLibCordovaUtils.mapInboxItem(notificareInboxItem));
+                                    callbackContext.success(NotificareUtils.mapInboxItem(notificareInboxItem));
                                 } catch (JSONException e) {
                                     NotificareError notificareError = new NotificareError("invalid response");
                                     callbackContext.error(notificareError.getLocalizedMessage());
@@ -924,7 +955,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
                         JSONArray assetsArray = new JSONArray();
                         try {
                             for (NotificareAsset asset : notificareAssets) {
-                                assetsArray.put(NotificarePushLibCordovaUtils.mapAsset(asset));
+                                assetsArray.put(NotificareUtils.mapAsset(asset));
                             }
                         } catch (JSONException e) {
                             // ignore, send list of assets as is
@@ -953,7 +984,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
                     @Override
                     public void onSuccess(NotificarePass notificarePass) {
                         try {
-                            callbackContext.success(NotificarePushLibCordovaUtils.mapPass(notificarePass));
+                            callbackContext.success(NotificareUtils.mapPass(notificarePass));
                         } catch (JSONException e) {
                             NotificareError notificareError = new NotificareError("invalid response");
                             callbackContext.error(notificareError.getLocalizedMessage());
@@ -981,7 +1012,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
                     @Override
                     public void onSuccess(NotificarePass notificarePass) {
                         try {
-                            callbackContext.success(NotificarePushLibCordovaUtils.mapPass(notificarePass));
+                            callbackContext.success(NotificareUtils.mapPass(notificarePass));
                         } catch (JSONException e) {
                             NotificareError notificareError = new NotificareError("invalid response");
                             callbackContext.error(notificareError.getLocalizedMessage());
@@ -1004,7 +1035,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
 
     private void fetchProducts(JSONArray args, CallbackContext callbackContext) {
         if (Notificare.shared().getBillingManager() != null) {
-            callbackContext.success(NotificarePushLibCordovaUtils.mapProducts(Notificare.shared().getBillingManager().getProducts()));
+            callbackContext.success(NotificareUtils.mapProducts(Notificare.shared().getBillingManager().getProducts()));
         } else {
             NotificareError notificareError = new NotificareError("billing not enabled");
             callbackContext.error(notificareError.getLocalizedMessage());
@@ -1021,7 +1052,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
                     products.add(product);
                 }
             }
-            callbackContext.success(NotificarePushLibCordovaUtils.mapProducts(products));
+            callbackContext.success(NotificareUtils.mapProducts(products));
         } else {
             NotificareError notificareError = new NotificareError("billing not enabled");
             callbackContext.error(notificareError.getLocalizedMessage());
@@ -1036,7 +1067,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
                     NotificareProduct theProduct = Notificare.shared().getBillingManager().getProduct(product.optString("productIdentifier"));
                     if (theProduct != null) {
                         try {
-                            callbackContext.success(NotificarePushLibCordovaUtils.mapProduct(theProduct));
+                            callbackContext.success(NotificareUtils.mapProduct(theProduct));
                         } catch (JSONException e) {
                             NotificareError notificareError = new NotificareError("invalid response");
                             callbackContext.error(notificareError.getLocalizedMessage());
@@ -1348,7 +1379,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
             @Override
             public void onSuccess(NotificareUser notificareUser) {
                 try {
-                    callbackContext.success(NotificarePushLibCordovaUtils.mapUser(notificareUser));
+                    callbackContext.success(NotificareUtils.mapUser(notificareUser));
                 } catch (JSONException e) {
                     NotificareError notificareError = new NotificareError("invalid response");
                     callbackContext.error(notificareError.getLocalizedMessage());
@@ -1393,7 +1424,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
             @Override
             public void onSuccess(NotificareUser notificareUser) {
                 try {
-                    callbackContext.success(NotificarePushLibCordovaUtils.mapUser(notificareUser));
+                    callbackContext.success(NotificareUtils.mapUser(notificareUser));
                 } catch (JSONException e) {
                     NotificareError notificareError = new NotificareError("invalid response");
                     callbackContext.error(notificareError.getLocalizedMessage());
@@ -1414,7 +1445,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
                 JSONArray preferencesArray = new JSONArray();
                 try {
                     for (NotificareUserPreference preference : notificareUserPreferences) {
-                        preferencesArray.put(NotificarePushLibCordovaUtils.mapUserPreference(preference));
+                        preferencesArray.put(NotificareUtils.mapUserPreference(preference));
                     }
                 } catch (JSONException e) {
                     // ignore, send list as is
@@ -1434,8 +1465,8 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
             JSONObject segment = args.getJSONObject(0);
             JSONObject preference = args.getJSONObject(1);
             if (segment != null && preference != null) {
-                NotificareUserSegment userSegment = NotificarePushLibCordovaUtils.createUserSegment(segment);
-                NotificareUserPreference userPreference = NotificarePushLibCordovaUtils.createUserPreference(preference);
+                NotificareUserSegment userSegment = NotificareUtils.createUserSegment(segment);
+                NotificareUserPreference userPreference = NotificareUtils.createUserPreference(preference);
                 if (userSegment != null && userPreference != null) {
                     Notificare.shared().userSegmentAddToUserPreference(userSegment, userPreference, new NotificareCallback<Boolean>() {
                         @Override
@@ -1466,8 +1497,8 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
             JSONObject segment = args.getJSONObject(0);
             JSONObject preference = args.getJSONObject(1);
             if (segment != null && preference != null) {
-                NotificareUserSegment userSegment = NotificarePushLibCordovaUtils.createUserSegment(segment);
-                NotificareUserPreference userPreference = NotificarePushLibCordovaUtils.createUserPreference(preference);
+                NotificareUserSegment userSegment = NotificareUtils.createUserSegment(segment);
+                NotificareUserPreference userPreference = NotificareUtils.createUserPreference(preference);
                 if (userSegment != null && userPreference != null) {
                     Notificare.shared().userSegmentRemoveFromUserPreference(userSegment, userPreference, new NotificareCallback<Boolean>() {
                         @Override
@@ -1518,7 +1549,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
     @Override
     public void onNotificareReady(NotificareApplicationInfo notificareApplicationInfo) {
         try {
-            handleEventPayload(PluginResult.Status.OK, "ready", NotificarePushLibCordovaUtils.mapApplicationInfo(notificareApplicationInfo));
+            handleEventPayload(PluginResult.Status.OK, "ready", NotificareUtils.mapApplicationInfo(notificareApplicationInfo));
             handleQueue();
         } catch (JSONException e) {
             // ignore
@@ -1544,7 +1575,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
                 }
             } else if (notificationId != null && !notificationId.isEmpty()) {
                 // We have a notificationId, let's see if we can create a notification from the payload, otherwise fetch from API
-                NotificareNotification notificareNotification = NotificarePushLibCordovaUtils.createNotification(notification);
+                NotificareNotification notificareNotification = NotificareUtils.createNotification(notification);
                 if (notificareNotification != null) {
                     Notificare.shared().openNotification(cordova.getActivity(), notificareNotification);
                 } else {
@@ -1669,11 +1700,35 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
         }
     }
 
+    public void sendRegistration(NotificareDevice device) {
+        if (device.getDeviceId() != null) {
+            try {
+                handleEventPayload(PluginResult.Status.OK, "deviceRegistered", NotificareUtils.mapDevice(device));
+            } catch (JSONException e) {
+
+            }
+        }
+    }
+
+    public void sendUrlClicked(Uri urlClicked, NotificareNotification notification) {
+        if (urlClicked != null && notification != null) {
+            JSONObject payload = new JSONObject();
+            try {
+                payload.put("url", urlClicked.toString());
+                payload.put("notification", NotificareUtils.mapNotification(notification));
+                handleEventPayload(PluginResult.Status.OK, "urlClickedInNotification", payload);
+            } catch (JSONException e) {
+
+            }
+
+        }
+    }
+
     private JSONObject parseNotificationIntent(Intent intent) {
         NotificareNotification notification = intent.getParcelableExtra(Notificare.INTENT_EXTRA_NOTIFICATION);
         if (notification != null) {
             try {
-                JSONObject notificationMap = NotificarePushLibCordovaUtils.mapNotification(notification);
+                JSONObject notificationMap = NotificareUtils.mapNotification(notification);
                 // Add inbox item id if present
                 if (intent.hasExtra(Notificare.INTENT_EXTRA_INBOX_ITEM_ID)) {
                     notificationMap.put("inboxItemId", intent.getStringExtra(Notificare.INTENT_EXTRA_INBOX_ITEM_ID));
@@ -1686,9 +1741,25 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
         return null;
     }
 
+    @Override
+    public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) throws JSONException {
+        switch (requestCode) {
+            case LOCATION_PERMISSION_REQUEST_CODE:
+                if (Notificare.shared().checkRequestLocationPermissionResult(permissions, grantResults)) {
+                    Notificare.shared().enableLocationUpdates();
+                    Notificare.shared().enableBeacons(30000);
+                } else if (Notificare.shared().checkRequestForegroundLocationPermissionResult(permissions, grantResults)) {
+                    Notificare.shared().enableLocationUpdates();
+                    Notificare.shared().enableBeacons(30000);
+                }
+                break;
+        }
+    }
+
     /************************************************************************************************************************************************************
      * Notificare Interfaces
      ************************************************************************************************************************************************************/
+
 
     @Override
     public void onChanged(@Nullable SortedSet<NotificareInboxItem> notificareInboxItems) {
@@ -1696,7 +1767,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
         if (notificareInboxItems != null) {
             try {
                 for (NotificareInboxItem item : notificareInboxItems) {
-                    inbox.put(NotificarePushLibCordovaUtils.mapInboxItem(item));
+                    inbox.put(NotificareUtils.mapInboxItem(item));
                 }
             } catch (JSONException e) {
                 // ignore, send list as is
@@ -1717,7 +1788,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
     public void onNotificareNotification(NotificareNotification notification, NotificareInboxItem inboxItem, Boolean shouldPresent) {
         if (notification != null) {
             try {
-                JSONObject notificationMap = NotificarePushLibCordovaUtils.mapNotification(notification);
+                JSONObject notificationMap = NotificareUtils.mapNotification(notification);
                 // Add inbox item id if present
                 if (inboxItem != null) {
                     notificationMap.put("inboxItemId", inboxItem.getItemId());
@@ -1743,12 +1814,12 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
             JSONObject payload = new JSONObject();
             JSONArray beaconsArray = new JSONArray();
             for (NotificareBeacon beacon : beacons) {
-                beaconsArray.put(NotificarePushLibCordovaUtils.mapBeacon(beacon));
+                beaconsArray.put(NotificareUtils.mapBeacon(beacon));
             }
             payload.put("beacons", beaconsArray);
             if (beacons.size() > 0) {
                 if (beacons.get(0).getRegion() != null) {
-                    payload.put("region", NotificarePushLibCordovaUtils.mapRegionForBeacon(beacons.get(0)));
+                    payload.put("region", NotificareUtils.mapRegionForBeacon(beacons.get(0)));
                 }
             }
             handleEventPayload(PluginResult.Status.OK, "beaconsInRangeForRegion", payload);
@@ -1764,7 +1835,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
         NotificareProduct product = Notificare.shared().getBillingManager().getProduct(purchase.getProductId());
         try {
             if (product != null) {
-                payload.put("product", NotificarePushLibCordovaUtils.mapProduct(product));
+                payload.put("product", NotificareUtils.mapProduct(product));
             }
             if (billingResult.isFailure()) {
                 payload.put("error", billingResult.getMessage());
@@ -1779,7 +1850,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
 
     @Override
     public void onRefreshFinished() {
-        handleEventPayload(PluginResult.Status.OK, "storeLoaded", NotificarePushLibCordovaUtils.mapProducts(Notificare.shared().getBillingManager().getProducts()));
+        handleEventPayload(PluginResult.Status.OK, "storeLoaded", NotificareUtils.mapProducts(Notificare.shared().getBillingManager().getProducts()));
     }
 
     @Override
@@ -1798,7 +1869,7 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
                         NotificareScannable scannable = Notificare.shared().extractScannableFromActivityResult(data);
                         if (scannable != null) {
                             try {
-                                handleEventPayload(PluginResult.Status.OK, "scannableDetected", NotificarePushLibCordovaUtils.mapScannable(scannable));
+                                handleEventPayload(PluginResult.Status.OK, "scannableDetected", NotificareUtils.mapScannable(scannable));
                             } catch (JSONException e) {
                                 // ignore
                             }
@@ -1827,6 +1898,9 @@ public class NotificarePushLibCordova extends CordovaPlugin implements Observer<
         JSONObject notificationMap = parseNotificationIntent(intent);
         if (notificationMap != null) {
             handleEventPayload(PluginResult.Status.OK, "remoteNotificationReceivedInBackground", notificationMap);
+        } else {
+            sendValidateUserToken(Notificare.shared().parseValidateUserIntent(intent));
+            sendResetPasswordToken(Notificare.shared().parseResetPasswordIntent(intent));
         }
     }
 
