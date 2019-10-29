@@ -3,6 +3,7 @@
     <name>NotificarePushLibCordova</name>
     <js-module name="NotificarePushLibCordova" src="www/NotificarePushLibCordova.js">
         <clobbers target="Notificare" />
+        <merges target="cordova.plugins.Notificare" />
     </js-module>
 
     <platform name="ios">
