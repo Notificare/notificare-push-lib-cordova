@@ -1,14 +1,38 @@
 {
-  "name": "notificare-push-lib-cordova",
-  "version": "0.1.0",
-  "description": "Cordova plugin for Notificare",
+  "version": "2.0.0",
+  "name": "cordova-plugin-notificare-push",
+  "cordova_name": "Notificare Plugin",
+  "description": "Official Notificare Cordova plugin. Implements the power of the Notificare platform in Cordova/Phonegap/Ionic applications.",
+  "license": "Apache",
+  "platforms": [
+    "android",
+    "ios"
+  ],
+  "engines": [
+    {
+      "name": "cordova",
+      "version": ">=6.0.0"
+    }
+  ],
   "cordova": {
-    "id": "notificare-push-lib-cordova",
-    "platforms": []
+    "id": "cordova-plugin-notificare-push",
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Notificare/notificare-push-lib-cordova.git"
   },
   "keywords": [
-    "ecosystem:cordova"
+    "ecosystem:cordova",
+    "cordova-android",
+    "cordova-ios"
   ],
   "author": "Notificare",
-  "license": "ISC"
+  "bugs": {
+    "url": "https://github.com/Notificare/notificare-push-lib-cordova/issues"
+  },
+  "homepage": "https://github.com/Notificare/notificare-push-lib-cordova#readme"
 }
