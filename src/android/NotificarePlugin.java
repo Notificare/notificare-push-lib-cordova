@@ -56,14 +56,10 @@ import re.notifica.model.NotificareUserSegment;
 public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSet<NotificareInboxItem>>, Notificare.OnNotificareReadyListener, Notificare.OnServiceErrorListener, Notificare.OnNotificareNotificationListener, BeaconRangingListener, Notificare.OnBillingReadyListener, BillingManager.OnRefreshFinishedListener, BillingManager.OnPurchaseFinishedListener {
 
     private static final String TAG = NotificarePlugin.class.getSimpleName();
-
     private static final int SCANNABLE_REQUEST_CODE = 9004;
-
-    public static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
-
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private LiveData<SortedSet<NotificareInboxItem>> mInboxItems;
     private boolean mIsBillingReady = false;
-
     private CallbackContext mainCallback;
     private List<PluginResult> eventQueue;
 
@@ -97,12 +93,12 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
+        this.handleIntent(cordova.getActivity().getIntent());
     }
 
 
     @Override
     public void onPause(boolean multitasking) {
-        Log.i(TAG, "activity paused");
         super.onPause(multitasking);
         Notificare.shared().removeServiceErrorListener(this);
         Notificare.shared().removeNotificareNotificationListener(this);
@@ -117,7 +113,6 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
 
     @Override
     public void onResume(boolean multitasking) {
-        Log.i(TAG, "activity resumed");
         super.onResume(multitasking);
         Notificare.shared().addServiceErrorListener(this);
         Notificare.shared().addNotificareNotificationListener(this);
@@ -133,7 +128,6 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
 
     @Override
     public void onDestroy() {
-        Log.i(TAG, "activity destroyed");
         super.onDestroy();
         Notificare.shared().removeServiceErrorListener(this);
         Notificare.shared().removeNotificareNotificationListener(this);
@@ -1669,6 +1663,19 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
     }
 
     /**
+     * Handle initial intent
+     * @param intent
+     */
+    private void handleIntent(Intent intent) {
+        JSONObject notificationMap = parseNotificationIntent(intent);
+        if (notificationMap != null) {
+            handleEventPayload(PluginResult.Status.OK, "remoteNotificationReceivedInBackground", notificationMap);
+        } else {
+            sendValidateUserToken(Notificare.shared().parseValidateUserIntent(intent));
+            sendResetPasswordToken(Notificare.shared().parseResetPasswordIntent(intent));
+        }
+    }
+    /**
      * Send a validate user token received event
      * @param token
      */
@@ -1895,13 +1902,7 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
     @Override
     public void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        JSONObject notificationMap = parseNotificationIntent(intent);
-        if (notificationMap != null) {
-            handleEventPayload(PluginResult.Status.OK, "remoteNotificationReceivedInBackground", notificationMap);
-        } else {
-            sendValidateUserToken(Notificare.shared().parseValidateUserIntent(intent));
-            sendResetPasswordToken(Notificare.shared().parseResetPasswordIntent(intent));
-        }
+        this.handleIntent(intent);
     }
 
 }
