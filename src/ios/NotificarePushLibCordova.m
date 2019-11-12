@@ -142,11 +142,6 @@
     [self handleCallback:pluginResult withCommand:command];
 }
 
--(void)didChangeAppLifecycleState:(CDVInvokedUrlCommand*)command {
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
-    [self handleCallback:pluginResult withCommand:command];
-}
-
 - (void)registerForNotifications:(CDVInvokedUrlCommand*)command {
     [[NotificarePushLib shared] registerForNotifications];
 

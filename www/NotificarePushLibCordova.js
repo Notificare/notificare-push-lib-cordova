@@ -102,10 +102,6 @@ Notificare.prototype.setCategoryOptions = function(options, success, fail) {
     exec(success, fail, 'NotificarePushLibCordova', 'setCategoryOptions', [options]);
 };
 
-Notificare.prototype.didChangeAppLifecycleState = function(success, fail) {
-    exec(success, fail, 'NotificarePushLibCordova', 'didChangeAppLifecycleState', []);
-};
-
 Notificare.prototype.isRemoteNotificationsEnabled = function(success, fail) {
     exec(success, fail, 'NotificarePushLibCordova', 'isRemoteNotificationsEnabled', []);
 };

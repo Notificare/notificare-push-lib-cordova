@@ -5,17 +5,15 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
 
+import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
-import org.apache.cordova.CallbackContext;
-
 import org.apache.cordova.CordovaWebView;
 import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
@@ -67,7 +65,7 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
      * Shared instance
      */
     private static NotificarePlugin instance;
-    final static Object lock = new Object();
+    private static final Object lock = new Object();
 
     /**
      * Constructor
@@ -154,9 +152,6 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
             return true;
         } else if (action.equals("setCategoryOptions")) {
             callbackContext.success();
-            return true;
-        } else if (action.equals("didChangeAppLifecycleState")) {
-            this.didChangeAppLifecycleState(args, callbackContext);
             return true;
         } else if (action.equals("registerForNotifications")) {
             this.registerForNotifications(args, callbackContext);
@@ -362,25 +357,6 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
         callbackContext.sendPluginResult(result);
     }
 
-    private void didChangeAppLifecycleState(JSONArray args, CallbackContext callbackContext) {
-        try {
-            String lifeCycleState = args.getString(0);
-            if (lifeCycleState != null) {
-                if (lifeCycleState.equals("AppLifecycleState.paused")) {
-                    Notificare.shared().setForeground(false);
-                    Notificare.shared().getEventLogger().logEndSession();
-                } else if (lifeCycleState.equals("AppLifecycleState.resumed")) {
-                    Notificare.shared().setForeground(true);
-                    Notificare.shared().getEventLogger().logStartSession();
-                }
-            }
-        } catch (JSONException e) {
-            // ignore
-        }
-
-        callbackContext.success();
-    }
-
     private void registerForNotifications(JSONArray args, CallbackContext callbackContext) {
         Notificare.shared().enableNotifications();
         callbackContext.success();
@@ -494,7 +470,7 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
 
     private void updatePreferredLanguage(JSONArray args, CallbackContext callbackContext) {
         try {
-            if (args.getString(0) != null  && args.getString(0) instanceof String) {
+            if (args.getString(0) != null) {
                 Notificare.shared().updatePreferredLanguage(args.getString(0), new NotificareCallback<Boolean>() {
                     @Override
                     public void onSuccess(Boolean aBoolean) {
@@ -531,7 +507,7 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
 
     private void addTag(JSONArray args, CallbackContext callbackContext) {
         try {
-            if (args.getString(0) != null  && args.getString(0) instanceof String) {
+            if (args.getString(0) != null) {
                 Notificare.shared().addDeviceTag(args.getString(0), new NotificareCallback<Boolean>() {
                     @Override
                     public void onSuccess(Boolean aBoolean) {
@@ -581,7 +557,7 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
 
     private void removeTag(JSONArray args, CallbackContext callbackContext) {
         try {
-            if (args.getString(0) != null  && args.getString(0) instanceof String) {
+            if (args.getString(0) != null) {
                 Notificare.shared().removeDeviceTag(args.getString(0), new NotificareCallback<Boolean>() {
                     @Override
                     public void onSuccess(Boolean aBoolean) {
@@ -942,7 +918,7 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
 
     private void fetchAssets(JSONArray args, CallbackContext callbackContext) {
         try {
-            if (args.getString(0) != null  && args.getString(0) instanceof String) {
+            if (args.getString(0) != null) {
                 Notificare.shared().fetchAssets(args.getString(0), new NotificareCallback<List<NotificareAsset>>() {
                     @Override
                     public void onSuccess(List<NotificareAsset> notificareAssets) {
@@ -973,7 +949,7 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
 
     private void fetchPassWithSerial(JSONArray args, CallbackContext callbackContext) {
         try {
-            if (args.getString(0) != null  && args.getString(0) instanceof String) {
+            if (args.getString(0) != null) {
                 Notificare.shared().fetchPass(args.getString(0), new NotificareCallback<NotificarePass>() {
                     @Override
                     public void onSuccess(NotificarePass notificarePass) {
@@ -1001,7 +977,7 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
 
     private void fetchPassWithBarcode(JSONArray args, CallbackContext callbackContext) {
         try {
-            if (args.getString(0) != null  && args.getString(0) instanceof String) {
+            if (args.getString(0) != null) {
                 Notificare.shared().fetchPass(args.getString(0), new NotificareCallback<NotificarePass>() {
                     @Override
                     public void onSuccess(NotificarePass notificarePass) {
@@ -1102,7 +1078,7 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
     private void logCustomEvent(JSONArray args, CallbackContext callbackContext) {
         try {
             JSONObject data = args.getJSONObject(1);
-            if (args.getString(0) != null  && args.getString(0) instanceof String) {
+            if (args.getString(0) != null) {
                 Notificare.shared().getEventLogger().logCustomEvent(args.getString(0), data, new NotificareCallback<Boolean>() {
                     @Override
                     public void onSuccess(Boolean aBoolean) {
@@ -1174,7 +1150,7 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
     private void doCloudHostOperation(JSONArray args, CallbackContext callbackContext) {
         try {
 
-            if ((args.getString(0) != null  && args.getString(0) instanceof String) && (args.getString(1) != null  && args.getString(1) instanceof String)) {
+            if (args.getString(0) != null && args.getString(1) != null) {
                 JSONObject body = args.getJSONObject(2);
                 JSONObject params = args.getJSONObject(3);
                 JSONObject headers = args.getJSONObject(4);
@@ -1216,9 +1192,7 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
     private void createAccount(JSONArray args, CallbackContext callbackContext) {
         try {
 
-            if ((args.getString(0) != null  && args.getString(0) instanceof String) &&
-                    (args.getString(1) != null  && args.getString(1) instanceof String) &&
-                    (args.getString(2) != null  && args.getString(2) instanceof String)) {
+            if (args.getString(0) != null && args.getString(1) != null && args.getString(2) != null) {
 
                 String email = args.getString(0);
                 String name = args.getString(1);
@@ -1247,7 +1221,7 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
     private void validateAccount(JSONArray args, CallbackContext callbackContext) {
         try {
 
-            if (args.getString(0) != null  && args.getString(0) instanceof String) {
+            if (args.getString(0) != null) {
 
                 Notificare.shared().validateUser(args.getString(0), new NotificareCallback<Boolean>() {
                     @Override
@@ -1273,8 +1247,8 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
     private void resetPassword(JSONArray args, CallbackContext callbackContext) {
         try {
 
-            if ((args.getString(0) != null  && args.getString(0) instanceof String) &&
-                    (args.getString(1) != null  && args.getString(1) instanceof String)) {
+            if (args.getString(0) != null &&
+                    args.getString(1) != null) {
 
                 Notificare.shared().resetPassword(args.getString(0), args.getString(1), new NotificareCallback<Boolean>() {
                     @Override
@@ -1300,7 +1274,7 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
     private void sendPassword(JSONArray args, CallbackContext callbackContext) {
         try {
 
-            if (args.getString(0) != null  && args.getString(0) instanceof String) {
+            if (args.getString(0) != null) {
 
                 Notificare.shared().sendPassword(args.getString(0), new NotificareCallback<Boolean>() {
                     @Override
@@ -1326,8 +1300,7 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
     private void login(JSONArray args, CallbackContext callbackContext) {
         try {
 
-            if ((args.getString(0) != null  && args.getString(0) instanceof String) &&
-                    (args.getString(1) != null  && args.getString(1) instanceof String)) {
+            if (args.getString(0) != null && args.getString(1) != null) {
 
                 Notificare.shared().userLogin(args.getString(0), args.getString(1), new NotificareCallback<Boolean>() {
                     @Override
@@ -1390,7 +1363,7 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
     private void changePassword(JSONArray args, CallbackContext callbackContext) {
         try {
 
-            if (args.getString(0) != null  && args.getString(0) instanceof String) {
+            if (args.getString(0) != null) {
 
                 Notificare.shared().changePassword(args.getString(0), new NotificareCallback<Boolean>() {
                     @Override
@@ -1640,7 +1613,6 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
 
     /**
      * Helper Method to send or queue events
-
      * @param pluginResult
      */
     public void handleEvent(PluginResult pluginResult) {
