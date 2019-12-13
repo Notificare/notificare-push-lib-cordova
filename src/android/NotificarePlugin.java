@@ -240,10 +240,13 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
         } else if (action.equals("clearDoNotDisturb")) {
             this.clearDoNotDisturb(args, callbackContext);
             return true;
+        } else if (action.equals("fetchNotification")) {
+            this.fetchNotification(args, callbackContext);
+            return true;
         } else if (action.equals("fetchNotificationForInboxItem")) {
             this.fetchNotificationForInboxItem(args, callbackContext);
             return true;
-        }  else if (action.equals("presentNotification")) {
+        } else if (action.equals("presentNotification")) {
             this.presentNotification(args, callbackContext);
             return true;
         }  else if (action.equals("fetchInbox")) {
@@ -741,6 +744,30 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
                 callbackContext.error(notificareError.getLocalizedMessage());
             }
         });
+    }
+
+    private void fetchNotification(JSONArray args, CallbackContext callbackContext) {
+        try {
+            JSONObject notification = args.getJSONObject(0);
+            if (notification != null && notification.optString("id", null) != null) {
+                 Notificare.shared().fetchNotification(notification.optString("id"), new NotificareCallback<NotificareNotification>() {
+                    @Override
+                    public void onSuccess(NotificareNotification notificareNotification) {
+                        callbackContext.success(NotificareUtils.mapNotification(notificareNotification));
+                    }
+
+                    @Override
+                    public void onError(NotificareError notificareError) {
+                        callbackContext.error(e.getLocalizedMessage());
+                    }
+                 });
+            } else {
+                NotificareError notificareError = new NotificareError("notification not found");
+                callbackContext.error(notificareError.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
     }
 
     private void fetchNotificationForInboxItem(JSONArray args, CallbackContext callbackContext) {

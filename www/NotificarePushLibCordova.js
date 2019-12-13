@@ -207,7 +207,7 @@ Notificare.prototype.fetchNotification = function(notification, success, fail) {
 };
 
 Notificare.prototype.fetchNotificationForInboxItem = function(inboxItem, success, fail) {
-    exec(success, fail, 'NotificarePushLibCordova', 'fetchNotification', [inboxItem]);
+    exec(success, fail, 'NotificarePushLibCordova', 'fetchNotificationForInboxItem', [inboxItem]);
 };
 
 Notificare.prototype.presentNotification = function(notification, success, fail) {
