@@ -753,12 +753,17 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
                  Notificare.shared().fetchNotification(notification.optString("id"), new NotificareCallback<NotificareNotification>() {
                     @Override
                     public void onSuccess(NotificareNotification notificareNotification) {
-                        callbackContext.success(NotificareUtils.mapNotification(notificareNotification));
+                        try {
+                            callbackContext.success(NotificareUtils.mapNotification(notificareNotification));
+                        } catch (JSONException e) {
+                            NotificareError notificareError = new NotificareError("invalid notification item");
+                            callbackContext.error(notificareError.getLocalizedMessage());
+                        }
                     }
 
                     @Override
                     public void onError(NotificareError notificareError) {
-                        callbackContext.error(e.getLocalizedMessage());
+                        callbackContext.error(notificareError.getLocalizedMessage());
                     }
                  });
             } else {
