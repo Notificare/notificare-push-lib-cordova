@@ -1,3 +1,6 @@
+## 2.2.3
+* optionally include googleServices gradle plugin
+
 ## 2.2.2
 * fixed issue with fetchNotificationForInboxItem
 * added fetchNotification in Android plugin
