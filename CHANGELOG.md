@@ -1,3 +1,6 @@
+## 2.2.4
+* updated to iOS SDK 2.2.6
+
 ## 2.2.3
 * optionally include googleServices gradle plugin
 

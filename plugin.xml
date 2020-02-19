@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<plugin id="cordova-plugin-notificare-push" version="2.2.3" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+<plugin id="cordova-plugin-notificare-push" version="2.2.4" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
     <name>NotificarePushLibCordova</name>
     <js-module name="NotificarePushLibCordova" src="www/NotificarePushLibCordova.js">
         <clobbers target="Notificare" />
@@ -62,7 +62,7 @@
                 <source url="https://github.com/CocoaPods/Specs.git"/>
             </config>
             <pods use-frameworks="true">
-                <pod name="notificare-push-lib" spec="2.2.4"/>
+                <pod name="notificare-push-lib" spec="2.2.6"/>
             </pods>
         </podspec>
     </platform>
