@@ -1,3 +1,6 @@
+## 2.2.5
+* check partially fetched notifications when fetching inbox items 
+
 ## 2.2.4
 * updated to iOS SDK 2.2.6
 

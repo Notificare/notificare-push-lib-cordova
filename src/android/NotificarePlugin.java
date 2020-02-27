@@ -782,12 +782,22 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
                 if (inboxItem != null && inboxItem.optString("inboxId", null) != null && Notificare.shared().getInboxManager() != null) {
                     NotificareInboxItem notificareInboxItem = Notificare.shared().getInboxManager().getItem(inboxItem.optString("inboxId"));
                     if (notificareInboxItem != null) {
-                        try {
-                            callbackContext.success(NotificareUtils.mapNotification(notificareInboxItem.getNotification()));
-                        } catch (JSONException e) {
-                            NotificareError notificareError = new NotificareError("invalid inbox item");
-                            callbackContext.error(notificareError.getLocalizedMessage());
-                        }
+                        Notificare.shared().fetchInboxItem(notificareInboxItem, new NotificareCallback<NotificareInboxItem>() {
+                            @Override
+                            public void onSuccess(NotificareInboxItem fetchedInboxItem) {
+                                try {
+                                    callbackContext.success(NotificareUtils.mapNotification(fetchedInboxItem.getNotification()));
+                                } catch (JSONException e) {
+                                    NotificareError notificareError = new NotificareError("invalid inbox item");
+                                    callbackContext.error(notificareError.getLocalizedMessage());
+                                }
+                            }
+
+                            @Override
+                            public void onError(NotificareError notificareError) {
+                                callbackContext.error(notificareError.getLocalizedMessage());
+                            }
+                        });
                     } else {
                         NotificareError notificareError = new NotificareError("inbox item not found");
                         callbackContext.error(notificareError.getLocalizedMessage());
