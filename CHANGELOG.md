@@ -1,3 +1,6 @@
+## 2.2.6
+* Updated to Android SDK 2.2.2
+
 ## 2.2.5
 * check partially fetched notifications when fetching inbox items 
 
