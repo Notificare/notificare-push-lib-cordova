@@ -23,10 +23,10 @@ repositories {
 }
 
 dependencies {
-    implementation 're.notifica:notificare-core:2.2.2'
-    implementation 're.notifica:notificare-location:2.2.2'
-    implementation 're.notifica:notificare-beacon:2.2.2'
-    implementation 're.notifica:notificare-scannable:2.2.2'
+    implementation 're.notifica:notificare-core:2.2.3'
+    implementation 're.notifica:notificare-location:2.2.3'
+    implementation 're.notifica:notificare-beacon:2.2.3'
+    implementation 're.notifica:notificare-scannable:2.2.3'
 }
 
 cdvPluginPostBuildExtras.add({

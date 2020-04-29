@@ -1,3 +1,6 @@
+## 2.2.7
+* Updated to Android SDK 2.2.3
+
 ## 2.2.6
 * Updated to Android SDK 2.2.2
 
