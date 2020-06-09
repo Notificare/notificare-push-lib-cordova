@@ -1,3 +1,6 @@
+## Upcoming release
+* Fix `sendPassword` & `presentScannable` invocations
+
 ## 2.2.7
 * Updated to Android SDK 2.2.3
 

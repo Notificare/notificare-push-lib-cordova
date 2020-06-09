@@ -303,7 +303,7 @@ Notificare.prototype.resetPassword = function(password, token, success, fail) {
 };
 
 Notificare.prototype.sendPassword = function(email, success, fail) {
-    exec(success, fail, 'NotificarePushLibCordova', 'resetPassword', [email]);
+    exec(success, fail, 'NotificarePushLibCordova', 'sendPassword', [email]);
 };
 
 Notificare.prototype.login = function(email, password, success, fail) {
@@ -347,7 +347,7 @@ Notificare.prototype.startScannableSession = function(success, fail) {
 };
 
 Notificare.prototype.presentScannable = function(scannable, success, fail) {
-    exec(success, fail, 'NotificarePushLibCordova', 'startScannableSession', [scannable]);
+    exec(success, fail, 'NotificarePushLibCordova', 'presentScannable', [scannable]);
 };
 
 
