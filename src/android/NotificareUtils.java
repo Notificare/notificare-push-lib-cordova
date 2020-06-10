@@ -476,6 +476,22 @@ public class NotificareUtils {
             json.put("_id", userPreferenceMap.get("preferenceId"));
             json.put("label", userPreferenceMap.get("preferenceLabel"));
             json.put("preferenceType", userPreferenceMap.get("preferenceType"));
+
+            JSONArray originalUserPreferenceOptions = userPreferenceMap.getJSONArray("preferenceOptions");
+            JSONArray convertedUserPreferenceOptions = new JSONArray();
+            for (int i = 0; i < originalUserPreferenceOptions.length(); i++) {
+                JSONObject optionJson = originalUserPreferenceOptions.getJSONObject(i);
+
+                JSONObject destinationJson = new JSONObject();
+                destinationJson.put("label", optionJson.getString("segmentLabel"));
+                destinationJson.put("userSegment", optionJson.getString("segmentId"));
+                destinationJson.put("selected", optionJson.getBoolean("selected"));
+
+                convertedUserPreferenceOptions.put(destinationJson);
+            }
+
+            json.put("preferenceOptions", convertedUserPreferenceOptions);
+            json.put("indexPosition", -1);
             return new NotificareUserPreference(json);
         } catch (JSONException e) {
             return null;
