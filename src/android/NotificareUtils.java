@@ -395,6 +395,7 @@ public class NotificareUtils {
         userMap.put("userID", user.getUserId());
         userMap.put("userName", user.getUserName());
         userMap.put("segments", user.getSegments());
+        userMap.put("accessToken", user.getAccessToken());
         return userMap;
     }
 
