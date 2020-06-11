@@ -2,6 +2,7 @@
 * Fix `sendPassword` & `presentScannable` invocations
 * Fix user preference parsing
 * Add `accessToken` to the account details
+* Fix `TimeOfDayRange` parsing
 
 ## 2.2.7
 * Updated to Android SDK 2.2.3

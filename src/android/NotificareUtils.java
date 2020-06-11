@@ -227,8 +227,10 @@ public class NotificareUtils {
      */
     public static JSONObject mapTimeOfDayRange(NotificareTimeOfDayRange notificareTimeOfDayRange) throws JSONException {
         JSONObject timeOfDayRangeMap = new JSONObject();
-        timeOfDayRangeMap.put("start", notificareTimeOfDayRange.getStart().toString());
-        timeOfDayRangeMap.put("end", notificareTimeOfDayRange.getEnd().toString());
+        if (notificareTimeOfDayRange != null) {
+            timeOfDayRangeMap.put("start", notificareTimeOfDayRange.getStart().toString());
+            timeOfDayRangeMap.put("end", notificareTimeOfDayRange.getEnd().toString());
+        }
         return timeOfDayRangeMap;
     }
 
