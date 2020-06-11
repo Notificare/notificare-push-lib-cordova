@@ -194,8 +194,8 @@ Notificare.prototype.fetchDoNotDisturb = function(success, fail) {
     exec(success, fail, 'NotificarePushLibCordova', 'fetchDoNotDisturb', []);
 };
 
-Notificare.prototype.updateDoNotDisturb = function(success, fail) {
-    exec(success, fail, 'NotificarePushLibCordova', 'updateDoNotDisturb', []);
+Notificare.prototype.updateDoNotDisturb = function(dnd, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'updateDoNotDisturb', [dnd]);
 };
 
 Notificare.prototype.clearDoNotDisturb = function(success, fail) {
