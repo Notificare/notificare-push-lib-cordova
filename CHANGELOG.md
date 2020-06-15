@@ -4,6 +4,7 @@
 * Add `accessToken` to the account details
 * Fix `TimeOfDayRange` parsing
 * Fix `updateDoNotDisturb` invocation
+* Fix `doCloudHostOperation` nullable params handling
 
 ## 2.2.7
 * Updated to Android SDK 2.2.3

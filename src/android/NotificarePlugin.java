@@ -1193,9 +1193,9 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
         try {
 
             if (args.getString(0) != null && args.getString(1) != null) {
-                JSONObject body = args.getJSONObject(2);
-                JSONObject params = args.getJSONObject(3);
-                JSONObject headers = args.getJSONObject(4);
+                JSONObject body = args.get(2) != JSONObject.NULL ? args.getJSONObject(2) : null;
+                JSONObject params = args.get(3) != JSONObject.NULL ? args.getJSONObject(3) : null;
+                JSONObject headers = args.get(4) != JSONObject.NULL ? args.getJSONObject(4) : null;
 
                 Map<String, String> paramsMap = new HashMap<>();
                 if (params != null) {
@@ -1211,7 +1211,7 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
                         headersMap.put(key, headers.optString(key, null));
                     }
                 }
-                Notificare.shared().doCloudRequest(args.getString(0), args.getString(1), paramsMap, body, headersMap, new NotificareCallback<JSONObject>() {
+                Notificare.shared().doCloudRequest(args.getString(0), "/api" + args.getString(1), paramsMap, body, headersMap, new NotificareCallback<JSONObject>() {
                     @Override
                     public void onSuccess(JSONObject jsonObject) {
                         callbackContext.success(jsonObject);
