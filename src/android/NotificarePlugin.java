@@ -1193,9 +1193,9 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
         try {
 
             if (args.getString(0) != null && args.getString(1) != null) {
-                JSONObject body = args.get(2) != JSONObject.NULL ? args.getJSONObject(2) : null;
+                JSONObject headers = args.get(2) != JSONObject.NULL ? args.getJSONObject(2) : null;
                 JSONObject params = args.get(3) != JSONObject.NULL ? args.getJSONObject(3) : null;
-                JSONObject headers = args.get(4) != JSONObject.NULL ? args.getJSONObject(4) : null;
+                JSONObject body = args.get(4) != JSONObject.NULL ? args.getJSONObject(4) : null;
 
                 Map<String, String> paramsMap = new HashMap<>();
                 if (params != null) {
