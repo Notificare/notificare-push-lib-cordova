@@ -144,6 +144,9 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
         if (action.equals("launch")) {
             this.launch(args, callbackContext);
             return true;
+        } else if (action.equals("unlaunch")) {
+            this.unlaunch(callbackContext);
+            return true;
         } else if (action.equals("setAuthorizationOptions")) {
             callbackContext.success();
             return true;
@@ -358,6 +361,11 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
         PluginResult result = new PluginResult(PluginResult.Status.NO_RESULT);
         result.setKeepCallback(true);
         callbackContext.sendPluginResult(result);
+    }
+
+    private void unlaunch(CallbackContext callbackContext) {
+        Notificare.shared().unlaunch();
+        callbackContext.success();
     }
 
     private void registerForNotifications(JSONArray args, CallbackContext callbackContext) {

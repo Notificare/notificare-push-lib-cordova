@@ -82,6 +82,10 @@ Notificare.prototype.launch = function() {
     exec(this.successCallback.bind(this), this.errorCallback.bind(this), 'NotificarePushLibCordova', 'launch', []);
 };
 
+Notificare.prototype.unlaunch = function () {
+    exec(this.successCallback.bind(this), this.errorCallback.bind(this), 'NotificarePushLibCordova', 'unlaunch', []);
+}
+
 Notificare.prototype.registerForNotifications = function(success, fail) {
     exec(success, fail, 'NotificarePushLibCordova', 'registerForNotifications', []);
 };
