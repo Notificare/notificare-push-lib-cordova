@@ -33,6 +33,13 @@
     [self handleCallback:pluginResult withCommand:command];
 }
 
+- (void)unlaunch:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] unlaunch];
+
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
 -(void)setAuthorizationOptions:(CDVInvokedUrlCommand*)command {
 
     NSArray *options = [command argumentAtIndex:0];
