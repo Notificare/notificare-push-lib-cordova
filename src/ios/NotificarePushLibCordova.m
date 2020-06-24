@@ -455,7 +455,6 @@
     id controller = [[NotificarePushLib shared] controllerForNotification:item];
     if ([self isViewController:controller]) {
         UINavigationController *navController = [self navigationControllerForViewControllers:controller];
-        [navController setModalPresentationStyle:UIModalPresentationFullScreen];
         [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:NO completion:^{
             [[NotificarePushLib shared] presentNotification:item inNavigationController:navController withController:controller];
         }];
@@ -489,7 +488,6 @@
          if (!error) {
              if ([self isViewController:response]) {
                  UINavigationController *navController = [self navigationControllerForViewControllers:response];
-                 [navController setModalPresentationStyle:UIModalPresentationFullScreen];
                  [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:NO completion:^{
                      [[NotificarePushLib shared] presentInboxItem:item inNavigationController:navController withController:response];
                  }];
@@ -899,7 +897,6 @@
         if (!error) {
             if ([self isViewController:response]) {
                 UINavigationController *navController = [self navigationControllerForViewControllers:response];
-                [navController setModalPresentationStyle:UIModalPresentationFullScreen];
                 [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:NO completion:^{
                     [[NotificarePushLib shared] presentScannable:item inNavigationController:navController withController:response];
                 }];
