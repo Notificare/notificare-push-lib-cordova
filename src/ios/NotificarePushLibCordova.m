@@ -57,6 +57,9 @@
             if ([option isEqualToString:@"sound"]) {
                 authorizationOptions = authorizationOptions + UNAuthorizationOptionSound;
             }
+            if ([option isEqualToString:@"carPlay"]) {
+                authorizationOptions = authorizationOptions + UNAuthorizationOptionCarPlay;
+            }
             if (@available(iOS 12.0, *)) {
                 if ([option isEqualToString:@"providesAppNotificationSettings"]) {
                     authorizationOptions = authorizationOptions + UNAuthorizationOptionProvidesAppNotificationSettings;
