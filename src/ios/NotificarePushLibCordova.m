@@ -793,9 +793,15 @@
 }
 
 -(void)logout:(CDVInvokedUrlCommand*)command {
-    [[[NotificarePushLib shared] authManager] logoutAccount];
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [self handleCallback:pluginResult withCommand:command];
+    [[[NotificarePushLib shared] authManager] logoutAccount:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
 }
 
 -(void)isLoggedIn:(CDVInvokedUrlCommand*)command {
