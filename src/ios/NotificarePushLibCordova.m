@@ -1176,16 +1176,6 @@
     [self handleEvents:@{@"type": @"visitReceived", @"data": [[NotificarePushLibCordovaUtils shared] dictionaryFromVisit:visit]}];
 }
 
-- (void)notificarePushLib:(NotificarePushLib *)library didChangeAccountState:(NSDictionary *)info{
-    [self handleEvents:@{@"type": @"accountStateChanged", @"data": info}];
-}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didFailToRenewAccountSessionWithError:(NSError * _Nullable)error{
-    NSMutableDictionary * payload = [NSMutableDictionary new];
-    [payload setObject:[error localizedDescription] forKey:@"error"];
-    [self handleEvents:@{@"type": @"accountSessionFailedToRenewWithError", @"data": payload}];
-}
-
 - (void)notificarePushLib:(NotificarePushLib *)library didReceiveActivationToken:(NSString *)token{
     NSMutableDictionary * payload = [NSMutableDictionary new];
     [payload setObject:token forKey:@"token"];
