@@ -366,6 +366,7 @@ public class NotificareUtils {
         JSONObject inboxItemMap = new JSONObject();
         inboxItemMap.put("inboxId", notificareInboxItem.getItemId());
         inboxItemMap.put("notification", notificareInboxItem.getNotification().getNotificationId());
+        inboxItemMap.put("type", notificareInboxItem.getType());
         inboxItemMap.put("message", notificareInboxItem.getNotification().getMessage());
         inboxItemMap.put("title", notificareInboxItem.getTitle());
         inboxItemMap.put("subtitle", notificareInboxItem.getSubtitle());
