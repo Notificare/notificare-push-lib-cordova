@@ -1,10 +1,13 @@
-## Upcoming release
+## 2.3.0
 * Fix `sendPassword` & `presentScannable` invocations
 * Fix user preference parsing
 * Add `accessToken` to the account details
 * Fix `TimeOfDayRange` parsing
 * Fix `updateDoNotDisturb` invocation
 * Fix `doCloudHostOperation` nullable params handling
+* Update to Android SDK 2.3.0
+* Update to iOS SDK 2.3.2
+* Allow `carPlay` in authorization options
 
 ## 2.2.7
 * Updated to Android SDK 2.2.3
