@@ -658,15 +658,24 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
 
     private void updateUserData(JSONArray args, CallbackContext callbackContext) {
         try {
-            JSONObject fields = args.getJSONObject(0);
-            if (fields != null) {
+            if (!args.isNull(0)) {
+                JSONArray fields = args.getJSONArray(0);
                 NotificareUserData data = new NotificareUserData();
-                while (fields.keys().hasNext()) {
-                    String key = fields.keys().next();
-                    if (fields.optString(key, null) != null) {
-                        data.setValue(key, fields.optString(key));
+
+                for (int i = 0; i < fields.length(); i++) {
+                    JSONObject field = fields.getJSONObject(i);
+
+                    if (!field.isNull("key") && field.has("value")) {
+                        String key = field.getString("key");
+                        String value = !field.isNull("value") ? field.getString("value") : null;
+                        data.setValue(key, value);
+                    } else {
+                        NotificareError notificareError = new NotificareError("invalid user data");
+                        callbackContext.error(notificareError.getLocalizedMessage());
+                        return;
                     }
                 }
+
                 Notificare.shared().updateUserData(data, new NotificareCallback<Boolean>() {
                     @Override
                     public void onSuccess(Boolean aBoolean) {
@@ -685,7 +694,6 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
         } catch (JSONException e) {
             callbackContext.error(e.getLocalizedMessage());
         }
-
     }
 
     private void fetchDoNotDisturb(JSONArray args, CallbackContext callbackContext) {
