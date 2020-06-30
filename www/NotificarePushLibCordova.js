@@ -262,8 +262,8 @@ Notificare.prototype.fetchProduct = function(product, success, fail) {
     exec(success, fail, 'NotificarePushLibCordova', 'fetchProduct', [product]);
 };
 
-Notificare.prototype.buyProduct = function(success, fail) {
-    exec(success, fail, 'NotificarePushLibCordova', 'buyProduct', []);
+Notificare.prototype.buyProduct = function(product, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'buyProduct', [product]);
 };
 
 Notificare.prototype.enableBilling = function(success, fail) {

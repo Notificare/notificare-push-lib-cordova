@@ -1,3 +1,6 @@
+## Upcoming release
+* Fix `buyProduct` & `updatePreferredLanguage` invocations
+
 ## 2.3.0
 * Fix `sendPassword` & `presentScannable` invocations
 * Fix user preference parsing
