@@ -158,8 +158,8 @@ Notificare.prototype.fetchPreferredLanguage = function(success, fail) {
     exec(success, fail, 'NotificarePushLibCordova', 'fetchPreferredLanguage', []);
 };
 
-Notificare.prototype.updatePreferredLanguage = function(success, fail) {
-    exec(success, fail, 'NotificarePushLibCordova', 'updatePreferredLanguage', []);
+Notificare.prototype.updatePreferredLanguage = function(preferredLanguage, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'updatePreferredLanguage', [preferredLanguage]);
 };
 
 Notificare.prototype.fetchTags = function(success, fail) {
