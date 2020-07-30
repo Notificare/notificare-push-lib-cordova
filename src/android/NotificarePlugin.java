@@ -31,8 +31,8 @@ import re.notifica.NotificareCallback;
 import re.notifica.NotificareError;
 import re.notifica.beacon.BeaconRangingListener;
 import re.notifica.billing.BillingManager;
-import re.notifica.billing.BillingResult;
-import re.notifica.billing.Purchase;
+import re.notifica.billing.NotificareBillingResult;
+import re.notifica.billing.NotificarePurchase;
 import re.notifica.model.NotificareApplicationInfo;
 import re.notifica.model.NotificareAsset;
 import re.notifica.model.NotificareBeacon;
@@ -57,7 +57,6 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
     private static final int SCANNABLE_REQUEST_CODE = 9004;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private LiveData<SortedSet<NotificareInboxItem>> mInboxItems;
-    private boolean mIsBillingReady = false;
     private CallbackContext mainCallback;
     private List<PluginResult> eventQueue;
 
@@ -1072,9 +1071,9 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
 
     private void fetchPurchasedProducts(JSONArray args, CallbackContext callbackContext) {
         if (Notificare.shared().getBillingManager() != null) {
-            List<Purchase> purchases = Notificare.shared().getBillingManager().getPurchases();
+            List<NotificarePurchase> purchases = Notificare.shared().getBillingManager().getPurchases();
             List<NotificareProduct> products = new ArrayList<>();
-            for (Purchase purchase : purchases) {
+            for (NotificarePurchase purchase : purchases) {
                 NotificareProduct product = Notificare.shared().getBillingManager().getProduct(purchase.getProductId());
                 if (product != null) {
                     products.add(product);
@@ -1816,9 +1815,7 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
 
     @Override
     public void onBillingReady() {
-        if (!mIsBillingReady) {
-            Notificare.shared().getBillingManager().refresh(this);
-        }
+        Notificare.shared().getBillingManager().refresh(this);
     }
 
     @Override
@@ -1839,9 +1836,9 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
 
     @Override
     public void onServiceError(int errorCode, int requestCode) {
-        if (Notificare.isUserRecoverableError(errorCode) && cordova != null && cordova.getActivity() != null) {
+        if (cordova != null && cordova.getActivity() != null && Notificare.shared().getServiceManager() != null && Notificare.shared().getServiceManager().isUserRecoverableError(errorCode)) {
             final Activity activity = cordova.getActivity();
-            activity.runOnUiThread(() -> Notificare.getErrorDialog(errorCode, activity, requestCode).show());
+            activity.runOnUiThread(() -> Notificare.shared().getServiceManager().getErrorDialog(errorCode, activity, requestCode).show());
         }
     }
 
@@ -1866,8 +1863,7 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
     }
 
     @Override
-    public void onPurchaseFinished(BillingResult billingResult, Purchase purchase) {
-        mIsBillingReady = false;
+    public void onPurchaseFinished(NotificareBillingResult billingResult, NotificarePurchase purchase) {
         JSONObject payload = new JSONObject();
         NotificareProduct product = Notificare.shared().getBillingManager().getProduct(purchase.getProductId());
         try {
@@ -1921,9 +1917,6 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
                 } else {
                     handleEventPayload(PluginResult.Status.ERROR, "scannableSessionInvalidatedWithError", "unknown error");
                 }
-            } else if (Notificare.shared().getBillingManager() != null && Notificare.shared().getBillingManager().handleActivityResult(requestCode, resultCode, data)) {
-                // Billingmanager handled the result
-                mIsBillingReady = true; // wait for purchase to finish before doing other calls
             }
         }
     }
