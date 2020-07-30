@@ -1724,6 +1724,10 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
         } else {
             sendValidateUserToken(Notificare.shared().parseValidateUserIntent(intent));
             sendResetPasswordToken(Notificare.shared().parseResetPasswordIntent(intent));
+
+            if (cordova.getActivity() != null) {
+                Notificare.shared().handleDynamicLinkIntent(cordova.getActivity(), intent);
+            }
         }
     }
     /**
