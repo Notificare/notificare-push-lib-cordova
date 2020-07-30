@@ -64,6 +64,7 @@ static NotificarePushLibCordovaUtils *utils;
     [data setValue:[device altitude] forKey:@"altitude"];
     [data setValue:[device floor] forKey:@"floor"];
     [data setValue:[device course] forKey:@"course"];
+    [data setValue:[device accuracy] forKey:@"accuracy"];
     if ([device lastRegistered] && [[device lastRegistered] isKindOfClass:[NSDate class]]) {
         [data setValue:[self dateToString:[device lastRegistered]] forKey:@"lastRegistered"];
     }
