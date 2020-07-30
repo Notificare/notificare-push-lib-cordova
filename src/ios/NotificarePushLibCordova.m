@@ -529,6 +529,18 @@
     }];
 }
 
+-(void)markAllAsRead:(CDVInvokedUrlCommand*)command {
+    [[[NotificarePushLib shared] inboxManager] markAllAsRead:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+          CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+          [self handleCallback:pluginResult withCommand:command];
+        } else {
+          CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+          [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
 -(void)clearInbox:(CDVInvokedUrlCommand*)command {
     [[[NotificarePushLib shared] inboxManager] clearInbox:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
