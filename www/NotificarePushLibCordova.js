@@ -234,6 +234,10 @@ Notificare.prototype.markAsRead = function(inboxItem, success, fail) {
     exec(success, fail, 'NotificarePushLibCordova', 'markAsRead', [inboxItem]);
 };
 
+Notificare.prototype.markAllAsRead = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'markAllAsRead', []);
+};
+
 Notificare.prototype.clearInbox = function(success, fail) {
     exec(success, fail, 'NotificarePushLibCordova', 'clearInbox', []);
 };

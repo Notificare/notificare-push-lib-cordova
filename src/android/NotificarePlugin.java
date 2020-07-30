@@ -263,6 +263,9 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
         } else if (action.equals("markAsRead")) {
             this.markAsRead(args, callbackContext);
             return true;
+        } else if (action.equals("markAllAsRead")) {
+            this.markAllAsRead(args, callbackContext);
+            return true;
         } else if (action.equals("clearInbox")) {
             this.clearInbox(args, callbackContext);
             return true;
@@ -951,6 +954,25 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
             }
         } catch (JSONException e) {
             callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void markAllAsRead(JSONArray args, CallbackContext callbackContext) {
+        if (Notificare.shared().getInboxManager() != null) {
+            Notificare.shared().getInboxManager().markAll(new NotificareCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean aBoolean) {
+                    callbackContext.success();
+                }
+
+                @Override
+                public void onError(NotificareError notificareError) {
+                    callbackContext.error(notificareError.getLocalizedMessage());
+                }
+            });
+        } else {
+            NotificareError notificareError = new NotificareError("inbox not enabled");
+            callbackContext.error(notificareError.getLocalizedMessage());
         }
     }
 
