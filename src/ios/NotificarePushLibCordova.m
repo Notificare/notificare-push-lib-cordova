@@ -972,6 +972,14 @@
     [self handleEvents:@{@"type": @"unknownNotificationReceived", @"data": notification}];
 }
 
+- (void)notificarePushLib:(NotificarePushLib *)library didReceiveUnknownNotificationInBackground:(NSDictionary *)notification {
+    [self handleEvents:@{@"type": @"unknownNotificationReceivedInBackground", @"data": notification}];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didReceiveUnknownNotificationInForeground:(NSDictionary *)notification {
+    [self handleEvents:@{@"type": @"unknownNotificationReceivedInForeground", @"data": notification}];
+}
+
 - (void)notificarePushLib:(NotificarePushLib *)library didReceiveUnknownAction:(NSDictionary *)action forNotification:(NSDictionary *)notification{
     NSMutableDictionary * payload = [NSMutableDictionary new];
     [payload setObject:action forKey:@"action"];
