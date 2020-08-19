@@ -569,6 +569,9 @@ static NotificarePushLibCordovaUtils *utils;
         case UNAuthorizationStatusDenied:
             authorizationStatus = @"denied";
             break;
+        case UNAuthorizationStatusEphemeral:
+            authorizationStatus = @"ephemeral";
+            break;
         default:
             break;
     }
