@@ -347,6 +347,12 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
         } else if (action.equals("presentScannable")) {
             this.presentScannable(args, callbackContext);
             return true;
+        } else if (action.equals("requestAlwaysAuthorizationForLocationUpdates")) {
+            callbackContext.success();
+            return true;
+        } else if (action.equals("requestTemporaryFullAccuracyAuthorization")) {
+            callbackContext.success();
+            return true;
         }
 
         return false;

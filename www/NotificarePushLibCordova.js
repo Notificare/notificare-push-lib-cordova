@@ -358,6 +358,13 @@ Notificare.prototype.presentScannable = function(scannable, success, fail) {
     exec(success, fail, 'NotificarePushLibCordova', 'presentScannable', [scannable]);
 };
 
+Notificare.prototype.requestAlwaysAuthorizationForLocationUpdates = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'requestAlwaysAuthorizationForLocationUpdates', []);
+};
+
+Notificare.prototype.requestTemporaryFullAccuracyAuthorization = function(purposeKey, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'requestTemporaryFullAccuracyAuthorization', [purposeKey]);
+};
 
 Notificare.prototype.successCallback = function(payload) {
     if (payload && payload.type) {

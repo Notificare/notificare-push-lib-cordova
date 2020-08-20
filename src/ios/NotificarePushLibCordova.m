@@ -930,6 +930,23 @@
     [self handleCallback:pluginResult withCommand:command];
 }
 
+-(void)requestAlwaysAuthorizationForLocationUpdates:(CDVInvokedUrlCommand*)command {
+    [[NotificarePushLib shared] requestAlwaysAuthorizationForLocationUpdates];
+
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
+-(void)requestTemporaryFullAccuracyAuthorization:(CDVInvokedUrlCommand*)command {
+    if (@available(iOS 14.0, *)) {
+        NSString *purposeKey = [command argumentAtIndex:0];
+        [[NotificarePushLib shared] requestTemporaryFullAccuracyAuthorizationWithPurposeKey:purposeKey];
+    }
+
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
 #pragma Notificare Delegates
 -(void)notificarePushLib:(NotificarePushLib *)library onReady:(NotificareApplication *)application{
     [self handleEvents:@{@"type": @"ready", @"data": [[NotificarePushLibCordovaUtils shared] dictionaryFromApplication:application]}];
@@ -1100,6 +1117,18 @@
 
     [self handleEvents:@{@"type": @"locationServiceAuthorizationStatusReceived", @"data": payload}];
 
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didReceiveLocationServiceAccuracyAuthorization:(NotificareGeoAccuracyAuthorization)accuracy {
+    NSMutableDictionary * payload = [NSMutableDictionary new];
+
+    if (accuracy == NotificareGeoAccuracyAuthorizationFull) {
+        [payload setObject:@"full" forKey:@"accuracy"];
+    } else if (accuracy == NotificareGeoGeoAccuracyAuthorizationReduced) {
+        [payload setObject:@"reduced" forKey:@"accuracy"];
+    }
+
+    [self handleEvents:@{@"type": @"locationServiceAccuracyAuthorizationReceived", @"data": payload}];
 }
 
 - (void)notificarePushLib:(NotificarePushLib *)library didUpdateLocations:(NSArray<NotificareLocation*> *)locations{
