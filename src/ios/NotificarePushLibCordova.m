@@ -228,12 +228,12 @@
 }
 
 -(void)enableBeacons:(CDVInvokedUrlCommand*)command {
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self handleCallback:pluginResult withCommand:command];
 }
 
 -(void)disableBeacons:(CDVInvokedUrlCommand*)command {
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self handleCallback:pluginResult withCommand:command];
 }
 
@@ -653,12 +653,12 @@
 }
 
 -(void)enableBilling:(CDVInvokedUrlCommand*)command {
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self handleCallback:pluginResult withCommand:command];
 }
 
 -(void)disableBilling:(CDVInvokedUrlCommand*)command {
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self handleCallback:pluginResult withCommand:command];
 }
 
