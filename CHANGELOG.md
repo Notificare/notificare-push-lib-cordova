@@ -1,5 +1,13 @@
 ## Upcoming release
 * Fix `buyProduct` & `updatePreferredLanguage` invocations
+- Update native SDKs to v2.4.0-beta
+- Refactor Billing Manager integration
+- Add `unknownNotificationReceivedInBackground` and `unknownNotificationReceivedInForeground` events on iOS
+- Add `markAllAsRead` method
+- Add `accuracy` to `NotificareDevice`
+- Add support for Dynamic Links
+- Add 'ephemeral' authorization status
+- Add `requestAlwaysAuthorizationForLocationUpdates` and `requestTemporaryFullAccuracyAuthorization` methods
 
 ## 2.3.0
 * Fix `sendPassword` & `presentScannable` invocations
