@@ -8,6 +8,7 @@
 - Add support for Dynamic Links
 - Add 'ephemeral' authorization status
 - Add `requestAlwaysAuthorizationForLocationUpdates` and `requestTemporaryFullAccuracyAuthorization` methods
+- Add `fetchLink` helper method
 
 ## 2.3.0
 * Fix `sendPassword` & `presentScannable` invocations
