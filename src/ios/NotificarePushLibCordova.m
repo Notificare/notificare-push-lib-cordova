@@ -947,6 +947,21 @@
     [self handleCallback:pluginResult withCommand:command];
 }
 
+-(void)fetchLink:(CDVInvokedUrlCommand*)command {
+    NSString *urlStr = [command argumentAtIndex:0];
+    NSURL* url = [NSURL URLWithString:urlStr];
+
+    [[NotificarePushLib shared] fetchLink:url completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[response absoluteString]];
+            [self handleCallback:pluginResult withCommand:command];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self handleCallback:pluginResult withCommand:command];
+        }
+    }];
+}
+
 #pragma Notificare Delegates
 -(void)notificarePushLib:(NotificarePushLib *)library onReady:(NotificareApplication *)application{
     [self handleEvents:@{@"type": @"ready", @"data": [[NotificarePushLibCordovaUtils shared] dictionaryFromApplication:application]}];
@@ -1124,7 +1139,7 @@
 
     if (accuracy == NotificareGeoAccuracyAuthorizationFull) {
         [payload setObject:@"full" forKey:@"accuracy"];
-    } else if (accuracy == NotificareGeoGeoAccuracyAuthorizationReduced) {
+    } else if (accuracy == NotificareGeoAccuracyAuthorizationReduced) {
         [payload setObject:@"reduced" forKey:@"accuracy"];
     }
 

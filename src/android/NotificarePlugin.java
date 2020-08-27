@@ -37,6 +37,7 @@ import re.notifica.model.NotificareApplicationInfo;
 import re.notifica.model.NotificareAsset;
 import re.notifica.model.NotificareBeacon;
 import re.notifica.model.NotificareDevice;
+import re.notifica.model.NotificareDynamicLink;
 import re.notifica.model.NotificareInboxItem;
 import re.notifica.model.NotificareNotification;
 import re.notifica.model.NotificarePass;
@@ -352,6 +353,9 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
             return true;
         } else if (action.equals("requestTemporaryFullAccuracyAuthorization")) {
             callbackContext.success();
+            return true;
+        } else if (action.equals("fetchLink")) {
+            this.fetchLink(args, callbackContext);
             return true;
         }
 
@@ -1589,6 +1593,27 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
             if (scannable != null && scannable.optJSONObject("notification") != null) {
                 handlePresentNotification(scannable.optJSONObject("notification"));
             }
+        } catch (JSONException e) {
+            callbackContext.error(e.getLocalizedMessage());
+        }
+    }
+
+    private void fetchLink(JSONArray args, CallbackContext callbackContext) {
+        try {
+            String url = args.getString(0);
+            Uri uri = Uri.parse(url);
+
+            Notificare.shared().fetchDynamicLink(uri, new NotificareCallback<NotificareDynamicLink>() {
+                @Override
+                public void onSuccess(NotificareDynamicLink notificareDynamicLink) {
+                    callbackContext.success(notificareDynamicLink.getTarget());
+                }
+
+                @Override
+                public void onError(NotificareError notificareError) {
+                    callbackContext.error(notificareError.getLocalizedMessage());
+                }
+            });
         } catch (JSONException e) {
             callbackContext.error(e.getLocalizedMessage());
         }

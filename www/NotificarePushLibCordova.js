@@ -366,6 +366,10 @@ Notificare.prototype.requestTemporaryFullAccuracyAuthorization = function(purpos
     exec(success, fail, 'NotificarePushLibCordova', 'requestTemporaryFullAccuracyAuthorization', [purposeKey]);
 };
 
+Notificare.prototype.fetchLink = function(url, success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'fetchLink', [url]);
+};
+
 Notificare.prototype.successCallback = function(payload) {
     if (payload && payload.type) {
         this.emit(payload.type, payload.data);
