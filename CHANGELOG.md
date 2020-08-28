@@ -10,6 +10,9 @@
 - Add `requestAlwaysAuthorizationForLocationUpdates` and `requestTemporaryFullAccuracyAuthorization` methods
 - Add `fetchLink` helper method
 
+## 2.3.1
+* Add `urlOpened` event to Android
+
 ## 2.3.0
 * Fix `sendPassword` & `presentScannable` invocations
 * Fix user preference parsing

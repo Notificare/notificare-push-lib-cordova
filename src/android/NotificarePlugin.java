@@ -1753,14 +1753,34 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
         if (notificationMap != null) {
             handleEventPayload(PluginResult.Status.OK, "remoteNotificationReceivedInBackground", notificationMap);
         } else {
-            sendValidateUserToken(Notificare.shared().parseValidateUserIntent(intent));
-            sendResetPasswordToken(Notificare.shared().parseResetPasswordIntent(intent));
+            String token = Notificare.shared().parseValidateUserIntent(intent);
+            if (token != null && !token.isEmpty()) {
+                sendValidateUserToken(token);
+                return;
+            }
 
-            if (cordova.getActivity() != null) {
-                Notificare.shared().handleDynamicLinkIntent(cordova.getActivity(), intent);
+            token = Notificare.shared().parseResetPasswordIntent(intent);
+            if (token != null && !token.isEmpty()) {
+                sendResetPasswordToken(token);
+                return;
+            }
+
+            if (cordova.getActivity() != null && Notificare.shared().handleDynamicLinkIntent(cordova.getActivity(), intent)) {
+                return;
+            }
+
+            if (intent.getData() != null) {
+                try {
+                    JSONObject payload = new JSONObject();
+                    payload.put("url", intent.getData().toString());
+                    handleEventPayload(PluginResult.Status.OK, "urlOpened", payload);
+                } catch (JSONException e) {
+                    // ignore
+                }
             }
         }
     }
+
     /**
      * Send a validate user token received event
      * @param token
