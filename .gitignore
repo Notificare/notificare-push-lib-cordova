@@ -19,3 +19,5 @@ local.properties
 !default.mode2v3
 !default.perspectivev3
 xcuserdata/
+
+!@ionic-native/scripts/build
