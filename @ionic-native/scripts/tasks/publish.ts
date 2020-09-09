@@ -9,7 +9,7 @@ import { Logger } from '../logger';
 const MAIN_PACKAGE_JSON = require('../../package.json');
 
 const DIST = path.resolve(ROOT, 'dist');
-const NPM_FLAGS = '--access public';
+const NPM_FLAGS = '--tag beta';
 
 const MIN_CORE_VERSION = '^5.1.0';
 const RXJS_VERSION = '^5.5.0 || ^6.5.0';
@@ -39,7 +39,7 @@ function writePackageJson(data: any, dir: string) {
 }
 
 function prepare(): string {
-  const dir = path.resolve(DIST, 'notificare');
+  const dir = path.resolve(DIST, '@ionic-native', 'plugins', 'notificare');
   writePackageJson(PACKAGE_JSON, dir);
 
   const ngxDir = path.join(dir, 'ngx');
