@@ -1,7 +1,7 @@
 {
   "name": "ionic-native-notificare-push",
   "description": "Official Notificare Ionic Native Plugin.",
-  "version": "2.4.0-beta.1",
+  "version": "2.4.0-beta.2",
   "license": "Apache",
   "author": "Notificare",
   "scripts": {
