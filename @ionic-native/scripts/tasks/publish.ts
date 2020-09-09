@@ -52,10 +52,6 @@ async function publish(ignoreErrors = false) {
   Logger.verbose('Preparing');
   const pluginDir = prepare();
 
-  if (new Date().getDate() > 0) {
-    return;
-  }
-
   Logger.profile('Publishing');
   const worker = (pkgDir: string) =>
     new Promise((resolve, reject) => {
