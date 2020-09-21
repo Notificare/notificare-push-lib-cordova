@@ -9,7 +9,7 @@ import { Logger } from '../logger';
 const MAIN_PACKAGE_JSON = require('../../package.json');
 
 const DIST = path.resolve(ROOT, 'dist');
-const NPM_FLAGS = '--tag beta';
+const NPM_FLAGS = '';
 
 const MIN_CORE_VERSION = '^5.1.0';
 const RXJS_VERSION = '^5.5.0 || ^6.5.0';
