@@ -95,8 +95,17 @@
         UNNotificationPresentationOptions presentationOptions = UNNotificationPresentationOptionNone;
 
         for (NSString * option in options) {
-            if ([option isEqualToString:@"alert"]) {
-                presentationOptions = presentationOptions + UNNotificationPresentationOptionAlert;
+            if (@available(iOS 14.0, *)) {
+                if ([option isEqualToString:@"banner"] || [option isEqualToString:@"alert"]) {
+                    presentationOptions = presentationOptions + UNNotificationPresentationOptionBanner;
+                }
+                if ([option isEqualToString:@"list"]) {
+                    presentationOptions = presentationOptions + UNNotificationPresentationOptionList;
+                }
+            } else {
+                if ([option isEqualToString:@"alert"]) {
+                    presentationOptions = presentationOptions + UNNotificationPresentationOptionAlert;
+                }
             }
             if ([option isEqualToString:@"badge"]) {
                 presentationOptions = presentationOptions + UNNotificationPresentationOptionBadge;
@@ -233,6 +242,16 @@
 }
 
 -(void)disableBeacons:(CDVInvokedUrlCommand*)command {
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
+-(void)enableBeaconForegroundService:(CDVInvokedUrlCommand*)command {
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
+-(void)disableBeaconForegroundService:(CDVInvokedUrlCommand*)command {
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self handleCallback:pluginResult withCommand:command];
 }

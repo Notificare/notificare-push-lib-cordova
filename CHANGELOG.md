@@ -1,3 +1,9 @@
+## 2.5.0
+* Update native Android SDK to 2.5.0
+* Update native iOS SDK to 2.5.0
+* Add beacon scanning foreground service
+* Add iOS 14 presentation options
+
 ## 2.4.0-beta.2
 * Add `targetContentIdentifier` to `NotificareNotification`
 * Update native iOS SDK to v2.4.0-beta.7
