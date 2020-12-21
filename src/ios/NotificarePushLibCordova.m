@@ -237,6 +237,16 @@
     [self handleCallback:pluginResult withCommand:command];
 }
 
+-(void)enableBeaconForegroundService:(CDVInvokedUrlCommand*)command {
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
+-(void)disableBeaconForegroundService:(CDVInvokedUrlCommand*)command {
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self handleCallback:pluginResult withCommand:command];
+}
+
 -(void)registerDevice:(CDVInvokedUrlCommand*)command {
     NSString *userID = ([command argumentAtIndex:0]) ? [command argumentAtIndex:0] : nil;
     NSString *userName = ([command argumentAtIndex:1]) ?  [command argumentAtIndex:1] : nil;

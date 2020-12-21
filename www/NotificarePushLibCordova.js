@@ -146,6 +146,14 @@ Notificare.prototype.disableBeacons = function(success, fail) {
     exec(success, fail, 'NotificarePushLibCordova', 'disableBeacons', []);
 };
 
+Notificare.prototype.enableBeaconForegroundService = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'enableBeaconForegroundService', []);
+};
+
+Notificare.prototype.disableBeaconForegroundService = function(success, fail) {
+    exec(success, fail, 'NotificarePushLibCordova', 'disableBeaconForegroundService', []);
+};
+
 Notificare.prototype.registerDevice = function(userID, userName, success, fail) {
     exec(success, fail, 'NotificarePushLibCordova', 'registerDevice', [userID, userName]);
 };

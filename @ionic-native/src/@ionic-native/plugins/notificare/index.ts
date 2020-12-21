@@ -187,6 +187,22 @@ export class Notificare extends IonicNativePlugin {
   }
 
   /**
+   * Enables beacon foreground scanning service.
+   */
+  @Cordova()
+  enableBeaconForegroundService(): Promise<void> {
+    return;
+  }
+
+  /**
+   * Disables beacon foreground scanning service.
+   */
+  @Cordova()
+  disableBeaconForegroundService(): Promise<void> {
+    return;
+  }
+
+  /**
    * Registers the device with Notificare.
    * Make sure you only invoke this method after the 'ready' event.
    *

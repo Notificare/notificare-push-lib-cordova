@@ -189,6 +189,12 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
         } else if (action.equals("enableBeacons")) {
             this.enableBeacons(args, callbackContext);
             return true;
+        } else if (action.equals("enableBeaconForegroundService")) {
+            this.enableBeaconForegroundService(args, callbackContext);
+            return true;
+        } else if (action.equals("disableBeaconForegroundService")) {
+            this.disableBeaconForegroundService(args, callbackContext);
+            return true;
         } else if (action.equals("disableBeacons")) {
             this.disableBeacons(args, callbackContext);
             return true;
@@ -438,6 +444,16 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
 
     private void disableBeacons(JSONArray args, CallbackContext callbackContext) {
         Notificare.shared().disableBeacons();
+        callbackContext.success();
+    }
+
+    private void enableBeaconForegroundService(JSONArray args, CallbackContext callbackContext) {
+        Notificare.shared().enableBeaconForegroundService();
+        callbackContext.success();
+    }
+
+    private void disableBeaconForegroundService(JSONArray args, CallbackContext callbackContext) {
+        Notificare.shared().disableBeaconForegroundService();
         callbackContext.success();
     }
 
