@@ -1,3 +1,7 @@
+## 2.5.1
+* Add `extra` to assets
+* Allow nullable asset URLs
+
 ## 2.5.0
 * Update native Android SDK to 2.5.0
 * Update native iOS SDK to 2.5.0
