@@ -208,6 +208,7 @@ public class NotificareUtils {
         assetMap.put("assetTitle", asset.getTitle());
         assetMap.put("assetDescription", asset.getDescription());
         assetMap.put("assetUrl", asset.getUrl().toString());
+        assetMap.put("assetExtra", asset.getExtra());
 
         JSONObject metaMap = new JSONObject();
         metaMap.put("originalFileName", asset.getOriginalFileName());
