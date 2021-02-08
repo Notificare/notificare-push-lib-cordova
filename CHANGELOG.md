@@ -1,3 +1,6 @@
+## 2.5.2
+* Prevent crash on inbox updates after un-launching
+
 ## 2.5.1
 * Add `extra` to assets
 * Allow nullable asset URLs
