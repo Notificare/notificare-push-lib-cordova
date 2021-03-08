@@ -371,9 +371,13 @@ public class NotificareUtils {
     public static JSONObject mapInboxItem(NotificareInboxItem notificareInboxItem) throws JSONException {
         JSONObject inboxItemMap = new JSONObject();
         inboxItemMap.put("inboxId", notificareInboxItem.getItemId());
-        inboxItemMap.put("notification", notificareInboxItem.getNotification().getNotificationId());
+        if (notificareInboxItem.getNotification() != null) {
+            inboxItemMap.put("notification", notificareInboxItem.getNotification().getNotificationId());
+        }
         inboxItemMap.put("type", notificareInboxItem.getType());
-        inboxItemMap.put("message", notificareInboxItem.getNotification().getMessage());
+        if (notificareInboxItem.getNotification() != null) {
+            inboxItemMap.put("message", notificareInboxItem.getNotification().getMessage());
+        }
         inboxItemMap.put("title", notificareInboxItem.getTitle());
         inboxItemMap.put("subtitle", notificareInboxItem.getSubtitle());
         if (notificareInboxItem.getAttachment() != null) {
