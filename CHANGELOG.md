@@ -1,3 +1,7 @@
+## 2.5.4
+- Update native iOS dependency
+- Improve present notifications, inbox items & scannables transition & styling
+
 ## 2.5.3
 - Prevent crash on mapping inbox items without a notification
 - Update native Android dependency
