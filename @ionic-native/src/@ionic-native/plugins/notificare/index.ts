@@ -238,7 +238,7 @@ export class Notificare extends IonicNativePlugin {
    * @param preferredLanguage a string representing the language (ISO 639-1) and region (ISO 3166-2) (e.g. en-US).
    */
   @Cordova()
-  updatePreferredLanguage(preferredLanguage: string): Promise<void> {
+  updatePreferredLanguage(preferredLanguage: string | null): Promise<void> {
     return;
   }
 

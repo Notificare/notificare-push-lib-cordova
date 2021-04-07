@@ -509,22 +509,18 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
 
     private void updatePreferredLanguage(JSONArray args, CallbackContext callbackContext) {
         try {
-            if (args.getString(0) != null) {
-                Notificare.shared().updatePreferredLanguage(args.getString(0), new NotificareCallback<Boolean>() {
-                    @Override
-                    public void onSuccess(Boolean aBoolean) {
-                        callbackContext.success();
-                    }
+            String language = args.isNull(0) ? null : args.getString(0);
+            Notificare.shared().updatePreferredLanguage(language, new NotificareCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean aBoolean) {
+                    callbackContext.success();
+                }
 
-                    @Override
-                    public void onError(NotificareError notificareError) {
-                        callbackContext.error(notificareError.getLocalizedMessage());
-                    }
-                });
-            } else {
-                NotificareError notificareError = new NotificareError("invalid parameters");
-                callbackContext.error(notificareError.getLocalizedMessage());
-            }
+                @Override
+                public void onError(NotificareError notificareError) {
+                    callbackContext.error(notificareError.getLocalizedMessage());
+                }
+            });
         } catch (JSONException e) {
             callbackContext.error(e.getLocalizedMessage());
         }

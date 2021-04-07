@@ -1,3 +1,6 @@
+## 2.5.5
+- Allow null on preferred language updates
+
 ## 2.5.4
 - Update native iOS dependency
 - Improve present notifications, inbox items & scannables transition & styling
