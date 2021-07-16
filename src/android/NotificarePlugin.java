@@ -1781,6 +1781,10 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
                 return;
             }
 
+            if (Notificare.shared().handleTestDeviceIntent(intent)) {
+                return;
+            }
+
             if (intent.getData() != null) {
                 try {
                     JSONObject payload = new JSONObject();
