@@ -81,15 +81,19 @@
             <activity
                     android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
                     android:name="re.notifica.ui.NotificationActivity"
-                    android:excludeFromRecents="true" />
+                    android:excludeFromRecents="true"
+                    android:exported="false" />
 
             <activity
                     android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
                     android:name="re.notifica.ui.PassbookActivity"
                     android:configChanges="keyboardHidden|orientation|screenSize"
+                    android:exported="false"
                     android:hardwareAccelerated="true" />
 
-            <receiver android:name="re.notifica.cordova.IntentReceiver" />
+            <receiver
+                    android:name="re.notifica.cordova.IntentReceiver"
+                    android:exported="false" />
 
             <!-- API key for Google Maps -->
             <meta-data
