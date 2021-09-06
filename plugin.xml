@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<plugin id="cordova-plugin-notificare-push" version="2.6.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+<plugin id="cordova-plugin-notificare-push" version="2.7.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
     <name>NotificarePushLibCordova</name>
     <js-module name="NotificarePushLibCordova" src="www/NotificarePushLibCordova.js">
         <clobbers target="Notificare" />
@@ -62,7 +62,7 @@
                 <source url="https://github.com/CocoaPods/Specs.git"/>
             </config>
             <pods use-frameworks="true">
-                <pod name="notificare-push-lib" spec="2.6.1"/>
+                <pod name="notificare-push-lib" spec="2.7-beta2"/>
             </pods>
         </podspec>
     </platform>
@@ -81,15 +81,19 @@
             <activity
                     android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
                     android:name="re.notifica.ui.NotificationActivity"
-                    android:excludeFromRecents="true" />
+                    android:excludeFromRecents="true"
+                    android:exported="false" />
 
             <activity
                     android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
                     android:name="re.notifica.ui.PassbookActivity"
                     android:configChanges="keyboardHidden|orientation|screenSize"
+                    android:exported="false"
                     android:hardwareAccelerated="true" />
 
-            <receiver android:name="re.notifica.cordova.IntentReceiver" />
+            <receiver
+                    android:name="re.notifica.cordova.IntentReceiver"
+                    android:exported="false" />
 
             <!-- API key for Google Maps -->
             <meta-data
@@ -99,6 +103,10 @@
         </config-file>
 
         <config-file target="AndroidManifest.xml" parent="/manifest/application/activity[@android:name='MainActivity']">
+            <intent-filter>
+                <action android:name="re.notifica.intent.action.RemoteMessageOpened" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
             <intent-filter>
                 <action android:name="re.notifica.intent.action.NotificationOpened" />
                 <category android:name="android.intent.category.DEFAULT" />

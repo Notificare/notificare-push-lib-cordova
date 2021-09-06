@@ -1761,6 +1761,8 @@ public class NotificarePlugin extends CordovaPlugin implements Observer<SortedSe
      * @param intent
      */
     private void handleIntent(Intent intent) {
+        if (Notificare.shared().handleTrampolineIntent(intent)) return;
+
         JSONObject notificationMap = parseNotificationIntent(intent);
         if (notificationMap != null) {
             handleEventPayload(PluginResult.Status.OK, "remoteNotificationReceivedInBackground", notificationMap);
