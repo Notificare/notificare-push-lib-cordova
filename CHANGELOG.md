@@ -1,3 +1,8 @@
+## 2.7.2
+- Update native iOS dependency
+- Update native Android dependency
+- Remove dependency on JCenter
+
 ## 2.7.1
 - Update native iOS dependency
 
