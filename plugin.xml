@@ -62,7 +62,7 @@
                 <source url="https://github.com/CocoaPods/Specs.git"/>
             </config>
             <pods use-frameworks="true">
-                <pod name="notificare-push-lib" spec="2.7.1"/>
+                <pod name="notificare-push-lib" spec="2.7.2"/>
             </pods>
         </podspec>
     </platform>
